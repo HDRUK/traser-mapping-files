@@ -1,0 +1,38 @@
+[
+      {
+            "output_model": "HDRUK",
+            "output_version": "2.1.2",
+            "input_model": "datasetv2",
+            "input_version": "default"
+      },
+      {
+            "output_model": "HDRUK",
+            "output_version": "2.1.2",
+            "input_model": "GWDM",
+            "input_version": "1.0"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "1.0",
+            "input_model": "HDRUK",
+            "input_version": "2.1.2"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "1.0",
+            "input_model": "SchemaOrg",
+            "input_version": "default"
+      },
+      {
+            "output_model": "SchemaOrg",
+            "output_version": "default",
+            "input_model": "HDRUK",
+            "input_version": "2.1.2"
+      },
+      {
+            "output_model": "SchemaOrg",
+            "output_version": "default",
+            "input_model": "GWDM",
+            "input_version": "1.0"
+      }
+]

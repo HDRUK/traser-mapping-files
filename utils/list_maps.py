@@ -1,15 +1,17 @@
 import glob
 import json
 
-structure = {}
+structure = []
 for schema in glob.glob('maps/**/translation.jsonata',recursive=True):
-    items = schema.split('/')
-    print (items)
-    continue
-    model = items[1]
-    version = items[2]
-    if model not in structure:
-        structure[model] = []
-    structure[model].append(version)
+    output_model,output_version,input_model,input_version = schema.split('/')[1:5]
 
+    obj = {
+        "output_model":output_model,
+        "output_version":output_version,
+        "input_model":input_model,
+        "input_version":input_version,
+    }
+    structure.append(obj)
+    
+        
 json.dump(structure,open('available.json','w'),indent=6)
