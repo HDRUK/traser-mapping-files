@@ -34,5 +34,11 @@
             "output_version": "default",
             "input_model": "GWDM",
             "input_version": "1.0"
+      },
+      {
+            "output_model": "SchemaOrg",
+            "output_version": "BioSchema",
+            "input_model": "GWDM",
+            "input_version": "1.0"
       }
 ]

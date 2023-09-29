@@ -82,7 +82,7 @@ $extract_media := function($x){
     }
   },
   "linkage": {
-    "IsGeneratedUsing": extra.IsGeneratedUsing, /* enrichmentAndLinkage */ 
+    "isGeneratedUsing": extra.isGeneratedUsing, /* enrichmentAndLinkage */ 
     "associatedMedia": $extract_media(input.documentation.associatedMedia),
     "dataUses": extra.dataUses,
     "isReferenceIn": input.accessibility.usage.isReferencedBy ~> $to_str,
