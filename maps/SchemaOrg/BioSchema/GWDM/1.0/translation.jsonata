@@ -27,12 +27,6 @@ $to_str := function($x){
     "alternateName": input.summary.shortTitle,
     "description":input.summary.description, 
     "citation":input.summary.doiName,
-    "funder":{ /*duplicate of creator at the moment...*/
-        "@type": "Organization", /*https://schema.org/Organization*/
-        "legalName": input.accessibility.usage.resourceCreator,
-        "name": input.accessibility.usage.resourceCreator
-	/*sameAs: <url> */
-    },
     "creator": {
         "@type": "Organization", /* as above */
         "legalName": input.accessibility.usage.resourceCreator,
