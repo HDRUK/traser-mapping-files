@@ -112,7 +112,7 @@ $extract_media := function($x){
             "name":"Male",
             "frequency":50
           }]
-        }|
+        }| ['elements'] |
       }
   |
 };
