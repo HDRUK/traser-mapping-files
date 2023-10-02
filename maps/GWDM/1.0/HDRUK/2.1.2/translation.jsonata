@@ -108,11 +108,11 @@ $extract_media := function($x){
       {
         "columns": elements ~> |$|
         {
-          "values":[{
+          "elements":[{
             "name":"Male",
             "frequency":50
           }]
-        }| ['elements'] |
+        },['elements']|
       }
   |
 };
