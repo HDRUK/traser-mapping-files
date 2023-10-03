@@ -7,15 +7,24 @@
     "revisions":[]
   },
   "summary": {
+    "contactPoint":input.creator.email,
     "title": input.name,
     "shortTitle": input.alternateName,
     "description": input.description,
+    "abstract": input.abstract,
     "doiName": input.citation,
-    "keywords": input.keywords
+    "keywords": input.keywords,
+    "controlledKeywords": input.keywords, /*temp like this*/
+    "datasetType": "dataset", /*going to have to fix this*/
+    "publisher":{
+        "publisherName":input.publisher.legalName,
+        "publisherGatewayId":input.publisher.identifier
+    }
   },
   "accessibility": {
     "usage": {
-      "resourceCreator": input.funder.legalName
+      "resourceCreator": input.creator.legalName,
+      "dataUseLimitation": input.usageInfo.accessibilitySummary
     },
     "access": {
       "accessRequestCost": input.isAccessibleForFree ? "Free" : "Not Free",
@@ -29,7 +38,9 @@
     },
     "temporal": {
       "startDate": $split(input.temporalCoverage,'/')[0],
-      "endDate": $split(input.temporalCoverage,'/')[1] = '..' ? null : $split(input.temporalCoverage,'/')[1]
+      "endDate": $split(input.temporalCoverage,'/')[1] = '..' ? null : $split(input.temporalCoverage,'/')[1],
+      "timeLag": "NOT APPLICABLE", /*schema.org doesnt hold this information - could be a variable to store it in ... */ 
+      "accrualPeriodicity": null /*also no stored in schema.org - unless some more detailed discover is done */
     }
   }
 }

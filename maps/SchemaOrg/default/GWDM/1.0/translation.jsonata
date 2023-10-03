@@ -26,6 +26,7 @@ $to_str := function($x){
     /* ... current schema definition doesnt allow it */
     "alternateName": input.summary.shortTitle,
     "description":input.summary.description, 
+    "abstract":input.summary.abstract, 
     "citation":input.summary.doiName,
     "funder":{ /*duplicate of creator at the moment...*/
         "@type": "Organization", /*https://schema.org/Organization*/
@@ -33,16 +34,28 @@ $to_str := function($x){
         "name": input.accessibility.usage.resourceCreator
 	/*sameAs: <url> */
     },
+    "usageInfo":{
+        "@type":"CreativeWork",
+        "name":"usage",
+        "accessibilitySummary":input.accessibility.usage.dataUseLimitation
+    },
     "creator": {
-        "@type": "Organization", /* as above */
+        "@type": "Organization", 
         "legalName": input.accessibility.usage.resourceCreator,
-        "name": input.accessibility.usage.resourceCreator
+        "name": input.accessibility.usage.resourceCreator,
+        "email": input.summary.contactPoint
+    },
+    "publisher": {
+        "@type": "Organization", 
+        "legalName": input.summary.publisher.publisherName,
+        "name": input.summary.publisher.publisherName,
+        "identifier":input.summary.publisher.publisherGatewayId
     },
     /* "hasPart":[{}], -- google recommend -- can be done via linakage?*/
     /* "isPartOf":[{}], -- google recommend */
     /* "sameAs":{} - google recommend */
     /* "variableMeasured":{} - google recommend */
-    "spacialCoverage": input.provenance.origin.source,
+    "spatialCoverage": input.provenance.origin.source,
     "temporalCoverage": input.provenance.temporal.startDate & '/' & (input.provenance.temporal.endDate ? input.provenance.temporal.endDate : '..') ,
     "isAccessibleForFree": input.accessibility.access.accessRequestCost = "Free" ? true : false,
     "dateCreated": $to_iso8601(input.required.issued),
