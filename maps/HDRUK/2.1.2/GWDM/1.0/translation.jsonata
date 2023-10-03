@@ -61,5 +61,9 @@
         }
       })] : [],
     "structuralMetadata": input.structuralMetadata
+    "structuralMetadata": input.structuralMetadata  ~> |$|
+    {
+      "elements": columns 
+    },['columns'] |
 }
 

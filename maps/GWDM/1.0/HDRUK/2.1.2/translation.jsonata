@@ -104,16 +104,15 @@ $extract_media := function($x){
         "disambiguatingDescription": $r.disambiguatingDescription
       }
     })] : [],
-  "structuralMetadata": input.structuralMetadata /* ~> |$|
+  "structuralMetadata": input.structuralMetadata  ~> |$|
       {
-        "elements": elements ~> |$|
+        "columns": elements ~> |$|
         {
-          "elements":[{
+          "values":[{
             "name":"Male",
             "frequency":50
           }]
         }|
-      }
-  |*/
+      },['elements'] |
 };
 )
