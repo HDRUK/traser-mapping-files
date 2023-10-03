@@ -19,23 +19,22 @@ $to_str := function($x){
     "@id": "https://hdruk.ac.uk",
     "@type": "Dataset",
     "identifier": input.summary.doiName, /*can be a list of URL or Text*/
-    "version": "GDMv1",
+    "version": "GWDM 1.0",
     "url":"https://hdruk.ac.uk/"&input.required.gatewayId, /*should use url to link to the dataset on our gateway */
     "name": input.summary.title,
-    /* according to google, alternateName could be an array */
-    /* ... current schema definition doesnt allow it */
     "alternateName": input.summary.shortTitle,
     "description":input.summary.description, 
     "citation":input.summary.doiName,
     "creator": {
         "@type": "Organization", /* as above */
         "legalName": input.accessibility.usage.resourceCreator,
-        "name": input.accessibility.usage.resourceCreator
+        "name": input.accessibility.usage.resourceCreator,
+        "sameAs": "<missing>"
     },
-    /* "hasPart":[{}], -- google recommend -- can be done via linakage?*/
-    /* "isPartOf":[{}], -- google recommend */
-    /* "sameAs":{} - google recommend */
-    /* "variableMeasured":{} - google recommend */
+    /* "hasPart":[{}], -- Recommended -- can be done via linakage?*/
+    /* "isPartOf":[{}], -- Recommended */
+    /* "sameAs":{} - Recommended */
+    /* "variableMeasured":{} -  Recommended */
     "isAccessibleForFree": input.accessibility.access.accessRequestCost = "Free" ? true : false,
     "dateCreated": $to_iso8601(input.required.issued),
     "distribution": {
@@ -43,9 +42,9 @@ $to_str := function($x){
         "name": input.accessibility.access.accessService,
         "contentUrl": "https://somehwere.com"
     },
-    "keywords": input.summary.keywords ~> $to_str,
+    "keywords": input.summary.controlledKeywords,
     "license": input.accessibility.access.accessRights
-    /* "measuredmentTechnique":{} - google recommend */
+    /* "measuredmentTechnique":{} - Recommended */
 
 }
 )
