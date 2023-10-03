@@ -24,12 +24,17 @@
   "accessibility": {
     "usage": {
       "resourceCreator": input.creator.legalName,
+      "dataUseRequirement": input.usageInfo.accessibilitySummary, /*some duplications here*/
       "dataUseLimitation": input.usageInfo.accessibilitySummary
     },
     "access": {
       "accessRequestCost": input.isAccessibleForFree ? "Free" : "Not Free",
       "accessService": input.distribution.name,
-      "accessRights": input.license
+      "accessRights": input.license,
+      "deliveryLeadTime": "OTHER",
+      "jurisdiction": "GB-ENG", /*not in schema.org */
+      "dataController": "HDR UK", /*not in schema.org */
+      "dataProcessor": "HDR UK" /*not in schema.org */
     }
   },
   "provenance": {

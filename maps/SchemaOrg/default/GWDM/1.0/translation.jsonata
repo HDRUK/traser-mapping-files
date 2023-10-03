@@ -45,6 +45,12 @@ $to_str := function($x){
         "name": input.accessibility.usage.resourceCreator,
         "email": input.summary.contactPoint
     },
+    "maintainer": {
+        "@type": "Organization", 
+        "legalName": input.accessibility.access.dataController,
+        "name": input.accessibility.access.dataController,
+        "email": input.summary.contactPoint /*this needs to be improved */
+    },
     "publisher": {
         "@type": "Organization", 
         "legalName": input.summary.publisher.publisherName,
