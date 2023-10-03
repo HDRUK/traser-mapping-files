@@ -11,9 +11,6 @@ $to_str := function($x){
     $type($x) = 'array' ? $join($x,",") : $x
 };
 
-/* Google recommendations: */
-/* - https://developers.google.com/search/docs/appearance/structured-data/dataset#structured-data-type-definitions */
-
 {
     "@context": "https://schema.org/",
     "@id": "https://hdruk.ac.uk",
