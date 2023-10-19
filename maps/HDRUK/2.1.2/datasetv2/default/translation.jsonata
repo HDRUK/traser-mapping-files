@@ -62,6 +62,10 @@ $get_date := function($x){
   $type($x) = "number" ? $fromMillis($x) : $fromMillis($toMillis($x,'[D01]/[M01]/[Y0001]'))
 };
 
+$force_url := function($x){
+    $x = /^http(s)?:\/\// ? $x : null
+};
+
 input ~> |$| 
 {
     "issued": $get_date(issued),
@@ -77,7 +81,8 @@ input ~> |$|
       ~> |$|
         {
           "dataUseLimitation": dataUseLimitation ~> $to_str ~> $null_string,
-          "dataUseRequirements": dataUseRequirements ~> $to_str ~> $null_string
+          "dataUseRequirements": dataUseRequirements ~> $to_str ~> $null_string,
+          "identifier": identifier ~> $force_url
         }|,
       "keywords": keywords ~> $to_str ~> $null_string, 
       "alternateIdentifiers": alternateIdentifiers ~> $to_str ~> $null_string,
