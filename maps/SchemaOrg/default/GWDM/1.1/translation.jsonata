@@ -1,0 +1,120 @@
+(
+/* define my custom functions */
+
+/* make sure to convert dates into ISO-8601 */
+$to_iso8601 := function($x){
+    $replace($x, /(\.\d{6})$/, 'Z')
+};
+
+
+$to_str := function($x){
+    $type($x) = 'array' ? $join($x,",") : $x
+};
+
+{
+    "@context": "https://schema.org/",
+    "@id": "https://hdruk.ac.uk",
+    "@type": "Dataset",
+    "identifier": input.required.gatewayId, /*can be a list of URL or Text*/
+    "dateModified": input.required.modified,
+    "version": input.required.version,
+    "url":"https://hdruk.ac.uk/"&input.required.gatewayId, /*should use url to link to the dataset on our gateway */
+    "name": input.summary.title,
+    /* according to google, alternateName could be an array */
+    /* ... current schema definition doesnt allow it */
+    "alternateName": input.summary.shortTitle,
+    "description":input.summary.description, 
+    "abstract":input.summary.abstract, 
+    "citation":input.summary.doiName,
+    "funder":{ /*duplicate of creator at the moment...*/
+        "@type": "Organization", /*https://schema.org/Organization*/
+        "legalName": input.accessibility.usage.resourceCreator.name,
+        "name": input.accessibility.usage.resourceCreator.name
+	/*sameAs: <url> */
+    },
+    "usageInfo":{
+        "@type":"CreativeWork",
+        "accessibilitySummary":input.accessibility.usage.dataUseLimitation,
+        "accessMode":input.accessibility.usage.dataUseRequirement,
+        "creator": { /* currently duplicates creator */
+            "@type": "Organization", 
+            "name": input.accessibility.usage.resourceCreator.name,
+            "legalName": input.accessibility.usage.resourceCreator.name,
+            "email": input.summary.contactPoint
+        }
+    },
+    "creator": {
+        "@type": "Organization", 
+        "name": input.accessibility.usage.resourceCreator.name,
+        "legalName": input.accessibility.usage.resourceCreator.name,
+        "email": input.summary.contactPoint
+    },
+    "maintainer": {
+        "@type": "Organization", 
+        "legalName": input.accessibility.access.dataController,
+        "name": input.accessibility.access.dataController,
+        "email": input.summary.contactPoint /*this needs to be improved */
+    },
+    "publisher": {
+        "@type": "Organization", 
+        "legalName": input.summary.publisher.publisherName,
+        "name": input.summary.publisher.publisherName,
+        "identifier":input.summary.publisher.publisherGatewayId
+    },
+    /* "hasPart":[{}], -- google recommend -- can be done via linakage?*/
+    /* "isPartOf":[{}], -- google recommend */
+    /* "sameAs":{} - google recommend */
+    /* "variableMeasured":{} - google recommend */
+    /*input.provenance.origin.source*/
+    "spatialCoverage": {
+        "@type": "Place",
+        "eligibleRegion": input.coverage.spatial
+    },
+    "jurisdiction": input.accessibility.access.jurisdiction,
+    "temporalCoverage": input.provenance.temporal.startDate & '/' & (input.provenance.temporal.endDate ? input.provenance.temporal.endDate : '..') ,
+    "releasedEvent": {
+        "startDate": input.provenance.temporal.distributionReleaseDate
+    },
+    "isAccessibleForFree": input.accessibility.access.accessRequestCost = "Free" ? true : false,
+    "dateCreated": $to_iso8601(input.required.issued),
+    "distribution": {
+        "@type":"DataDownload",
+        "name": input.accessibility.access.accessService,
+        "contentUrl": "https://somehwere.com"
+    },
+    "keywords": input.summary.keywords ~> $to_str,
+    "license": input.accessibility.access.accessRights,
+    "typicalAgeRange": input.coverage.typicalAgeRange,
+    "inLanguage": input.accessibility.formatAndStandards.languages ~> $to_str,
+    "encodingFormat": input.accessibility.formatAndStandards.formats ~> $to_str,
+    "extra": {
+        "controlledKeywords": input.summary.controlledKeywords ~> $to_str,
+        "identifier": input.required.gatewayId,
+        "altIdentifier": input.required.gatewayPid,
+        "tools": input.linakage.tools,
+        "datasetType": input.summary.datasetType,
+        "pathway": input.coverage.pathway,
+        "followup": input.coverage.followup,
+        "revisions": input.required.revisions,
+        "structuralMetadata": input.structuralMetadata,
+        "accessRequestCost":input.accessibility.access.accessRequestCost,
+        "vocabularyEncodingSchemes": input.accessibility.formatAndStandards.vocabularyEncodingSchemes ~> $to_str,
+        "vocabularyConformsTo": input.accessibility.formatAndStandards.conformsTo ~> $to_str,
+        "temporalTimeLag": input.provenance.temporal.timeLag,
+        "temporalAccruralPeriodicity": input.provenance.temporal.accrualPeriodicity,
+        "physicalSampleAvailability": input.coverage.physicalSampleAvailability,
+        "provenanceOrigin": input.provenance.origin,
+        "linkage":input.linkage
+    },
+    "variableMeasured": input.observations ? [$map(input.observations,function($obs) {
+        {
+            "value": $obs.measuredValue,
+            "measurementMethod": $obs.measuredProperty,
+            "measurementTechnique" : $obs.observedNode,
+            "date": $obs.observationDate,
+            "description": $obs.disambiguatingDescription
+        }
+      })] : []
+    /* "measuredmentTechnique":{} - google recommend */
+}
+)
