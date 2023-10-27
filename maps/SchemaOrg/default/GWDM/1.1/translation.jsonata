@@ -15,7 +15,7 @@ $to_str := function($x){
     "@context": "https://schema.org/",
     "@id": "https://hdruk.ac.uk",
     "@type": "Dataset",
-    "identifier": input.summary.doiName, /*can be a list of URL or Text*/
+    "identifier": input.required.gatewayId, /*can be a list of URL or Text*/
     "dateModified": input.required.modified,
     "version": input.required.version,
     "url":"https://hdruk.ac.uk/"&input.required.gatewayId, /*should use url to link to the dataset on our gateway */
@@ -28,19 +28,25 @@ $to_str := function($x){
     "citation":input.summary.doiName,
     "funder":{ /*duplicate of creator at the moment...*/
         "@type": "Organization", /*https://schema.org/Organization*/
-        "legalName": input.accessibility.usage.resourceCreator,
-        "name": input.accessibility.usage.resourceCreator
+        "legalName": input.accessibility.usage.resourceCreator.name,
+        "name": input.accessibility.usage.resourceCreator.name
 	/*sameAs: <url> */
     },
     "usageInfo":{
         "@type":"CreativeWork",
-        "name":"usage",
-        "accessibilitySummary":input.accessibility.usage.dataUseLimitation
+        "accessibilitySummary":input.accessibility.usage.dataUseLimitation,
+        "accessMode":input.accessibility.usage.dataUseRequirement,
+        "creator": { /* currently duplicates creator */
+            "@type": "Organization", 
+            "name": input.accessibility.usage.resourceCreator.name,
+            "legalName": input.accessibility.usage.resourceCreator.name,
+            "email": input.summary.contactPoint
+        }
     },
     "creator": {
         "@type": "Organization", 
-        "legalName": input.accessibility.usage.resourceCreator,
-        "name": input.accessibility.usage.resourceCreator,
+        "name": input.accessibility.usage.resourceCreator.name,
+        "legalName": input.accessibility.usage.resourceCreator.name,
         "email": input.summary.contactPoint
     },
     "maintainer": {
@@ -66,6 +72,9 @@ $to_str := function($x){
     },
     "jurisdiction": input.accessibility.access.jurisdiction,
     "temporalCoverage": input.provenance.temporal.startDate & '/' & (input.provenance.temporal.endDate ? input.provenance.temporal.endDate : '..') ,
+    "releasedEvent": {
+        "startDate": input.provenance.temporal.distributionReleaseDate
+    },
     "isAccessibleForFree": input.accessibility.access.accessRequestCost = "Free" ? true : false,
     "dateCreated": $to_iso8601(input.required.issued),
     "distribution": {
@@ -74,8 +83,38 @@ $to_str := function($x){
         "contentUrl": "https://somehwere.com"
     },
     "keywords": input.summary.keywords ~> $to_str,
-    "license": input.accessibility.access.accessRights
+    "license": input.accessibility.access.accessRights,
+    "typicalAgeRange": input.coverage.typicalAgeRange,
+    "inLanguage": input.accessibility.formatAndStandards.languages ~> $to_str,
+    "encodingFormat": input.accessibility.formatAndStandards.formats ~> $to_str,
+    "extra": {
+        "controlledKeywords": input.summary.controlledKeywords ~> $to_str,
+        "identifier": input.required.gatewayId,
+        "altIdentifier": input.required.gatewayPid,
+        "tools": input.linakage.tools,
+        "datasetType": input.summary.datasetType,
+        "pathway": input.coverage.pathway,
+        "followup": input.coverage.followup,
+        "revisions": input.required.revisions,
+        "structuralMetadata": input.structuralMetadata,
+        "accessRequestCost":input.accessibility.access.accessRequestCost,
+        "vocabularyEncodingSchemes": input.accessibility.formatAndStandards.vocabularyEncodingSchemes ~> $to_str,
+        "vocabularyConformsTo": input.accessibility.formatAndStandards.conformsTo ~> $to_str,
+        "temporalTimeLag": input.provenance.temporal.timeLag,
+        "temporalAccruralPeriodicity": input.provenance.temporal.accrualPeriodicity,
+        "physicalSampleAvailability": input.coverage.physicalSampleAvailability,
+        "provenanceOrigin": input.provenance.origin,
+        "linkage":input.linkage
+    },
+    "variableMeasured": input.observations ? [$map(input.observations,function($obs) {
+        {
+            "value": $obs.measuredValue,
+            "measurementMethod": $obs.measuredProperty,
+            "measurementTechnique" : $obs.observedNode,
+            "date": $obs.observationDate,
+            "description": $obs.disambiguatingDescription
+        }
+      })] : []
     /* "measuredmentTechnique":{} - google recommend */
-
 }
 )
