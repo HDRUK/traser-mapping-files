@@ -1,0 +1,44 @@
+(
+$biologicalsamplesValues := [
+    "Blood",
+    "Urine",
+    "Saliva",
+    "Other"
+];
+
+
+$fixBiologicalsamplesValues := function($x){
+    $not($x in biologicalsamplesValues) ? null : $x
+};
+
+
+input ~> |$| 
+{
+    "required": required ~> |$| 
+    {
+      "version": "1.1.0"
+    }|,
+    "summary": summary ~> |$| 
+    {
+        "publisher": {
+            "name": publisher.publisherName,
+            "gatewayId": null,
+            "rorId": null
+        }
+    }|,
+    "accessibility": accessibility ~> |$| 
+    {
+        "usage": usage ~> |$| 
+        {
+            "resourceCreator" : {
+                "name": resourceCreator
+            }
+        }|
+    }|,
+    "coverage": coverage ~> |$| 
+    {
+        "biologicalsamples": physicalSampleAvailability ~> $fixBiologicalsamplesValues
+    },['physicalSampleAvailability']|
+}
+|
+)
