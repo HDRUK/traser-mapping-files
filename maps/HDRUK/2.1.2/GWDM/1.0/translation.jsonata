@@ -40,10 +40,10 @@
     "accessibility": {
         "access": {
           "deliveryLeadTime": input.accessibility.access.deliveryLeadTime,
-          "jurisdiction": input.accessibility.access.jurisdiction  ~> $split(','),
+          "jurisdiction": input.accessibility.access.jurisdiction  ,
           "dataController": input.accessibility.access.dataController,
           "dataProcessor": input.accessibility.access.dataProcessor,
-          "accessRights": input.accessibility.access.accessRights  ~> $split(','),
+          "accessRights": input.accessibility.access.accessRights  ,
           "accessService": input.accessibility.access.accessService,
           "accessRequestCost": input.accessibility.access.accessRequestCost  
         }
