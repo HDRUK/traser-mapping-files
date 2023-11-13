@@ -1,6 +1,6 @@
 (
 
-$nullable_values := [""," ","Not Applicable","Not Available",
+$nullable_values := [""," ","-","\"","Not Applicable","Not Available",
                      "Not applicable",
                      "NOT AVAILABLE","NOT APPLICABLE",[null]];
 
@@ -33,7 +33,9 @@ $null_string := function($x){
 
 $fixAccrualPeriodicityValues := {
   '1 Month Cycle':"MONTHLY",
-  'IN PROGRESS':"OTHER"
+  'IN PROGRESS':"OTHER",
+  'Updated at least weekly':"WEEKLY",
+  'updated annually':"ANNUAL"
 };
 
 $fixAccrualPeriodicity := function($x){
@@ -105,8 +107,10 @@ input ~> |$|
         {$k: $v  ~> $to_str ~> $null_string}    
       }) ~> $merge() ~> |$|
          {
-          "accrualPeriodicity": accrualPeriodicity ~> $fixAccrualPeriodicity,
-          "timeLag": timeLag ~> $fixTimeLag 
+            /*"startDate": startDate ~> $get_date,*/
+            /*"endDate": endDate ~> $get_date,*/
+            "accrualPeriodicity": accrualPeriodicity ~> $fixAccrualPeriodicity,
+            "timeLag": timeLag ~> $fixTimeLag 
          }|
     },
     "accessibility": {
@@ -152,7 +156,7 @@ input ~> |$|
           }
         ]
       } : null
-    })] ~> $filter(function($x) { $x != null })
+    })] /*~> $filter(function($x) { $x != null })*/
 },
 ['datasetv2.identifier','datasetv2.issued','datasetv2.modified'] 
 |

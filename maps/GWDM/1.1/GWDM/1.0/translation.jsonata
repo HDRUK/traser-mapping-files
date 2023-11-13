@@ -22,7 +22,7 @@ input ~> |$|
     {
         "publisher": {
             "name": publisher.publisherName,
-            "gatewayId": null,
+            "gatewayId": publisher.publisherGatewayId,
             "rorId": null
         }
     }|,
@@ -31,14 +31,16 @@ input ~> |$|
         "usage": usage ~> |$| 
         {
             "resourceCreator" : {
-                "name": resourceCreator
+                "name": resourceCreator,
+                "gatewayId": null,
+                "rorId": null
             }
         }|
     }|,
     "coverage": coverage ~> |$| 
     {
-        "biologicalsamples": physicalSampleAvailability ~> $fixBiologicalsamplesValues
+        "biologicalsamples": physicalSampleAvailability/* ~> $fixBiologicalsamplesValues*/
     },['physicalSampleAvailability']|
 }
-|
+|f
 )
