@@ -81,8 +81,7 @@ input ~> |$|
         "logo": publisher.logo  ~> $null_string,
         "description": publisher.description  ~> $null_string,
         "contactPoint": publisher.contactPoint  ~> $null_string,
-        "memberOf": publisher.memberOf  ~> $null_string,
-        "test": "yo"
+        "memberOf": publisher.memberOf  ~> $null_string
       },
       "keywords": keywords ~> $to_str ~> $null_string, 
       "alternateIdentifiers": alternateIdentifiers ~> $to_str ~> $null_string,
