@@ -1,6 +1,6 @@
 (
 
-$nullable_values := [""," ","Not Applicable","Not Available",
+$nullable_values := [""," ","\"","Not Applicable","Not Available",
                      "Not applicable",
                      "NOT AVAILABLE","NOT APPLICABLE",[null]];
 
@@ -33,7 +33,9 @@ $null_string := function($x){
 
 $fixAccrualPeriodicityValues := {
   '1 Month Cycle':"MONTHLY",
-  'IN PROGRESS':"OTHER"
+  'IN PROGRESS':"OTHER",
+  'Updated at least weekly':"WEEKLY",
+  'updated annually':"ANNUAL"
 };
 
 $fixAccrualPeriodicity := function($x){
@@ -75,15 +77,14 @@ input ~> |$|
     "summary": summary ~> |$| /*copy summary over and transform it*/
     {
       /*loop over all publisher fields and set blank fields to null */
-      "publisher": $each(publisher, function($v, $k) { 
-        {$k: $v ~> $null_string}  
-      }) ~> $merge() /* each creates a [{},{}] -- merge them to get {} back*/
-      ~> |$|
-        {
-          "dataUseLimitation": dataUseLimitation ~> $to_str ~> $null_string,
-          "dataUseRequirements": dataUseRequirements ~> $to_str ~> $null_string,
-          "identifier": identifier ~> $force_url
-        }|,
+      "publisher": {
+        "identifier": publisher.identifier  ~> $null_string,
+        "name": publisher.name  ~> $null_string,
+        "logo": publisher.logo  ~> $null_string,
+        "description": publisher.description  ~> $null_string,
+        "contactPoint": publisher.contactPoint  ~> $null_string,
+        "memberOf": publisher.memberOf  ~> $null_string
+      },
       "keywords": keywords ~> $to_str ~> $null_string, 
       "alternateIdentifiers": alternateIdentifiers ~> $to_str ~> $null_string,
       "doiName": doiName ~> $to_str ~>  $extract_doi ~> $null_string 
@@ -152,7 +153,7 @@ input ~> |$|
           }
         ]
       } : null
-    })] ~> $filter(function($x) { $x != null })
+    })] 
 },
 ['datasetv2.identifier','datasetv2.issued','datasetv2.modified'] 
 |

@@ -1,0 +1,22 @@
+(
+/*
+Notes: 
+    - Main difference between HDRUK Schema 2.0.2 and 2.1.2 is the inclusion of structuralMetadata
+    - TRASER (using AJV) will automatically fill missing fields as null (e.g. structuralMetadata)
+    - This map fixes an additional difference in the 2.0.2 publisher field that allowed extra fields 
+*/
+
+input ~> |$| 
+{
+    "summary": summary ~> |$| {
+        "publisher": {
+            "identifier": publisher.identifier,
+            "name": publisher.name,
+            "logo": publisher.logo,
+            "description": publisher.description,
+            "contactPoint": publisher.contactPoint,
+            "memberOf": publisher.memberOf
+        }
+    }|
+}|
+)
