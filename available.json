@@ -24,12 +24,6 @@
             "input_version": "default"
       },
       {
-            "output_model": "GWDM",
-            "output_version": "1.1",
-            "input_model": "SchemaOrg",
-            "input_version": "default"
-      },
-      {
             "output_model": "SchemaOrg",
             "output_version": "default",
             "input_model": "HDRUK",
