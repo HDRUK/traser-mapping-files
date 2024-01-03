@@ -1,0 +1,15 @@
+(
+input ~> |$| 
+{
+    "summary": summary ~> |$| {
+        "publisher": {
+            "identifier": publisher.identifier,
+            "name": publisher.name,
+            "logo": publisher.logo,
+            "description": publisher.description,
+            "contactPoint": publisher.contactPoint,
+            "memberOf": publisher.memberOf
+        }
+    }|
+}|
+)
