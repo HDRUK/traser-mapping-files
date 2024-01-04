@@ -34,8 +34,8 @@ $extract_media := function($x){
     "shortTitle": input.summary.title,
     "title": input.summary.abstract,
     "publisher": {
-      "publisherName":input.summary.publisher.name,
-      "publisherGatewayId": input.summary.publisher.identifier
+      "publisherName": extra.publisherName ? extra.publisherName : input.summary.publisher.name,
+      "publisherGatewayId": extra.publisherId ? extra.publisherId : input.summary.publisher.identifier
     }
   },
   "coverage": {
