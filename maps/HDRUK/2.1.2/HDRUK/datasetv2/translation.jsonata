@@ -106,7 +106,7 @@ input ~> |$|
         {$k: $v  ~> $to_str ~> $null_string}    
       }) ~> $merge() ~> |$|
          {
-          "accrualPeriodicity": accrualPeriodicity ~> $fixAccrualPeriodicity,
+          "accrualPeriodicity": accrualPeriodicity ~> $fixAccrualPeriodicity ~> $null_string,
           "timeLag": timeLag ~> $fixTimeLag 
          }|
     },
