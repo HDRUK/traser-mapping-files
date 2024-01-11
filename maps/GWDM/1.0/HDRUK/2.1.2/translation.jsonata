@@ -22,17 +22,17 @@ $extract_media := function($x){
     })] : []
   },
   "summary": {
-    "abstract": input.summary.abstract,
+    "abstract": $substring(input.summary.abstract,5000),
     "contactPoint": input.summary.contactPoint,
     "keywords": $to_str(input.summary.keywords),
     "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
       $v in extra.controlledKeywords
     })]),
     "datasetType": extra.datasetType,
-    "description": input.documentation.description,
+    "description": $substring(iinput.documentation.description,50000),
     "doiName": input.summary.doiName,
-    "shortTitle": input.summary.title,
-    "title": input.summary.abstract,
+    "shortTitle": $substring(input.summary.title,100), //could do something with this?
+    "title": $substring(input.summary.title,255),
     "publisher": {
       "publisherName": extra.publisherName ? extra.publisherName : input.summary.publisher.name,
       "publisherGatewayId": extra.publisherId ? extra.publisherId : input.summary.publisher.identifier
