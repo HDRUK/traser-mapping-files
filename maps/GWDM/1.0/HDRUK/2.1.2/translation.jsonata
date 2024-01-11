@@ -26,17 +26,17 @@ $truncate := function($x,$length){
     })] : []
   },
   "summary": {
-    "abstract": $truncate(input.summary.abstract,5000),
+    //"abstract": $truncate(input.summary.abstract,5000),
     "contactPoint": input.summary.contactPoint,
     "keywords": $to_str(input.summary.keywords),
     "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
       $v in extra.controlledKeywords
     })]),
     "datasetType": extra.datasetType,
-    "description": $truncate(input.documentation.description,50000),
+    //"description": $truncate(input.documentation.description,50000),
     "doiName": input.summary.doiName,
-    "shortTitle": $truncate(input.summary.title,100), //could do something with this?
-    "title": $truncate(input.summary.title,255),
+    //"shortTitle": $truncate(input.summary.title,100), 
+    //"title": $truncate(input.summary.title,255),
     "publisher": {
       "publisherName": extra.publisherName ? extra.publisherName : input.summary.publisher.name,
       "publisherGatewayId": extra.publisherId ? extra.publisherId : input.summary.publisher.identifier
