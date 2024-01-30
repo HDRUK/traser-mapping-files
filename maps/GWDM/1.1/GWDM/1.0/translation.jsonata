@@ -28,7 +28,7 @@ input ~> |$|
     }|,
     "coverage": coverage ~> |$|
     {
-        "biologicalsamples": $split(physicalSampleAvailability,",") ~> $map(function($value){ $fixBiologicalSamples($value) } ),
+        "biologicalsamples": physicalSampleAvailability ? $split(physicalSampleAvailability,",") ~> $map(function($value){ $fixBiologicalSamples($value) } ) : null,
         "gender": $$.extra.coverage.gender,
         "psychological": $$.extra.coverage.psychological,
         "physical": $$.extra.coverage.physical,
