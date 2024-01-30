@@ -25,7 +25,7 @@ $fixBiologicalSamples := function($x){
 };
 
 
-{
+{ /*this is a copy of the map from HDRUK 2.1.2 -> GWDM 1.0 */
   "required": {
     "gatewayId": extra.id,
     "gatewayPid": extra.pid,
@@ -132,7 +132,7 @@ $fixBiologicalSamples := function($x){
         }|
       },['elements'] |
 } ~> |$| 
-{
+{ /*this is a copy of the map from GWDM 1.0 to 1.1*/
     "required": required ~> |$|
     {
         "version": $$.extra.version ? $$.extra.version : '0.0.1'
