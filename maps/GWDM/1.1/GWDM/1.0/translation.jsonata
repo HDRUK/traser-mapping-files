@@ -1,0 +1,53 @@
+(
+
+$allowedBiologicalSamples := [
+    "Blood",
+    "Urine",
+    "Saliva",
+    "Other"
+];
+
+$fixBiologicalSamples := function($x){
+  $not($x in allowedBiologicalSamples) ? null : $x
+};
+
+
+input ~> |$| 
+{
+    "required": required ~> |$|
+    {
+        "version": $$.extra.version ? $$.extra.version : '0.0.1'
+    }|,
+    "summary": summary ~> |$|
+    {
+        "publisher": {
+            "name": publisher.publisherName,
+            "gatewayId": publisher.publisherGatewayId
+        },
+        "populationSize": $$.input.observations[observedNode="PERSONS"].measuredValue
+    }|,
+    "coverage": coverage ~> |$|
+    {
+        "biologicalsamples": $split(physicalSampleAvailability,",") ~> $map(function($value){ $fixBiologicalSamples($value) } ),
+        "gender": $$.extra.coverage.gender,
+        "psychological": $$.extra.coverage.psychological,
+        "physical": $$.extra.coverage.physical,
+        "anthropometric": $$.extra.coverage.anthropometric,
+        "lifestyle": $$.extra.coverage.lifestyle,
+        "socioeconomic": $$.extra.coverage.socioeconomic
+
+    }, ['physicalSampleAvailability'] |,
+    "accessibility": accessibility ~> |$|
+    {
+        "usage": usage ~> |$|
+        {
+            "resourceCreator": {
+                "name": resourceCreator,
+                "gatewayId": $$.extra.resourceCreatorId
+            }
+        }|
+    }|
+}|
+
+
+)
