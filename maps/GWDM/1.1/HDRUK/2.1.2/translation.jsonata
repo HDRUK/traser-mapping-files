@@ -1,0 +1,171 @@
+(
+/*function to enforce any arrays to be strings */
+$to_str := function($x){
+  $type($x)="array" ? $join($x,',') : $x
+};
+
+$extract_media := function($x){
+  $type($x)="array" ? $join($x.url, ',') : $x
+};
+
+
+$truncate := function($x,$length){
+    $x ? $substring($x,0,$length) : null
+};
+
+$allowedBiologicalSamples := [
+    "Blood",
+    "Urine",
+    "Saliva",
+    "Other"
+];
+
+$fixBiologicalSamples := function($x){
+  $not($x in allowedBiologicalSamples) ? null : $x
+};
+
+
+{
+  "required": {
+    "gatewayId": extra.id,
+    "gatewayPid": extra.pid,
+    "issued": input.issued,
+    "modified": input.modified,
+    "revisions": input.revisions ? [$map(input.revisions,function($r) {
+      {
+        "version": $r.version,
+        "url": $r.url
+      }
+    })] : []
+  },
+  "summary": {
+    "abstract": $truncate(input.summary.abstract,5000),
+    "contactPoint": input.summary.contactPoint,
+    "keywords": $to_str(input.summary.keywords),
+    "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
+      $v in extra.controlledKeywords
+    })]),
+    "datasetType": extra.datasetType,
+    "description": $truncate(input.documentation.description,50000),
+    "doiName": input.summary.doiName,
+    "shortTitle": $truncate(input.summary.title,100),
+    "title": $truncate(input.summary.title,255),
+    "publisher": {
+      "publisherName": extra.publisherName ? extra.publisherName : input.summary.publisher.name,
+      "publisherGatewayId": extra.publisherId ? extra.publisherId : input.summary.publisher.identifier
+    }
+  },
+  "coverage": {
+    "pathway": input.coverage.pathway, 
+    "physicalSampleAvailability": input.coverage.physicalSampleAvailability ~> $to_str,
+    "spatial": $to_str(input.coverage.spatial),
+    "followup": input.coverage.followup,
+    "typicalAgeRange": input.coverage.typicalAgeRange /* $split('-') into mix/max */
+  },
+  "provenance": {
+    "origin": {
+      "purpose": $to_str(input.provenance.origin.purpose),
+      "source": $to_str(input.provenance.origin.source),
+      "collectionSituation": $to_str(input.provenance.origin.collectionSituation)
+    },
+    "temporal": {
+      "endDate": input.provenance.temporal.endDate,
+      "startDate": input.provenance.temporal.startDate,
+      "timeLag": input.provenance.temporal.timeLag,
+      "accrualPeriodicity": input.provenance.temporal.accrualPeriodicity,
+      "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
+    }
+  },
+  "accessibility": {
+    "access": {
+      "deliveryLeadTime": $to_str(input.accessibility.access.deliveryLeadTime), /*may need to be min/max in the future */
+      "jurisdiction": $to_str(input.accessibility.access.jurisdiction),
+      "dataController": input.accessibility.access.dataController,
+      "dataProcessor": input.accessibility.access.dataProcessor,
+      "accessRights": input.accessibility.access.accessRights ~> $to_str,
+      "accessService": input.accessibility.access.accessService,
+      "accessRequestCost": $to_str(input.accessibility.access.accessRequestCost) /* may need to be fixed */
+    },
+    "usage": {
+      "dataUseLimitation": $to_str(input.accessibility.usage.dataUseLimitation),	
+      "dataUseRequirement": $to_str(input.accessibility.usage.dataUseRequirements),
+      "resourceCreator": $to_str(input.accessibility.usage.resourceCreator)
+    },
+    "formatAndStandards": {
+      "vocabularyEncodingSchemes": $to_str(input.accessibility.formatAndStandards.vocabularyEncodingScheme),
+      "conformsTo": $to_str(input.accessibility.formatAndStandards.conformsTo),
+      "languages": $to_str(input.accessibility.formatAndStandards.language),
+      "formats": $to_str(input.accessibility.formatAndStandards.format)
+    }
+  },
+  "linkage": {
+    "isGeneratedUsing": extra.isGeneratedUsing, /* enrichmentAndLinkage */ 
+    "associatedMedia": $extract_media(input.documentation.associatedMedia),
+    "dataUses": extra.dataUses,
+    "isReferenceIn": input.accessibility.usage.isReferencedBy ~> $to_str,
+    "tools": $to_str(input.enrichmentAndLinkage.tools),
+    "datasetLinkage":{
+      "isDerivedFrom":$to_str(input.enrichmentAndLinkage.derivation),
+      "isPartOf":$to_str(input.documentation.isPartOf),
+      "isMemberOf": extra.isMemberOf,
+      "linkedDatasets":$to_str(input.enrichmentAndLinkage.qualifiedRelation)
+    },
+    "investigations":$to_str(input.accessibility.usage.investigations)
+  },
+  "observations": input.observations ? [$map(input.observations,function($r) {
+      {
+        "observedNode": $r.observedNode,
+        "measuredValue": $r.measuredValue,
+        "observationDate": $r.observationDate,
+        "measuredProperty": $r.measuredProperty,
+        "disambiguatingDescription": $r.disambiguatingDescription
+      }
+    })] : [],
+  "structuralMetadata": input.structuralMetadata  ~> |$|
+      {
+        "columns": elements ~> |$|
+        {
+          "values":[{
+            "name":"Male",
+            "frequency":50
+          }]
+        }|
+      },['elements'] |
+} ~> |$| 
+{
+    "required": required ~> |$|
+    {
+        "version": $$.extra.version ? $$.extra.version : '0.0.1'
+    }|,
+    "summary": summary ~> |$|
+    {
+        "publisher": {
+            "name": publisher.publisherName,
+            "gatewayId": publisher.publisherGatewayId
+        },
+        "populationSize": $$.input.observations[observedNode="PERSONS"].measuredValue
+    }|,
+    "coverage": coverage ~> |$|
+    {
+        "biologicalsamples": $split(physicalSampleAvailability,",") ~> $map(function($value){ $fixBiologicalSamples($value) } ),
+        "gender": $$.extra.coverage.gender,
+        "psychological": $$.extra.coverage.psychological,
+        "physical": $$.extra.coverage.physical,
+        "anthropometric": $$.extra.coverage.anthropometric,
+        "lifestyle": $$.extra.coverage.lifestyle,
+        "socioeconomic": $$.extra.coverage.socioeconomic
+    }, ['physicalSampleAvailability'] |,
+    "accessibility": accessibility ~> |$|
+    {
+        "usage": usage ~> |$|
+        {
+            "resourceCreator": {
+                "name": resourceCreator,
+                "gatewayId": $$.extra.resourceCreatorId
+            }
+        }|
+    }|
+}|
+
+
+)

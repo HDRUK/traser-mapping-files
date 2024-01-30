@@ -35,7 +35,6 @@ input ~> |$|
         "anthropometric": $$.extra.coverage.anthropometric,
         "lifestyle": $$.extra.coverage.lifestyle,
         "socioeconomic": $$.extra.coverage.socioeconomic
-
     }, ['physicalSampleAvailability'] |,
     "accessibility": accessibility ~> |$|
     {
