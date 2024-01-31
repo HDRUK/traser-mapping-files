@@ -11,6 +11,9 @@ $fixBiologicalSamples := function($x){
   $not($x in allowedBiologicalSamples) ? null : $x
 };
 
+$null_to_zero := function($x){
+  $x = null ? 0 : $x
+};
 
 input ~> |$| 
 {
@@ -24,7 +27,7 @@ input ~> |$|
             "name": publisher.publisherName,
             "gatewayId": publisher.publisherGatewayId
         },
-        "populationSize": $$.input.observations[observedNode="PERSONS"].measuredValue
+        "populationSize": $$.input.observations[observedNode="PERSONS"].measuredValue ~> $null_to_zero
     }|,
     "coverage": coverage ~> |$|
     {

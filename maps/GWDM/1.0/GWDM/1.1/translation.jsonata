@@ -1,0 +1,27 @@
+(
+
+input ~> |$| 
+{
+    "required": required ~> |$|{},["version"]|, 
+    "summary": summary ~> |$|
+    {
+        "publisher": { 
+            "publisherName": publisher.name,
+            "publisherGatewayId": publisher.gatewayId
+        }
+    },["populationSize"]|,
+    "coverage": coverage ~> |$|
+    {
+        "physicalSampleAvailability": biologicalsamples
+    }, ["biologicalsamples","gender","psychological","anthropometric","lifestyle","socioeconomic"] |, 
+    "accessibility": accessibility ~> |$|
+    {
+        "usage": usage ~> |$|
+        {
+            "resourceCreator": resourceCreator.name 
+        }|
+    }|
+},["tissuesSampleCollection"]|
+
+
+)
