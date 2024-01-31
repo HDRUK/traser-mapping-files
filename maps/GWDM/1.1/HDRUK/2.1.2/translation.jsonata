@@ -24,10 +24,6 @@ $fixBiologicalSamples := function($x){
   $not($x in allowedBiologicalSamples) ? null : $x
 };
 
-$null_to_zero := function($x){
-   $x ? $x : null
-};
-
 
 { /*this is a copy of the map from HDRUK 2.1.2 -> GWDM 1.0 */
   "required": {
@@ -147,7 +143,7 @@ $null_to_zero := function($x){
             "name": publisher.publisherName,
             "gatewayId": publisher.publisherGatewayId
         },
-        "populationSize": $$.input.observations[observedNode="PERSONS"].measuredValue ~> $null_to_zero
+        "populationSize": 0 /*$$.input.observations[observedNode="PERSONS"].measuredValue */
     }|,
     "coverage": coverage ~> |$|
     {
