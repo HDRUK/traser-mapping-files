@@ -1,0 +1,10 @@
+input ~> |$| 
+{
+    "provenance": provenance ~> |$|
+    {
+        "temporal": temporal ~> |$|
+        {
+            "publishingFrequency": accrualPeriodicity
+        },["accrualPeriodicity"]|
+    }|
+}|
