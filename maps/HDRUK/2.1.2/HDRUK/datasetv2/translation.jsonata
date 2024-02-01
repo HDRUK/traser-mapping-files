@@ -130,7 +130,7 @@ input ~> |$|
       "derivation": derivation ~> $to_str ~> $null_string,
       "tools": tools ~> $to_str ~> $null_string
     }|,
-    "observations": observations ? [$map(input.observations,function($r) {
+    "observations": observations ? [$map(observations,function($r) {
       {
         "observedNode": $uppercase($r.observedNode),
         "measuredValue": $r.measuredValue,
