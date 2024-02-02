@@ -1,0 +1,76 @@
+(
+
+$safeSplit := function($x,$delim){
+    $x ? $x ~> $split($delim) : []
+};
+
+
+{
+    "identifier": input.required.gatewayPid,
+    "issued": input.required.issued,
+    "modified": input.required.modified,
+    "revisions": input.required.revisions,
+    "version": input.required.version,
+    "summary": {
+        "abstract": input.summary.abstract,
+        "contactPoint": input.summary.contactPoint,
+        "keywords": input.summary.keywords ~> $safeSplit(','),
+        "doiName": input.summary.doiName,
+        "title": input.summary.shortTitle,
+        "publisher": {
+            "name": input.summary.publisher.name,
+            "identifier": input.summary.publisher.gatewayId,
+            "contactPoint": input.summary.contactPoint
+        }
+    },
+    "coverage": {
+        "pathway": input.coverage.pathway,
+        "physicalSampleAvailability": input.coverage.biologicalsamples ~> $safeSplit(','),
+        "spatial": input.coverage.spatial,
+        "followup": input.coverage.followup,
+        "typicalAgeRange": input.coverage.typicalAgeRange
+    },
+    "provenance": {
+        "origin": { /* input.provenance.origin */
+            "purpose": input.provenance.origin.purpose  ~> $safeSplit(','),
+            "source": input.provenance.origin.source  ~> $safeSplit(','),
+            "collectionSituation": input.provenance.origin.collectionSituation  ~> $safeSplit(',')
+        },
+        "temporal": { /* input.provenance.temporal */
+            "endDate": input.provenance.temporal.endDate,
+            "startDate": input.provenance.temporal.startDate,
+            "timeLag": input.provenance.temporal.timeLag,
+            "accrualPeriodicity": input.provenance.temporal.accrualPeriodicity,
+            "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
+        }
+    },
+    "accessibility": {
+        "access": {
+          "deliveryLeadTime": input.accessibility.access.deliveryLeadTime,
+          "jurisdiction": input.accessibility.access.jurisdiction  ,
+          "dataController": input.accessibility.access.dataController,
+          "dataProcessor": input.accessibility.access.dataProcessor,
+          "accessRights": input.accessibility.access.accessRights  ,
+          "accessService": input.accessibility.access.accessService,
+          "accessRequestCost": input.accessibility.access.accessRequestCost  
+        }
+    },
+    "enrichmentAndLinkage": {
+        "tools": input.linkage.toos ~> $safeSplit(','),
+        "derivation": input.linkage.derivations  ~> $safeSplit(',') 
+    },
+    "observations": input.observations ? [$map(input.observations,function($r) {
+        {
+          "observedNode": $r.observedNode,
+          "measuredValue": $r.measuredValue,
+          "observationDate": $r.observationDate,
+          "measuredProperty": $r.measuredProperty
+        }
+      })] : [],
+    "structuralMetadata": input.structuralMetadata  ~> |$|
+    {
+      "elements": columns 
+    },['columns'] |
+}
+
+)
