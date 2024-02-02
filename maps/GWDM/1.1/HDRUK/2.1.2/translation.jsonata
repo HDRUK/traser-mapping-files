@@ -139,7 +139,7 @@ $null_to_zero := function($x){
 { /*this is a copy of the map from GWDM 1.0 to 1.1*/
     "required": required ~> |$|
     {
-        "version": $$.input.version ? $$.input.version : $$.extra.version ? $$.extra.version : '0.0.1'
+        "version": $$.extra.version ? $$.extra.version : $$.input.version 
     }|,
     "summary": summary ~> |$|
     {
