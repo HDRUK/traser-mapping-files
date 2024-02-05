@@ -24,6 +24,10 @@ $fixBiologicalSamples := function($x){
   $not($x in allowedBiologicalSamples) ? null : $x
 };
 
+$null_to_zero := function($x){
+   $x ? $x : null
+};
+
 
 { /*this is a copy of the map from HDRUK 2.1.2 -> GWDM 1.0 */
   "required": {
@@ -135,7 +139,7 @@ $fixBiologicalSamples := function($x){
 { /*this is a copy of the map from GWDM 1.0 to 1.1*/
     "required": required ~> |$|
     {
-        "version": $$.extra.version ? $$.extra.version : '0.0.1'
+        "version": $$.extra.version ? $$.extra.version : $$.input.version 
     }|,
     "summary": summary ~> |$|
     {
@@ -143,7 +147,7 @@ $fixBiologicalSamples := function($x){
             "name": publisher.publisherName,
             "gatewayId": publisher.publisherGatewayId
         },
-        "populationSize": 0 /*$$.input.observations[observedNode="PERSONS"].measuredValue */
+        "populationSize": $$.input.observations[observedNode="PERSONS"].measuredValue ~> $null_to_zero
     }|,
     "coverage": coverage ~> |$|
     {
