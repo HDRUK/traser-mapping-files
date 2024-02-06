@@ -147,7 +147,7 @@ $null_to_zero := function($x){
             "name": publisher.publisherName,
             "gatewayId": publisher.publisherGatewayId
         },
-        "populationSize": $$.input.observations[observedNode="PERSONS"].measuredValue ~> $null_to_zero
+        "populationSize": $$.input.observations[observedNode="PERSONS"][0].measuredValue ~> $null_to_zero
     }|,
     "coverage": coverage ~> |$|
     {
