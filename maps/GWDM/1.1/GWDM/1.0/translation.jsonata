@@ -27,7 +27,7 @@ input ~> |$|
             "name": publisher.publisherName,
             "gatewayId": publisher.publisherGatewayId
         },
-        "populationSize": $$.input.observations[observedNode="PERSONS"][0].measuredValue ~> $null_to_zero,
+        "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_zero
         "datasetType": $$.extra.datasetType,
         "datasetSubType":$$.extra.datasetSubType
 
