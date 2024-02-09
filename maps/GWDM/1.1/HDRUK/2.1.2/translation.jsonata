@@ -20,9 +20,18 @@ $allowedBiologicalSamples := [
     "Other"
 ];
 
-$fixBiologicalSamples := function($x){
-  $not($x in allowedBiologicalSamples) ? null : $x
+$removeBadBiologicalSamples := function($x){
+     $not($x in allowedBiologicalSamples) ? null : $x
 };
+
+$cleanBiologicalSamples := function($x){
+   $x = 'DNA' ? 'Other' : $uppercase($substring($lowercase($x),0,1)) &  $substring($lowercase($x),1)
+};
+
+$fixBiologicalSamples := function($x){
+   $cleanBiologicalSamples($x) ~> $removeBadBiologicalSamples 
+};
+
 
 $null_to_zero := function($x){
    $x ? $x : null
@@ -147,11 +156,11 @@ $null_to_zero := function($x){
             "name": publisher.publisherName,
             "gatewayId": publisher.publisherGatewayId
         },
-        "populationSize": $$.input.observations[observedNode="PERSONS"].measuredValue ~> $null_to_zero
+        "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_zero
     }|,
     "coverage": coverage ~> |$|
     {
-        "biologicalsamples": physicalSampleAvailability ? $split(physicalSampleAvailability,",") ~> $map(function($value){ $fixBiologicalSamples($value) } ) : null,
+        "biologicalsamples": physicalSampleAvailability ? $split(physicalSampleAvailability,",") ~> $map(function($value){ $fixBiologicalSamples($value) } ) ~> $filter(function($x){$x != null}) ~> $join(",") : null,
         "gender": $$.extra.coverage.gender,
         "psychological": $$.extra.coverage.psychological,
         "physical": $$.extra.coverage.physical,
