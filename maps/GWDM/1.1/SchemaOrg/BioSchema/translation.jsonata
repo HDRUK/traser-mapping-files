@@ -1,0 +1,52 @@
+{
+  "required": {
+    "gatewayId": "placeholder",
+    "gatewayPid": "placeholder",
+    "issued": input.dateCreated,
+    "modified": $now(),
+    "revisions":[],
+    "version": input.version
+  },
+  "summary": {
+    "contactPoint":input.creator.email,
+    "title": input.name,
+    "shortTitle": input.alternateName,
+    "description": input.description,
+    "abstract": extra.abstract ? extra.abstract : "test",
+    "doiName": input.citation,
+    "keywords": input.keywords,
+    "controlledKeywords": input.keywords, /*temp like this*/
+    "datasetType": "dataset", /*going to have to fix this*/
+    "publisher":{
+        "publisherName":input.publisher.legalName,
+        "publisherGatewayId":input.publisher.identifier
+    }
+  },
+  "accessibility": {
+    "usage": {
+      "resourceCreator": input.creator.legalName,
+      "dataUseRequirement": input.usageInfo.accessibilitySummary, /*some duplications here*/
+      "dataUseLimitation": input.usageInfo.accessibilitySummary
+    },
+    "access": {
+      "accessRequestCost": input.isAccessibleForFree ? "Free" : "Not Free",
+      "accessService": input.distribution.name,
+      "accessRights": input.license,
+      "deliveryLeadTime": "OTHER",
+      "jurisdiction": "GB-ENG", /*not in schema.org */
+      "dataController": "HDR UK", /*not in schema.org */
+      "dataProcessor": "HDR UK" /*not in schema.org */
+    }
+  },
+  "provenance": {
+    "origin": {
+      "source": input.spacialCoverage
+    },
+    "temporal": {
+      "startDate": $split(input.temporalCoverage,'/')[0],
+      "endDate": $split(input.temporalCoverage,'/')[1] = '..' ? null : $split(input.temporalCoverage,'/')[1],
+      "timeLag": "NOT APPLICABLE", /*schema.org doesnt hold this information - could be a variable to store it in ... */ 
+      "accrualPeriodicity": null /*also no stored in schema.org - unless some more detailed discover is done */
+    }
+  }
+}
