@@ -1,0 +1,83 @@
+(
+
+$safeSplit := function($x,$delim){
+    $x ? $x ~> $split($delim) : []
+};
+
+
+{
+    "identifier": input.required.gatewayPid,
+    "issued": input.required.issued,
+    "modified": input.required.modified,
+    "revisions": input.required.revisions,
+    "version": input.required.version,
+    "summary": {
+        "abstract": input.summary.abstract,
+        "contactPoint": input.summary.contactPoint,
+        "keywords": input.summary.keywords ~> $safeSplit(','),
+        "doiName": input.summary.doiName,
+        "title": input.summary.shortTitle,
+        "publisher": {
+            "name": input.summary.publisher.name,
+            "identifier": input.summary.publisher.gatewayId,
+            "contactPoint": input.summary.contactPoint
+        },
+        "datasetType": input.summary.datasetType,
+        "datasetSubType": input.summary.datasetSubType,
+        "populationSize": input.summary.populationSize
+    },
+    "coverage": input.coverage ~> |$|
+    {
+        "biologicalsamples": biologicalsamples ~> $safeSplit(','),
+        "gender": gender ~> $safeSplit(','),
+        "psychological": psychological ~> $safeSplit(','),
+        "physical": physical ~> $safeSplit(','),
+        "anthropometric": anthropometric ~> $safeSplit(','),
+        "lifestyle": lifestyle ~> $safeSplit(','),
+        "socioeconomic": socioeconomic ~> $safeSplit(',')
+    }|,
+    "provenance": {
+        "origin": { /* input.provenance.origin */
+            "purpose": input.provenance.origin.purpose  ~> $safeSplit(','),
+            "source": input.provenance.origin.source  ~> $safeSplit(','),
+            "collectionSituation": input.provenance.origin.collectionSituation  ~> $safeSplit(',')
+        },
+        "temporal": { /* input.provenance.temporal */
+            "endDate": input.provenance.temporal.endDate,
+            "startDate": input.provenance.temporal.startDate,
+            "timeLag": input.provenance.temporal.timeLag,
+            "publishingFrequency": input.provenance.temporal.accrualPeriodicity,
+            "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
+        }
+    },
+    "accessibility": {
+        "access": {
+          "deliveryLeadTime": input.accessibility.access.deliveryLeadTime,
+          "jurisdiction": input.accessibility.access.jurisdiction  ,
+          "dataController": input.accessibility.access.dataController,
+          "dataProcessor": input.accessibility.access.dataProcessor,
+          "accessRights": input.accessibility.access.accessRights  ,
+          "accessService": input.accessibility.access.accessService,
+          "accessRequestCost": input.accessibility.access.accessRequestCost  
+        }
+    },
+    "enrichmentAndLinkage": {
+        "tools": input.linkage.toos ~> $safeSplit(','),
+        "derivation": input.linkage.derivations  ~> $safeSplit(',') 
+    },
+    "observations": input.observations ? [$map(input.observations,function($r) {
+        {
+          "observedNode": $r.observedNode,
+          "measuredValue": $r.measuredValue,
+          "observationDate": $r.observationDate,
+          "measuredProperty": $r.measuredProperty
+        }
+      })] : [],
+    "structuralMetadata": input.structuralMetadata  ~> |$|
+    {
+      "elements": columns 
+    },['columns'] |,
+    "tissuesSamplesCollection": input.tissuesSamplesCollection
+}
+
+)
