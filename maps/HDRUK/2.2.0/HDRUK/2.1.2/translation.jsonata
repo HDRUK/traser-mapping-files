@@ -1,5 +1,27 @@
+(
+
+$null_to_zero := function($x){
+  $exists($x) ? $number($x) : 0
+};
+
 input ~> |$| 
 {
+    "summary": summary ~> |$|
+    {
+        "datasetType": $$.extra.datasetType,
+        "datasetSubType": $$.extra.datasetType,
+        "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_zero
+    }|,
+    "coverage": coverage ~> |$|
+    {
+        "biologicalsamples": physicalSampleAvailability ? $split(physicalSampleAvailability,",") ~> $map(function($value){ $fixBiologicalSamples($value) } ) : null,
+        "gender": $$.extra.coverage.gender,
+        "psychological": $$.extra.coverage.psychological,
+        "physical": $$.extra.coverage.physical,
+        "anthropometric": $$.extra.coverage.anthropometric,
+        "lifestyle": $$.extra.coverage.lifestyle,
+        "socioeconomic": $$.extra.coverage.socioeconomic
+    }, ['physicalSampleAvailability'] |,
     "provenance": provenance ~> |$|
     {
         "temporal": temporal ~> |$|
@@ -8,3 +30,5 @@ input ~> |$|
         },["accrualPeriodicity"]|
     }|
 }|
+
+)
