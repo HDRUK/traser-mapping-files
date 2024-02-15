@@ -12,7 +12,7 @@ $fixBiologicalSamples := function($x){
 };
 
 $null_to_zero := function($x){
-  $x = null ? 0 : $x
+  $exists($x) ? $number($x) : 0
 };
 
 input ~> |$| 

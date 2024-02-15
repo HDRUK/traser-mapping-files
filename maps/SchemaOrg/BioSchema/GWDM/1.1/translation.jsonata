@@ -24,8 +24,8 @@ $to_str := function($x){
     "citation":input.summary.doiName,
     "creator": {
         "@type": "Organization", 
-        "legalName": input.accessibility.usage.resourceCreator,
-        "name": input.accessibility.usage.resourceCreator,
+        "legalName": input.accessibility.usage.resourceCreator.name,
+        "name": input.accessibility.usage.resourceCreator.name,
         "email": input.summary.contactPoint
     },
     "maintainer": {

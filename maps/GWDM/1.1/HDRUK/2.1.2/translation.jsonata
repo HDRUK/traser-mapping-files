@@ -21,7 +21,7 @@ $allowedBiologicalSamples := [
 ];
 
 $removeBadBiologicalSamples := function($x){
-     $not($x in allowedBiologicalSamples) ? null : $x
+     $not($x in $allowedBiologicalSamples) ? null : $x
 };
 
 $cleanBiologicalSamples := function($x){
@@ -32,11 +32,9 @@ $fixBiologicalSamples := function($x){
    $cleanBiologicalSamples($x) ~> $removeBadBiologicalSamples 
 };
 
-
 $null_to_zero := function($x){
-   $x ? $x : null
+  $exists($x) ? $number($x) : 0
 };
-
 
 { /*this is a copy of the map from HDRUK 2.1.2 -> GWDM 1.0 */
   "required": {

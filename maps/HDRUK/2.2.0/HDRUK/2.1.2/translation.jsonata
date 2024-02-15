@@ -1,10 +1,84 @@
+(
+
+$allowedBiologicalSamples := [
+    "Blood",
+    "Urine",
+    "Saliva",
+    "Other"
+];
+
+$allowedMaterialTypes := [
+    "Blood",
+    "DNA",
+    "Faeces",
+    "Immortalized Cell Lines",
+    "Isolated Pathogen",
+    "Other",
+    "Plasma",
+    "RNA",
+    "Saliva",
+    "Serum",
+    "Tissue (Frozen)",
+    "Tissue (FFPE)",
+    "Urine"
+];
+
+$removeBadBiologicalSamples := function($x){
+    $not($x in $allowedBiologicalSamples) ? null : $x
+};
+
+$removeBadMaterialTypes := function($x){
+    $not($x in $allowedMaterialTypes) ? null : $x
+};
+
+
+$cleanBiologicalSamples := function($x){
+   $x = 'DNA' ? 'Other' : $uppercase($substring($lowercase($x),0,1)) &  $substring($lowercase($x),1)
+};
+
+$cleanMaterialType := function($x){
+    $contains($x,"BLOOD") ? 'Blood' : $uppercase($substring($lowercase($x),0,1)) &  $substring($lowercase($x),1)
+};
+
+$fixMaterialType := function($x){
+    $cleanMaterialType($x) ~> $removeBadMaterialTypes
+};
+
+$fixBiologicalSamples := function($x){
+   $cleanBiologicalSamples($x) ~> $removeBadBiologicalSamples 
+};
+
+$null_to_zero := function($x){
+  $exists($x) ? $number($x) : 0
+};
+
 input ~> |$| 
 {
+    "summary": summary ~> |$|
+    {
+        "datasetType": $$.extra.datasetType,
+        "datasetSubType": $$.extra.datasetType,
+        "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_zero
+    }|,
+    "coverage": coverage ~> |$|
+    {
+        "biologicalsamples": physicalSampleAvailability ? $split(physicalSampleAvailability,",") ~> $map(function($value){ $fixBiologicalSamples($value) } ) ~> $filter(function($x){$x != null})  : null,
+        "gender": $$.extra.coverage.gender,
+        "psychological": $$.extra.coverage.psychological,
+        "physical": $$.extra.coverage.physical,
+        "anthropometric": $$.extra.coverage.anthropometric,
+        "lifestyle": $$.extra.coverage.lifestyle,
+        "socioeconomic": $$.extra.coverage.socioeconomic
+    }, ['physicalSampleAvailability'] |,
     "provenance": provenance ~> |$|
     {
         "temporal": temporal ~> |$|
         {
             "publishingFrequency": accrualPeriodicity
         },["accrualPeriodicity"]|
-    }|
+    }|,
+    "tissuesSampleCollection": coverage.physicalSampleAvailability ? $split(coverage.physicalSampleAvailability,",") ~> 
+                $map(function($value){ {"materialType":[$fixMaterialType($value)]} } ) 
 }|
+
+)
