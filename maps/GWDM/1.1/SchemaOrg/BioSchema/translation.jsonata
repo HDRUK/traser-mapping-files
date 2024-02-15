@@ -12,21 +12,23 @@
     "title": input.name,
     "shortTitle": input.alternateName,
     "description": input.description,
-    "abstract": extra.abstract ? extra.abstract : "test",
+    "abstract": extra.abstract ? extra.abstract : input.description,
     "doiName": input.citation,
     "keywords": input.keywords,
     "controlledKeywords": input.keywords, /*temp like this*/
     "datasetType": "dataset", /*going to have to fix this*/
     "publisher":{
-        "publisherName":input.publisher.legalName,
-        "publisherGatewayId":input.publisher.identifier
+        "name":input.publisher.legalName,
+        "gatewayId":input.publisher.identifier
     }
   },
   "accessibility": {
     "usage": {
-      "resourceCreator": input.creator.legalName,
-      "dataUseRequirement": input.usageInfo.accessibilitySummary, /*some duplications here*/
-      "dataUseLimitation": input.usageInfo.accessibilitySummary
+      "resourceCreator": {
+        "name": input.creator.legalName
+      },
+      "dataUseRequirement": extra.dataUseRequirement ? extra.dataUseRequirement : "Unknown", 
+      "dataUseLimitation": extra.dataUseLimitation ? dataUseLimitation : "Unknown"
     },
     "access": {
       "accessRequestCost": input.isAccessibleForFree ? "Free" : "Not Free",
@@ -40,13 +42,13 @@
   },
   "provenance": {
     "origin": {
-      "source": input.spacialCoverage
+      "source": extra.spacialCoverage
     },
-    "temporal": {
-      "startDate": $split(input.temporalCoverage,'/')[0],
-      "endDate": $split(input.temporalCoverage,'/')[1] = '..' ? null : $split(input.temporalCoverage,'/')[1],
-      "timeLag": "NOT APPLICABLE", /*schema.org doesnt hold this information - could be a variable to store it in ... */ 
-      "accrualPeriodicity": null /*also no stored in schema.org - unless some more detailed discover is done */
-    }
+    "temporal": extra.temporalCoverage ? {
+      "timeLag": "NOT APPLICABLE",
+      "accrualPeriodicity": null,
+      "startDate": $split(extra.temporalCoverage,'/')[0],
+      "endDate": $split(extra.temporalCoverage,'/')[1] = '..' ? null : $split(extra.temporalCoverage,'/')[1]
+    } : null
   }
 }
