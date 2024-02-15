@@ -21,7 +21,7 @@ $allowedBiologicalSamples := [
 ];
 
 $removeBadBiologicalSamples := function($x){
-     $not($x in allowedBiologicalSamples) ? null : $x
+     $not($x in $allowedBiologicalSamples) ? null : $x
 };
 
 $cleanBiologicalSamples := function($x){
