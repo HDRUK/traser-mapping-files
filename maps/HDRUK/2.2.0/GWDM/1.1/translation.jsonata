@@ -19,7 +19,7 @@ $safeSplit := function($x,$delim){
         "title": input.summary.shortTitle,
         "publisher": {
             "name": input.summary.publisher.name,
-            "identifier": input.summary.publisher.gatewayId,
+            "identifier": "https://placeholder-for-publisher-page/"&input.summary.publisher.gatewayId,
             "contactPoint": input.summary.contactPoint
         },
         "datasetType": input.summary.datasetType,
