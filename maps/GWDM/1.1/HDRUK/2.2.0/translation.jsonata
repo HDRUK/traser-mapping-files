@@ -86,7 +86,9 @@ $truncate := function($x,$length){
     "usage": {
       "dataUseLimitation": $to_str(input.accessibility.usage.dataUseLimitation),	
       "dataUseRequirement": $to_str(input.accessibility.usage.dataUseRequirements),
-      "resourceCreator": $to_str(input.accessibility.usage.resourceCreator)
+      "resourceCreator": {
+            "name": $to_str(input.accessibility.usage.resourceCreator)
+      }
     },
     "formatAndStandards": {
       "vocabularyEncodingSchemes": $to_str(input.accessibility.formatAndStandards.vocabularyEncodingScheme),
