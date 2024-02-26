@@ -62,7 +62,7 @@ $safeSplit := function($x,$delim){
         }
     },
     "enrichmentAndLinkage": {
-        "tools": input.linkage.toos ~> $safeSplit(','),
+        "tools": input.linkage.tools ~> $safeSplit(','),
         "derivation": input.linkage.derivations  ~> $safeSplit(',') 
     },
     "observations": input.observations ? [$map(input.observations,function($r) {
