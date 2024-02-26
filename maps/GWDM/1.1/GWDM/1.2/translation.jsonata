@@ -1,0 +1,12 @@
+(
+
+input ~> |$| 
+{
+    "linkage": linkage ~> |$|{},["syntheticDataWebLink"]|,
+    "accessibility": accessibility ~> |$|
+    {
+        "access": access ~> |$|{},["accessServiceCategory"]|
+    }|
+}
+
+)
