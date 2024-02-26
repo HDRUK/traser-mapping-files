@@ -1,0 +1,8 @@
+input ~> |$| 
+{
+    "enrichmentAndLinkage": enrichmentAndLinkage ~> |$|{},["syntheticDataWebLink"]|,
+    "accessibility": accessibility ~> |$|
+    {
+        "access": access ~> |$|{},["accessServiceCategory"]|
+    }|
+}
