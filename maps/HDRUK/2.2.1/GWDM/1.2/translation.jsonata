@@ -58,12 +58,14 @@ $safeSplit := function($x,$delim){
           "dataProcessor": input.accessibility.access.dataProcessor,
           "accessRights": input.accessibility.access.accessRights  ,
           "accessService": input.accessibility.access.accessService,
-          "accessRequestCost": input.accessibility.access.accessRequestCost  
+          "accessRequestCost": input.accessibility.access.accessRequestCost,
+          "accessServiceCategory": input.accessibility.access.accessServiceCategory
         }
     },
     "enrichmentAndLinkage": {
         "tools": input.linkage.tools ~> $safeSplit(','),
-        "derivation": input.linkage.derivations  ~> $safeSplit(',') 
+        "derivation": input.linkage.derivations  ~> $safeSplit(','),
+        "syntheticDataWebLink": input.linkage.syntheticDataWebLink
     },
     "observations": input.observations ? [$map(input.observations,function($r) {
         {

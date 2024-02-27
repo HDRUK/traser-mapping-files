@@ -1,0 +1,23 @@
+(
+
+
+input ~> |$| 
+{
+    "linkage": linkage ~> |$|
+    {
+        "syntheticDataWebLink": $$.extra.syntheticDataWebLink
+    }|,
+    "access": linkage ~> |$|
+    {
+        "accessibility": accessibility ~> |$|
+        {
+            "access": access ~> |$|
+            {
+                "accessServiceCategory":  $$.extra.syntheticDataWebLink
+            }|
+        }|
+    }|
+}|
+
+
+)
