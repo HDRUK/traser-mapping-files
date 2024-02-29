@@ -23,7 +23,7 @@ $to_str := function($x){
           function($item){
               $type($item)='array' ? $to_str($item) : $item
           }
-      ) ~> $filter(function($x) { $x != null and $x != "" }) ~> $join(",")
+      ) ~> $filter(function($x) { $x != null and $x != "" }) ~> $join(";,;")
   ) : $x
 };
 
