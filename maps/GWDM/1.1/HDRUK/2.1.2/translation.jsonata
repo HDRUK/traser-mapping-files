@@ -1,11 +1,11 @@
 (
 /*function to enforce any arrays to be strings */
 $to_str := function($x){
-  $type($x)="array" ? $join($x,',') : $x
+  $type($x)="array" ? $join($x,';,;') : $x
 };
 
 $extract_media := function($x){
-  $type($x)="array" ? $join($x.url, ',') : $x
+  $type($x)="array" ? $join($x.url, ';,;') : $x
 };
 
 
@@ -53,7 +53,7 @@ $null_to_number := function($x){
     "abstract": $truncate(input.summary.abstract,5000),
     "contactPoint": input.summary.contactPoint,
     "keywords": $to_str(input.summary.keywords),
-    "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
+    "controlledKeywords": $to_str([$filter( $split($to_str($keywords),';,;'), function($v) {
       $v in extra.controlledKeywords
     })]),
     "datasetType": extra.datasetType,
