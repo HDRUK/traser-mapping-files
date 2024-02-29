@@ -32,8 +32,8 @@ $fixBiologicalSamples := function($x){
    $cleanBiologicalSamples($x) ~> $removeBadBiologicalSamples 
 };
 
-$null_to_zero := function($x){
-  $exists($x) ? $number($x) : 0
+$null_to_number := function($x){
+  $exists($x) ? $number($x) : -1
 };
 
 { /*this is a copy of the map from HDRUK 2.1.2 -> GWDM 1.0 */
@@ -154,7 +154,7 @@ $null_to_zero := function($x){
             "name": publisher.publisherName,
             "gatewayId": publisher.publisherGatewayId
         },
-        "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_zero
+        "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_number
     }|,
     "coverage": coverage ~> |$|
     {
