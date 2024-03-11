@@ -1,8 +1,7 @@
 (
 
 $safeSplit := function($x){
-    $delim := ";,;"
-    $x ? $x ~> $split($delim) : []
+    $x ? $x ~> $split(';,;') : []
 };
 
 
