@@ -7,14 +7,11 @@ input ~> |$|
     {
         "syntheticDataWebLink": $$.extra.syntheticDataWebLink
     }|,
-    "access": linkage ~> |$|
+    "accessibility": accessibility ~> |$|
     {
-        "accessibility": accessibility ~> |$|
+        "access": access ~> |$|
         {
-            "access": access ~> |$|
-            {
-                "accessServiceCategory":  $$.extra.syntheticDataWebLink
-            }|
+            "accessServiceCategory":  $$.extra.syntheticDataWebLink
         }|
     }|
 }|

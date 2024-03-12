@@ -48,8 +48,8 @@ $fixBiologicalSamples := function($x){
    $cleanBiologicalSamples($x) ~> $removeBadBiologicalSamples 
 };
 
-$null_to_zero := function($x){
-  $exists($x) ? $number($x) : 0
+$null_to_number := function($x){
+  $exists($x) ? $number($x) : -1
 };
 
 input ~> |$| 
@@ -58,7 +58,7 @@ input ~> |$|
     {
         "datasetType": $$.extra.datasetType,
         "datasetSubType": $$.extra.datasetType,
-        "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_zero
+        "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_number
     }|,
     "coverage": coverage ~> |$|
     {

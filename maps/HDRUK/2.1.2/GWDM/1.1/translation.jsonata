@@ -1,7 +1,7 @@
 (
 
-$safeSplit := function($x,$delim){
-    $x ? $x ~> $split($delim) : []
+$safeSplit := function($x){
+    $x ? $x ~> $split(';,;') : []
 };
 
 
@@ -14,7 +14,7 @@ $safeSplit := function($x,$delim){
     "summary": {
         "abstract": input.summary.abstract,
         "contactPoint": input.summary.contactPoint,
-        "keywords": input.summary.keywords ~> $safeSplit(','),
+        "keywords": input.summary.keywords ~>$safeSplit,
         "doiName": input.summary.doiName,
         "title": input.summary.shortTitle,
         "publisher": {
@@ -25,16 +25,16 @@ $safeSplit := function($x,$delim){
     },
     "coverage": {
         "pathway": input.coverage.pathway,
-        "physicalSampleAvailability": input.coverage.biologicalsamples ~> $safeSplit(','),
+        "physicalSampleAvailability": input.coverage.biologicalsamples ~>$safeSplit,
         "spatial": input.coverage.spatial,
         "followup": input.coverage.followup,
         "typicalAgeRange": input.coverage.typicalAgeRange
     },
     "provenance": {
         "origin": { /* input.provenance.origin */
-            "purpose": input.provenance.origin.purpose  ~> $safeSplit(','),
-            "source": input.provenance.origin.source  ~> $safeSplit(','),
-            "collectionSituation": input.provenance.origin.collectionSituation  ~> $safeSplit(',')
+            "purpose": input.provenance.origin.purpose  ~>$safeSplit,
+            "source": input.provenance.origin.source  ~>$safeSplit,
+            "collectionSituation": input.provenance.origin.collectionSituation  ~>$safeSplit
         },
         "temporal": { /* input.provenance.temporal */
             "endDate": input.provenance.temporal.endDate,
@@ -56,8 +56,8 @@ $safeSplit := function($x,$delim){
         }
     },
     "enrichmentAndLinkage": {
-        "tools": input.linkage.toos ~> $safeSplit(','),
-        "derivation": input.linkage.derivations  ~> $safeSplit(',') 
+        "tools": input.linkage.toos ~>$safeSplit,
+        "derivation": input.linkage.derivations  ~>$safeSplit 
     },
     "observations": input.observations ? [$map(input.observations,function($r) {
         {
