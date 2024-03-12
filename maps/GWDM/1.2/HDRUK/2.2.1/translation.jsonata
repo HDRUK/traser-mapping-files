@@ -126,11 +126,13 @@ $truncate := function($x,$length){
       {
         "columns": elements
       },['elements'] |,
-  "tissuesSampleCollection": input.tissuesSampleCollection  ~> |$|
+   "tissuesSampleCollection": input.tissuesSampleCollection ? [$map(input.tissuesSampleCollection,function($r) {  
+      $r ~> |$|
       {
-        "dataCategories": dataCategories ~> $to_str,
-        "materialType": materialType ~> $to_str,
-        "id": extra.tissuesSampleCollectionId ? extra.tissuesSampleCollectionId : id
+        "dataCategories": dataCategories ? dataCategories ~> $to_str: null,
+        "materialType": materialType ? materialType ~> $to_str : null,
+        "id": $$.extra.tissuesSampleCollectionId ? $$.extra.tissuesSampleCollectionId : id ? id : null
       }|
+  })] : []
 };
 )

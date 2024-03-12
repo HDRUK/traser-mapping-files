@@ -49,6 +49,11 @@
       "accrualPeriodicity": null,
       "startDate": $split(extra.temporalCoverage,'/')[0],
       "endDate": $split(extra.temporalCoverage,'/')[1] = '..' ? null : $split(extra.temporalCoverage,'/')[1]
-    } : null
+    } : {
+      "timeLag": "NOT APPLICABLE",
+      "accrualPeriodicity": null,
+      "startDate": null,
+      "endDate": null
+    }
   }
 }

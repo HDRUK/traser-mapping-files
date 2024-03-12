@@ -8,7 +8,6 @@ $extract_media := function($x){
   $type($x)="array" ? $join($x.url, ',') : $x
 };
 
-
 $truncate := function($x,$length){
     $x ? $substring($x,0,$length) : null
 };

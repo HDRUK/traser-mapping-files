@@ -6,11 +6,11 @@ input ~> |$|
     "accessibility": accessibility ~> |$|
     {
         "access": access ~> |$|{
-            "accessServiceCategory": $$.extra.accessServiceCategory
-        }
+            "accessServiceCategory": $$.extra.accessServiceCategory ? $$.extra.accessServiceCategory : null
+        }|
     }|,
     "enrichmentAndLinkage": {
-        "syntheticDataWebLink": $$.extra.syntheticDataWebLink
+        "syntheticDataWebLink": $$.extra.syntheticDataWebLink ? $$.extra.syntheticDataWebLink : null
     }
 }|
 
