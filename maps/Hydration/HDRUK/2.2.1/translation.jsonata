@@ -1,0 +1,221 @@
+(
+
+$isHidden := function($location){
+    $sum($map($hiddenFields, function($h){
+        $contains($location, $h) ? 1 : 0
+    })) >= 1 ? true : false
+};
+
+$hiddenFields := [
+    "identifier",
+    "version",
+    "revisions",
+    "issued",
+    "modified",
+    "publisher",
+    "populationSize"
+];
+
+$textArea := function($component){
+    {
+        "component": "TextArea",
+        "variant": "outlined",
+        "name": $component.title,
+        "placeholder": $component.examples[0],
+        "label": $component.description,
+        "limit": $component.types.maxLength,
+        "required": $component.required,
+        "showClearButton": true,
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$textField := function($component){
+    {
+        "component": "TextField",
+        "variant": "outlined",
+        "name": $component.title,
+        "placeholder": $component.examples[0],
+        "label": $component.description,
+        "limit": $component.types.maxLength,
+        "required": $component.required,
+        "showClearButton": true,
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$textBoxSize := function($x){
+    $x.types.maxLength > 200 ?
+        $textArea($x) : $textField($x)
+};
+
+$selectBox := function($component){
+    {
+        "component": "Select",
+        "options": $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
+        "name": $component.title,
+        "label": $component.description,
+        "required": $component.required,
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$datePicker := function($component){
+    {
+        "component": "DatePicker",
+        "name": $component.title,
+        "label": $component.description,
+        "required": $component.required,
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$autoComplete := function($component){
+    {
+        "component": "Autocomplete",
+        "name": $component.title,
+        "label": $component.description,
+        "placeholder": $component.examples[0],
+        "required": $component.required,
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$get_component := function ($x){
+    $x.is_list ?
+        $autoComplete($x) :
+    $x.types = "int" ?
+        $textField($x) :
+    $x.types = "date" ?
+        $datePicker($x) :
+    $x.types.options ? 
+        $selectBox($x) : 
+    $x.types.format ?
+        $textField($x) :
+    $x.types.pattern ?
+        $textField($x) :
+    $x.types.maxLength ?
+        $textBoxSize($x) : $textField($x)
+};
+
+$getItemsType := function($types){
+    $types.options ?
+        {
+            "type": $types.type,
+            "enum": $types.options,
+            "enum_titles": $types.options
+        } :
+    $types.format ?
+        {
+            "type": $types.type,
+            "format": $types.format
+        } : null
+};
+
+$listValidation := function($component){
+    {
+        "required": $component.required,
+        "type": "array",
+        "of": $getItemsType($component.types)
+    }
+};
+
+$stringValidation := function($component){
+    {
+        "required": $component.required,
+        "type": $component.types.type,
+        "min": $component.types.minLength,
+        "max": $component.types.maxLength
+    }
+};
+
+$formatValidation := function($component){
+    {
+        "required": $component.required,
+        "type": $component.types.type,
+        "format": $component.types.format
+    }
+};
+
+$enumValidation := function($component){
+    {
+        "required": $component.required,
+        "type": $component.types.type,
+        "enum": $component.types.options,
+        "enum_titles": $component.types.options
+    }
+};
+
+$regexValidation := function($component){
+    {
+        "required": $component.required,
+        "type": $component.types.type,
+        "pattern": $component.types.pattern
+    }
+};
+
+$intValidation := function($component){
+    {
+        "required": $component.required,
+        "type": "integer",
+        "positive": true
+    }
+};
+
+$dateValidation := function($component){
+    {
+        "required": $component.required,
+        "type": $component.types
+    }
+};
+
+$validationSchema := function($component, $f){
+    {
+        "schema": {
+            "title": $component.title,
+            "type": "object",
+            "properties": {
+                "field": $f($component)
+            }
+        }
+    }
+};
+
+$get_validation := function($component){
+    $component.is_list ?
+        $validationSchema($component, $listValidation) :
+    $component.types.maxLength ?
+        $validationSchema($component, $stringValidation) :
+    $component.types.format ?
+        $validationSchema($component, $formatValidation) :
+    $component.types.options ?
+        $validationSchema($component, $enumValidation) :
+    $component.types.pattern ?
+        $validationSchema($component, $regexValidation) :
+    $component.types = "int" ? 
+        $validationSchema($component, $intValidation) :
+    $component.types = "date" ?
+        $validationSchema($component, $dateValidation) : null
+};
+
+$define_components := function($components){
+    $map($components, function($component){
+        {
+            "title": $component.title,
+            "description": $component.description,
+            "location": $component.location,
+            "guidance": $component.guidance ? $component.guidance : "",
+            "field": $get_component($component),
+            "validation": $get_validation($component)
+        }
+    })
+};
+
+{
+    "schema_fields": $define_components(schema_fields),
+    "array_forms": [
+        "observations"
+    ]
+}
+
+)
