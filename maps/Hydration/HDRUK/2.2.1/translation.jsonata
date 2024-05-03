@@ -202,6 +202,7 @@ $define_components := function($components){
     $map($components, function($component){
         {
             "title": $component.title,
+            "is_array_form": $contains($component.location, 'observations') ? true : false,
             "description": $component.description,
             "location": $component.location,
             "guidance": $component.guidance ? $component.guidance : "",
@@ -212,10 +213,7 @@ $define_components := function($components){
 };
 
 {
-    "schema_fields": $define_components(schema_fields),
-    "array_forms": [
-        "observations"
-    ]
+    "schema_fields": $define_components(schema_fields)
 }
 
 )
