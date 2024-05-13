@@ -6,15 +6,36 @@ $isHidden := function($location){
     })) >= 1 ? true : false
 };
 
-$hiddenFields := [
-    "identifier",
-    "version",
-    "revisions",
-    "issued",
-    "modified",
-    "publisher",
-    "populationSize"
-];
+$optionalSections := {
+    "tissuesSampleCollection": ["tissuesSampleCollection"],
+    "cohortStudy": [
+        "biologicalsamples",
+        "psychological",
+        "physical",
+        "anthropometric",
+        "lifestyle",
+        "socioeconomic"
+    ]
+};
+
+$hiddenByDataType := function($dataTypes, $optionalSections) {
+    $each($optionalSections, function($v, $k) {
+        $k in dataTypes ? [] : $v
+    })
+};
+
+$hiddenFields := $append(
+    [
+        "identifier",
+        "version",
+        "revisions",
+        "issued",
+        "modified",
+        "publisher",
+        "populationSize"
+    ],
+    $hiddenByDataType(dataTypes, $optionalSections).*
+);
 
 $textArea := function($component){
     {
