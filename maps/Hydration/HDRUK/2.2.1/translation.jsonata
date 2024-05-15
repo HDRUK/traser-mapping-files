@@ -19,13 +19,11 @@ $hiddenFields := [
 $textArea := function($component){
     {
         "component": "TextArea",
-        "variant": "outlined",
         "name": $component.title,
         "placeholder": $component.examples[0],
         "label": $component.description,
         "limit": $component.types.maxLength,
         "required": $component.required,
-        "showClearButton": true,
         "hidden": $isHidden($component.location)
     }
 };
@@ -33,13 +31,11 @@ $textArea := function($component){
 $textField := function($component){
     {
         "component": "TextField",
-        "variant": "outlined",
         "name": $component.title,
         "placeholder": $component.examples[0],
         "label": $component.description,
         "limit": $component.types.maxLength,
         "required": $component.required,
-        "showClearButton": true,
         "hidden": $isHidden($component.location)
     }
 };
@@ -73,6 +69,7 @@ $datePicker := function($component){
 $autoComplete := function($component){
     {
         "component": "Autocomplete",
+        "options": $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
         "name": $component.title,
         "label": $component.description,
         "placeholder": $component.examples[0],
@@ -114,6 +111,7 @@ $getItemsType := function($types){
 
 $listValidation := function($component){
     {
+        "title": $component.title,
         "required": $component.required,
         "type": "array",
         "of": $getItemsType($component.types)
@@ -122,6 +120,7 @@ $listValidation := function($component){
 
 $stringValidation := function($component){
     {
+        "title": $component.title,
         "required": $component.required,
         "type": $component.types.type,
         "min": $component.types.minLength,
@@ -131,6 +130,7 @@ $stringValidation := function($component){
 
 $formatValidation := function($component){
     {
+        "title": $component.title,
         "required": $component.required,
         "type": $component.types.type,
         "format": $component.types.format
@@ -139,6 +139,7 @@ $formatValidation := function($component){
 
 $enumValidation := function($component){
     {
+        "title": $component.title,
         "required": $component.required,
         "type": $component.types.type,
         "enum": $component.types.options,
@@ -148,6 +149,7 @@ $enumValidation := function($component){
 
 $regexValidation := function($component){
     {
+        "title": $component.title,
         "required": $component.required,
         "type": $component.types.type,
         "pattern": $component.types.pattern
@@ -156,6 +158,7 @@ $regexValidation := function($component){
 
 $intValidation := function($component){
     {
+        "title": $component.title,
         "required": $component.required,
         "type": "integer",
         "positive": true
@@ -164,38 +167,27 @@ $intValidation := function($component){
 
 $dateValidation := function($component){
     {
+        "title": $component.title,
         "required": $component.required,
-        "type": $component.types
-    }
-};
-
-$validationSchema := function($component, $f){
-    {
-        "schema": {
-            "title": $component.title,
-            "type": "object",
-            "properties": {
-                "field": $f($component)
-            }
-        }
+        "type": "date"
     }
 };
 
 $get_validation := function($component){
     $component.is_list ?
-        $validationSchema($component, $listValidation) :
+        $listValidation($component) :
     $component.types.maxLength ?
-        $validationSchema($component, $stringValidation) :
+        $stringValidation($component) :
     $component.types.format ?
-        $validationSchema($component, $formatValidation) :
+        $formatValidation($component) :
     $component.types.options ?
-        $validationSchema($component, $enumValidation) :
+        $enumValidation($component) :
     $component.types.pattern ?
-        $validationSchema($component, $regexValidation) :
+        $regexValidation($component) :
     $component.types = "int" ? 
-        $validationSchema($component, $intValidation) :
-    $component.types = "date" ?
-        $validationSchema($component, $dateValidation) : null
+        $intValidation($component) :
+    $component.types = "date" or $component.types = "datetime" ?
+        $dateValidation($component) : null
 };
 
 $define_components := function($components){
@@ -206,14 +198,18 @@ $define_components := function($components){
             "description": $component.description,
             "location": $component.location,
             "guidance": $component.guidance ? $component.guidance : "",
-            "field": $get_component($component),
-            "validation": $get_validation($component)
+            "field": $get_component($component)
         }
     })
 };
 
+$define_validations := function($components){
+    $map($components, $get_validation)
+};
+
 {
-    "schema_fields": $define_components(schema_fields)
+    "schema_fields": $define_components(schema_fields),
+    "validation": $define_validations(schema_fields)
 }
 
 )
