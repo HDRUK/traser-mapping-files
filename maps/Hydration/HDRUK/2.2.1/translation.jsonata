@@ -190,21 +190,62 @@ $get_validation := function($component){
         $dateValidation($component) : null
 };
 
-$define_components := function($components){
-    $map($components, function($component){
-        {
-            "title": $component.title,
-            "is_array_form": $contains($component.location, 'observations') ? true : false,
-            "description": $component.description,
-            "location": $component.location,
-            "guidance": $component.guidance ? $component.guidance : "",
-            "field": $get_component($component)
-        }
-    })
+$split_array_single_components := function($components){(
+    $array_list := $filter($components, function($v){
+        $contains($v.location, 'observations')
+    });
+    $single_list := $filter($components, function($v){
+        $not($contains($v.location, 'observations'))
+    });
+    {
+        "array_list": $array_list,
+        "single_list": $single_list
+    }
+)};
+
+$define_components := function($components){(
+    $split := $split_array_single_components($components);
+    $array_components := $define_array_components($split.array_list);
+    $single_components := $map($split.single_list, function($component){
+        $define_single_component($component)
+    });
+    $append($single_components, $array_components)
+)};
+
+$define_array_components := function($components){
+    {
+        "title": "Observations Array",
+        "is_array_form": true,
+        "fields": $map($components, function($component){
+            $define_single_component($component)
+        })
+    }
 };
 
-$define_validations := function($components){
-    $map($components, $get_validation)
+$define_single_component := function($component){
+    {
+        "title": $component.title,
+        "is_array_form": $contains($component.location, 'observations') ? true : false,
+        "description": $component.description,
+        "location": $component.location,
+        "guidance": $component.guidance ? $component.guidance : "",
+        "field": $get_component($component)
+    }
+};
+
+$define_validations := function($components){(
+    $split := $split_array_single_components($components);
+    $array_validation := $define_array_validation($split.array_list);
+    $single_validations := $map($split.single_list, $get_validation);
+    $append($single_validations, $array_validation)
+)};
+
+$define_array_validation := function($components){
+    {
+        "title": "Observations Array",
+        "type": "array",
+        "items": $map($components, $get_validation)
+    }
 };
 
 {
