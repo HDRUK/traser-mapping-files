@@ -78,11 +78,24 @@ $autoComplete := function($component){
     }
 };
 
+$numberBox := function($component){
+    {
+        "component": "TextField",
+        "name": $component.title,
+        "type": "number",
+        "placeholder": $component.examples[0],
+        "label": $component.description,
+        "limit": $component.types.maxLength,
+        "required": $component.required,
+        "hidden": $isHidden($component.location)
+    }
+};
+
 $get_component := function ($x){
     $x.is_list ?
         $autoComplete($x) :
     $x.types = "int" ?
-        $textField($x) :
+        $numberBox($x) :
     $x.types = "date" ?
         $datePicker($x) :
     $x.types.options ? 
@@ -215,6 +228,7 @@ $define_components := function($components){(
 $define_array_components := function($components){
     {
         "title": "Observations Array",
+        "location": "observations",
         "is_array_form": true,
         "fields": $map($components, function($component){
             $define_single_component($component)
@@ -225,7 +239,7 @@ $define_array_components := function($components){
 $define_single_component := function($component){
     {
         "title": $component.title,
-        "is_array_form": $contains($component.location, 'observations') ? true : false,
+        "is_array_form": false,
         "description": $component.description,
         "location": $component.location,
         "guidance": $component.guidance ? $component.guidance : "",
