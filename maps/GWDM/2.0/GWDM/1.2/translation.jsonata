@@ -1,0 +1,41 @@
+(
+
+$allowedAccessModes := [
+    "Join research consortium",
+    "New project"
+];
+
+$removeBadAccessMode := function($x){
+    $not($x in $allowedAccessModes) ? null : $x
+};
+
+$fixAccessMode := function($x){
+    $removeBadAccessMode($x)
+};
+
+input ~> |$| {
+    "summary": summary ~> |$|{
+        "inPipeline": null
+    }|,
+    "coverage": coverage ? coverage ~> |$|
+        {
+            "datasetCompleteness": $$.extra.datasetCompleteness ? $$.extra.datasetCompleteness : null
+        }, ['biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic','gender'] | : null,
+    "provenance": provenance ? provenance ~> |$|
+    {
+        "origin": origin ~> |$|{
+            "imageContrast": null
+        }|
+    }| : null,
+    "accessibility": accessibility ~> |$|
+    {
+        "access": access ~> |$|{
+            "accessMode": $$.extra.accessMode ? $fixAccessMode($$.extra.accessMode) : "New project"
+        }|
+    }|,
+    "linkage": linkage ? linkage ~> |$|{
+        "publicationAboutDataset": null,
+        "publicationUsingDataset": $$.input.access.usage.isReferencedBy
+    }| : null
+}, ['tissuesSampleCollection'] |
+)
