@@ -178,5 +178,11 @@
             "output_version": "GoogleRecommended",
             "input_model": "GWDM",
             "input_version": "1.0"
+      },
+      {
+            "output_model": "SchemaOrg",
+            "output_version": "GoogleRecommended",
+            "input_model": "GWDM",
+            "input_version": "2.0"
       }
 ]
