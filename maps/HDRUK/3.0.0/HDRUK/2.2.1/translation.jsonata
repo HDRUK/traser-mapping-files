@@ -305,7 +305,7 @@ input ~> |$| {
         "description": $$.input.documentation.description ? $$.input.documentation.description : null,
         "associatedMedia": $$.input.linkage.associatedMedia ? $$.input.linkage.associatedMedia : null,
         "inPipeline": null
-    }['isPartOf']| : null,
+    }, ['isPartOf'] | : null,
     "coverage": coverage ? coverage ~> |$|
         {
             "typicalAgeRangeMin": $parseInteger($ageRangeMin($$.input.coverage.typicalAgeRange), "#,##0"),
