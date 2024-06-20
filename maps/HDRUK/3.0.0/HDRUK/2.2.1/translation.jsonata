@@ -254,6 +254,47 @@ $allowedNodes := [
     "Number of scans per modality"
 ];
 
+$allowedEncodings := [
+    "LOCAL",
+    "OPCS4",
+    "READ",
+    "SNOMED CT",
+    "SNOMED RT",
+    "DM PLUS D",
+    "DM+D",
+    "NHS NATIONAL CODES",
+    "NHS SCOTLAND NATIONAL CODES",
+    "NHS WALES NATIONAL CODES",
+    "ODS",
+    "LOINC",
+    "ICD10",
+    "ICD10CM",
+    "ICD10PCS",
+    "ICD9CM",
+    "ICD9",
+    "ICDO3",
+    "AMT",
+    "APC",
+    "ATC",
+    "CIEL",
+    "HPO",
+    "CPT4",
+    "DPD",
+    "DRG",
+    "HEMONC",
+    "JMDC",
+    "KCD7",
+    "MULTUM",
+    "NAACCR",
+    "NDC",
+    "NDFRT",
+    "OXMIS",
+    "RXNORM",
+    "RXNORM EXTENSION",
+    "SPL",
+    "OTHER"
+];
+
 $tryMatchEnum := function($x, $allowed){(
     $cleaned := $replace($x, ";", "");
     $lowered := $join([$uppercase($substring($cleaned, 0, 1)), $substring($lowercase($cleaned), 1, $length($cleaned))]);
@@ -290,6 +331,11 @@ $cleanDatasetType := function($x){(
     $tryClean ? $tryClean : "Health and disease"
 )};
 
+$cleanDatasetSubType := function($x){(
+    $tryClean := $cleanEnumSingle($$.input.summary.datasetSubType, $allowedDatasetSubType);
+    $tryClean ? $tryClean : "Not applicable"
+)};
+
 $cleanDataTable := function($table){(
     $table ~> |$| {
         "columns": $table.elements
@@ -322,7 +368,7 @@ input ~> |$| {
             "datasetType": $$.input.summary.datasetType ?
                 $cleanDatasetType($$.input.summary.datasetType) : "Health and disease",
             "datasetSubType": $$.input.summary.datasetSubType ?
-                $cleanEnum($$.input.summary.datasetSubType, $allowedDatasetSubType) : null,
+                $cleanDatasetSubType($$.input.summary.datasetSubType) : null,
             "source": $$.input.provenance.origin.source ?
                 $cleanEnum($$.input.provenance.origin.source, $allowedSource) : null,
             "collectionSource": $$.input.provenance.origin.collectionSituation ?
@@ -350,7 +396,11 @@ input ~> |$| {
             "dataUseRequirements": $$.input.accessibility.usage.dataUseRequirement ? 
                 $cleanEnum($$.input.accessibility.usage.dataUseRequirement, $allowedDataUseRequirements) : null,
             "resourceCreator": null
-        }, ['investigations','isReferencedBy']| : null
+        }, ['investigations','isReferencedBy']| : null,
+        "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
+            "vocabularyEncodingScheme": $$.input.accessibility.formatAndStandards.vocabularyEncodingScheme ?
+                $cleanEnum($$.input.accessibility.formatAndStandards.vocabularyEncodingScheme, $allowedEncodings) : null
+        }| : null
     }|,
     "enrichmentAndLinkage": enrichmentAndLinkage ? enrichmentAndLinkage ~> |$|{
         "derivedFrom": null,
