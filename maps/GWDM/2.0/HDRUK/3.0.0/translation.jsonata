@@ -12,7 +12,7 @@ $truncate := function($x,$length){
     $x ? $substring($x,0,$length) : null
 };
 
-{ "metadata": {
+{
   "required": {
     "gatewayId": extra.id,
     "gatewayPid": extra.pid,
@@ -130,5 +130,5 @@ $truncate := function($x,$length){
       }
     })] : [],
   "structuralMetadata": input.structuralMetadata.tables
-}};
+};
 )
