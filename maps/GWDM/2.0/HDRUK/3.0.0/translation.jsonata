@@ -14,8 +14,8 @@ $truncate := function($x,$length){
 
 {
   "required": {
-    "gatewayId": extra.id,
-    "gatewayPid": extra.pid,
+    "gatewayId": extra.id ? extra.id : $truncate(input.identifier,50),
+    "gatewayPid": extra.pid ? extra.pid : input.identifier,
     "issued": input.issued,
     "modified": input.modified,
     "version": input.version,
@@ -43,8 +43,8 @@ $truncate := function($x,$length){
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
     "publisher": {
-      "name": extra.publisherName ? extra.publisherName : input.summary.publisher.name,
-      "gatewayId": extra.publisherId ? extra.publisherId : input.summary.publisher.identifier
+      "name": extra.publisherName ? extra.publisherName : input.summary.dataProvider.name,
+      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataProvider.identifier, 50)
     },
     "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : null
   },
