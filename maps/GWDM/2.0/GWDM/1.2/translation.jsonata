@@ -13,6 +13,15 @@ $fixAccessMode := function($x){
     $removeBadAccessMode($x)
 };
 
+$fixObservedNode := function($obs){(
+    $node := $lowercase($obs.observedNode) = "persons" ? "Person" :
+        $lowercase($obs.observedNode) = "events" ? "Event" :
+        $lowercase($obs.observedNode) = "findings" ? "Findings" : null;
+    $obs ~> |$| {
+        "observedNode": $node
+    }|
+)};
+
 input ~> |$| {
     "summary": summary ~> |$|{
         "inPipeline": null
@@ -36,6 +45,7 @@ input ~> |$| {
     "linkage": linkage ? linkage ~> |$|{
         "publicationAboutDataset": null,
         "publicationUsingDataset": $$.input.access.usage.isReferencedBy
-    }| : null
+    }| : null,
+    "observations": observations ? $map(observations, $fixObservedNode)[] : null
 }, ['tissuesSampleCollection'] |
 )
