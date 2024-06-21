@@ -102,7 +102,6 @@ $cleanEnumSingle := function($x, $allowed){
 
 
 {
-    "metadata": {
     "identifier": input.required.gatewayPid,
     "issued": input.required.issued,
     "modified": input.required.modified,
@@ -176,6 +175,6 @@ $cleanEnumSingle := function($x, $allowed){
         "tables": input.structuralMetadata,
         "syntheticDataWebLink": input.linkage.syntheticDataWebLink
     }
-}}
+}
 
 )
