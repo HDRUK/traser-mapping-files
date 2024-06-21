@@ -1,0 +1,181 @@
+(
+
+$safeSplit := function($x,$delim){
+    $x ? $x ~> $split($delim) : []
+};
+
+$allowedPublishingFrequency := [
+    "Static",
+    "Irregular",
+    "Continuous",
+    "Biennial",
+    "Annual",
+    "Biannual",
+    "Quarterly",
+    "Bimonthly",
+    "Monthly",
+    "Biweekly",
+    "Weekly",
+    "Twice a week",
+    "Daily",
+    "Other"
+];
+
+$allowedTimeLag := [
+    "Less than 1 week",
+    "1-2 weeks",
+    "2-4 weeks",
+    "1-2 months",
+    "2-6 months",
+    "6 months plus",
+    "Variable",
+    "Not applicable",
+    "Other"
+];
+
+$allowedEncodings := [
+    "LOCAL",
+    "OPCS4",
+    "READ",
+    "SNOMED CT",
+    "SNOMED RT",
+    "DM PLUS D",
+    "DM+D",
+    "NHS NATIONAL CODES",
+    "NHS SCOTLAND NATIONAL CODES",
+    "NHS WALES NATIONAL CODES",
+    "ODS",
+    "LOINC",
+    "ICD10",
+    "ICD10CM",
+    "ICD10PCS",
+    "ICD9CM",
+    "ICD9",
+    "ICDO3",
+    "AMT",
+    "APC",
+    "ATC",
+    "CIEL",
+    "HPO",
+    "CPT4",
+    "DPD",
+    "DRG",
+    "HEMONC",
+    "JMDC",
+    "KCD7",
+    "MULTUM",
+    "NAACCR",
+    "NDC",
+    "NDFRT",
+    "OXMIS",
+    "RXNORM",
+    "RXNORM EXTENSION",
+    "SPL",
+    "OTHER"
+];
+
+$getMaterialType := function($tissue){
+    $lowercase($tissue.materialType)
+};
+
+$tryMatchEnum := function($x, $allowed){(
+    $cleaned := $replace($x, ";", "");
+    $lowered := $join([$uppercase($substring($cleaned, 0, 1)), $substring($lowercase($cleaned), 1, $length($cleaned))]);
+    $match := $filter($allowed, function($v, $i, $a){(
+        $allowedLowered := $join([$uppercase($substring($v, 0, 1)), $substring($lowercase($v), 1, $length($v))]);
+        $allowedLowered = $lowered ? $a[$i] : null
+    )})
+)};
+
+$cleanEnum := function($x, $allowed){
+    $type($x) = "string" ? [$map($split($x, ","), function($v){
+        $tryMatchEnum($v, $allowed)
+    })] : 
+        [$map($x, function($v){
+            $tryMatchEnum($v, $allowed)
+    })]
+};
+
+$cleanEnumSingle := function($x, $allowed){
+    $tryMatchEnum($x, $allowed)
+};
+
+
+{
+    "metadata": {
+    "identifier": input.required.gatewayPid,
+    "issued": input.required.issued,
+    "modified": input.required.modified,
+    "revisions": input.required.revisions,
+    "version": input.required.version,
+    "summary": {
+        "abstract": input.summary.abstract,
+        "contactPoint": input.summary.contactPoint,
+        "keywords": input.summary.keywords ~> $safeSplit(','),
+        "doiName": input.summary.doiName,
+        "title": input.summary.shortTitle,
+        "dataProvider": {
+            "name": input.summary.publisher.name,
+            "identifier": "https://placeholder-for-publisher-page/"&input.summary.publisher.gatewayId,
+            "contactPoint": input.summary.contactPoint
+        },
+        "populationSize": input.summary.populationSize
+    },
+    "documentation": {
+        "description": input.summary.description,
+        "associatedMedia": input.linkage.associatedMedia,
+        "inPipeline": input.summary.inPipeline
+    },
+    "coverage": input.coverage ~> |$|
+    {
+        "gender": gender ~> $safeSplit(','),
+        "followup": followup,
+        "typicalAgeRangeMin": $parseInteger($split(typicalAgeRange, "-")[0], "#,##0"),
+        "typicalAgeRangeMax": $parseInteger($split(typicalAgeRange, "-")[1], "#,##0"),
+        "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
+    }, ['typicalAgeRange']|,
+    "provenance": {
+        "origin": {
+            "purpose": input.provenance.origin.purpose  ~> $safeSplit(','),
+            "source": input.provenance.origin.source  ~> $safeSplit(','),
+            "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(','),
+            "datasetType": input.summary.datasetType,
+            "datasetSubType": input.summary.datasetSubType,
+            "imageContrast": input.provenance.origin.imageContrast
+        },
+        "temporal": { /* input.provenance.temporal */
+            "endDate": input.provenance.temporal.endDate,
+            "startDate": input.provenance.temporal.startDate,
+            "timeLag": $cleanEnumSingle(input.provenance.temporal.timeLag, $allowedTimeLag),
+            "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency),
+            "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
+        }
+    },
+    "accessibility": input.accessibility ~> |$|{
+        "usage": usage ? usage ~> |$|{
+            "dataUseRequirements": $$.input.accessibility.usage.dataUseRequirement,
+            "dataUseLimitation": $safeSplit($$.input.accessibility.usage.dataUseLimitation,","),
+            "resourceCreator": $$.input.accessibility.usage.resourceCreator.name
+        }, ['dataUseRequirement']|,
+        "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
+            "vocabularyEncodingScheme": $$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes ?
+                $safeSplit($$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes, ",") : null,
+            "language": $$.input.accessibility.formatAndStandards.languages,
+            "format": $$.input.accessibility.formatAndStandards.formats,
+            "conformsTo": $safeSplit($$.input.accessibility.formatAndStandards.conformsTo, ",")
+        }, ['vocabularyEncodingSchemes','languages','formats']| : null
+    }|,
+    "enrichmentAndLinkage": input.linkage ~> |$|{
+        "derivedFrom": $$.input.linkage.datasetLinkage.isDerivedFrom,
+        "isPartOf": $$.input.linkage.datasetLinkage.isPartOf,
+        "linkableDatasets": $$.input.linkage.datasetLinkage.linkedDatasets,
+        "similarToDatasets": $$.input.linkage.datasetLinkage.isMemberOf
+    }, ['dataUses','isGeneratedUsing','associatedMedia','isReferenceIn','syntheticDataWebLink','datasetLinkage']|,
+    "observations": input.observations,
+    "structuralMetadata": {
+        "tables": input.structuralMetadata,
+        "syntheticDataWebLink": input.linkage.syntheticDataWebLink
+    }
+}}
+
+)
