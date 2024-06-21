@@ -47,5 +47,5 @@ input ~> |$| {
         "publicationUsingDataset": $$.input.access.usage.isReferencedBy
     }| : null,
     "observations": observations ? $map(observations, $fixObservedNode)[] : null
-}, ['tissuesSampleCollection'] |
+}|
 )
