@@ -25,6 +25,12 @@
       },
       {
             "output_model": "HDRUK",
+            "output_version": "3.0.0",
+            "input_model": "GWDM",
+            "input_version": "2.0"
+      },
+      {
+            "output_model": "HDRUK",
             "output_version": "2.1.2",
             "input_model": "GWDM",
             "input_version": "1.0"

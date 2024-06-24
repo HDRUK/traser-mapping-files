@@ -129,6 +129,11 @@ $truncate := function($x,$length){
         "disambiguatingDescription": $r.disambiguatingDescription
       }
     })] : [],
-  "structuralMetadata": input.structuralMetadata.tables
+  "structuralMetadata": input.structuralMetadata.tables,
+  "tissuesSampleCollection": [
+      {
+          "materialType": $join(input.coverage.materialType, ",")
+      }
+  ]
 };
 )

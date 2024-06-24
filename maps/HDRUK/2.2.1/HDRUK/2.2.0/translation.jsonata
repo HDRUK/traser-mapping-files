@@ -1,5 +1,8 @@
 (
 
+$safeSplit := function($x,$delim){
+    $x ? $x ~> $split($delim) : []
+};
 
 input ~> |$| 
 {
@@ -7,6 +10,17 @@ input ~> |$|
     {
         "access": access ~> |$|{
             "accessServiceCategory": $$.extra.accessServiceCategory ? $$.extra.accessServiceCategory : null
+        }|,
+        "formatAndStandards": formatAndStandards ~> |$|{
+            "conformsTo": $safeSplit($$.input.accessibility.formatAndStandards.conformsTo, ",")
+        }|
+    }|,
+    "provenance": provenance ? provenance ~> |$|
+    {
+        "origin": origin ~> |$|{
+            "purpose": $safeSplit($$.input.provenance.origin.purpose, ","),
+            "source": $safeSplit($$.input.provenance.origin.source, ","),
+            "collectionSituation": $safeSplit($$.input.provenance.origin.colledctionSituation, ",")
         }|
     }|,
     "enrichmentAndLinkage": {
