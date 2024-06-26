@@ -6,15 +6,56 @@ $isHidden := function($location){
     })) >= 1 ? true : false
 };
 
-$hiddenFields := [
-    "identifier",
-    "version",
-    "revisions",
-    "issued",
-    "modified",
-    "dataProvider",
-    "populationSize"
+$allOptionalFields := [
+    "materialType",
+    "imageContrast"
 ];
+
+$neededFieldsMap := {
+    "Health and disease": ["materialType"],
+    "Treatments/Interventions": ["materialType"],
+    "Measurements/Tests": ["materialType"],
+    "Imaging types": ["imageContrast"],
+    "Imaging area of the body": ["imageContrast"],
+    "Omics": ["materialType"],
+    "Socioeconomic": [],
+    "Lifestyle": [],
+    "Registry": ["materialType"],
+    "Environment and energy": [],
+    "Information and communication": [],
+    "Politics": []
+};
+
+$getNeededFields := function($dataTypes, $neededFieldsMap) {(
+    $list :=  $each($neededFieldsMap, function($v, $k) {
+        $k in dataTypes ? $v : []
+    });
+    $neededFields := $append([], $list).*
+)};
+
+$setDiff := function($setOne, $setTwo){
+    $filter($setOne, function($v) {
+        $not($v in $setTwo)
+    })
+};
+
+$hiddenByDataType := function($dataTypes) {(
+    $neededFields := $getNeededFields($dataTypes, $neededFieldsMap);
+    $toHide := $count($dataTypes) = 0 ? [] : $setDiff($allOptionalFields, $neededFields)
+)};
+
+$hiddenFields := $append(
+    [
+        "identifier",
+        "version",
+        "revisions",
+        "issued",
+        "modified",
+        "dataProvider",
+        "populationSize"
+    ],
+    $hiddenByDataType(dataTypes)
+);
 
 $textArea := function($component){
     {
