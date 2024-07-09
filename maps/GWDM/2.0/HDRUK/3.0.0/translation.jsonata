@@ -130,10 +130,10 @@ $truncate := function($x,$length){
       }
     })] : [],
   "structuralMetadata": input.structuralMetadata.tables,
-  "tissuesSampleCollection": [
+  "tissuesSampleCollection": input.coverage.materialType ? [$map(input.coverage.materialType,function($type) {
       {
-          "materialType": $join(input.coverage.materialType, ",")
+        "materialType": $type
       }
-  ]
+    })] : []
 };
 )
