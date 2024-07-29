@@ -125,12 +125,13 @@ $cleanEnumSingle := function($x, $allowed){
         "associatedMedia": input.linkage.associatedMedia,
         "inPipeline": input.summary.inPipeline
     },
-    "coverage": input.coverage ~> |$|
+    "coverage": 
     {
         "pathway": input.coverage.pathway, 
         "spatial": input.coverage.spatial ~> $safeSplit(','),
         "followup": input.coverage.followup,
-        "typicalAgeRange": $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]),
+        "typicalAgeRangeMin": (input.coverage.typicalAgeRange ~> $safeSplit("-"))[0],
+        "typicalAgeRangeMax": (input.coverage.typicalAgeRange ~> $safeSplit("-"))[1],
         "datasetCompleteness": input.coverage.datasetCompleteness
     }, 
     "provenance": {
