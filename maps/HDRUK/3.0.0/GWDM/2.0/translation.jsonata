@@ -1,5 +1,9 @@
 (
 
+$defaultValue := function($value,$defaultValue){
+    $value ? $value : $defaultValue
+};
+
 $safeSplit := function($x,$delim){
     $x ? $x ~> $split($delim) : []
 };
@@ -74,6 +78,78 @@ $allowedEncodings := [
     "OTHER"
 ];
 
+$allowedPurpose := [
+    'Research cohort',
+    'Study',
+    'Disease registry',
+    'Trial',
+    'Care',
+    'Audit',
+    'Administrative',
+    'Financial',
+    'Statuatory',
+    'Other'
+];
+
+$allowedDatasetType := [
+    'Health and disease',
+    'Treatments/Interventions',
+    'Measurements/Tests',
+    'Imaging types',
+    'Imaging area of the body',
+    'Omics',
+    'Socioeconomic',
+    'Lifestyle',
+    'Registry',
+    'Environment and energy',
+    'Information and communication',
+    'Politics'
+];
+
+$allowedSource := [
+    'EPR',
+    'Electronic survey',
+    'LIMS',
+    'Paper-based',
+    'Free text NLP',
+    'Machine generated',
+    'Other'
+];
+
+$allowedSetting := [
+    'Cohort, study, trial',
+    'Clinic',
+    'Primary care - Referrals',
+    'Primary care - Clinic',
+    'Primary care - Out of hours',
+    'Secondary care - Accident and Emergency',
+    'Secondary care - Outpatients',
+    'Secondary care - In-patients',
+    'Secondary care - Ambulance',
+    'Secondary care - ICU',
+    'Prescribing - Community pharmacy',
+    'Prescribing - Hospital',
+    'Patient report outcome',
+    'Wearables',
+    'Local authority',
+    'National government',
+    'Community',
+    'Services',
+    'Home',
+    'Private',
+    'Social care - Health care at home',
+    'Social care - Other social data',
+    'Census',
+    'Other'
+];
+
+$allowedServiceCategory := [
+    'TRE/SDE',
+    'Direct access',
+    'Open access',
+    'Varies based on project'
+];
+
 $getMaterialType := function($tissue){
     $lowercase($tissue.materialType)
 };
@@ -137,10 +213,10 @@ $cleanEnumSingle := function($x, $allowed){
     }, 
     "provenance": {
         "origin": {
-            "purpose": input.provenance.origin.purpose  ~> $safeSplit(','),
-            "source": input.provenance.origin.source  ~> $safeSplit(','),
-            "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(','),
-            "datasetType": input.summary.datasetType,
+            "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
+            "source": input.provenance.origin.source  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSource),
+            "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
+            "datasetType": input.summary.datasetType ~> $cleanEnumSingle($allowedDatasetType) ~> $defaultValue("Health and disease"),
             "datasetSubType": input.summary.datasetSubType,
             "imageContrast": input.provenance.origin.imageContrast
         },
@@ -153,6 +229,9 @@ $cleanEnumSingle := function($x, $allowed){
         }
     },
     "accessibility": input.accessibility ~> |$|{
+        "access": access ~> |$|{
+            "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null)
+        }|,  
         "usage": usage ? usage ~> |$|{
             "dataUseRequirements": $$.input.accessibility.usage.dataUseRequirement,
             "dataUseLimitation": $safeSplit($$.input.accessibility.usage.dataUseLimitation,","),
@@ -172,7 +251,7 @@ $cleanEnumSingle := function($x, $allowed){
         "linkableDatasets": $$.input.linkage.datasetLinkage.linkedDatasets,
         "similarToDatasets": $$.input.linkage.datasetLinkage.isMemberOf
     }, ['dataUses','isGeneratedUsing','associatedMedia','isReferenceIn','syntheticDataWebLink','datasetLinkage']|,
-    "observations": input.observations,
+    "observations": input.observations ~> $defaultValue([]),
     "structuralMetadata": {
         "tables": input.structuralMetadata,
         "syntheticDataWebLink": input.linkage.syntheticDataWebLink
