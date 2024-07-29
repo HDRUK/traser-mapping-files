@@ -132,7 +132,8 @@ $cleanEnumSingle := function($x, $allowed){
         "followup": input.coverage.followup,
         "typicalAgeRangeMin": (input.coverage.typicalAgeRange ~> $safeSplit("-"))[0],
         "typicalAgeRangeMax": (input.coverage.typicalAgeRange ~> $safeSplit("-"))[1],
-        "datasetCompleteness": input.coverage.datasetCompleteness
+        "datasetCompleteness": input.coverage.datasetCompleteness,
+        "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
     }, 
     "provenance": {
         "origin": {
@@ -175,8 +176,7 @@ $cleanEnumSingle := function($x, $allowed){
     "structuralMetadata": {
         "tables": input.structuralMetadata,
         "syntheticDataWebLink": input.linkage.syntheticDataWebLink
-    },
-    "tissuesSampleCollections":  input.tissuesSampleCollections ~> |$|{}|
+    }
 }
 
 )
