@@ -110,7 +110,7 @@ $cleanEnumSingle := function($x, $allowed){
     "summary": {
         "abstract": input.summary.abstract,
         "contactPoint": input.summary.contactPoint,
-        "keywords": input.summary.keywords ~> $safeSplit(','),
+        "keywords": input.summary.keywords ~> $safeSplit(';,;'),
         "doiName": input.summary.doiName,
         "title": input.summary.shortTitle,
         "dataProvider": {
@@ -175,7 +175,8 @@ $cleanEnumSingle := function($x, $allowed){
     "structuralMetadata": {
         "tables": input.structuralMetadata,
         "syntheticDataWebLink": input.linkage.syntheticDataWebLink
-    }
+    },
+    "tissuesSampleCollections":  input.tissuesSampleCollections ~> |$|{}|
 }
 
 )
