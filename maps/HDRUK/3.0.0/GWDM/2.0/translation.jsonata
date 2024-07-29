@@ -128,7 +128,7 @@ $cleanEnumSingle := function($x, $allowed){
     "coverage": 
     {
         "pathway": input.coverage.pathway, 
-        "spatial": input.coverage.spatial ~> $safeSplit(','),
+        "spatial": input.coverage.spatial, /* ~> $safeSplit(','),  something not right here...  3.0.0  spatial: Union[CommaSeparatedValues, List[Url]] = */
         "followup": input.coverage.followup,
         "typicalAgeRangeMin": (input.coverage.typicalAgeRange ~> $safeSplit("-"))[0],
         "typicalAgeRangeMax": (input.coverage.typicalAgeRange ~> $safeSplit("-"))[1],
