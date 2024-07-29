@@ -127,12 +127,12 @@ $cleanEnumSingle := function($x, $allowed){
     },
     "coverage": input.coverage ~> |$|
     {
-        "gender": gender ~> $safeSplit(','),
-        "followup": followup,
-        "typicalAgeRangeMin": $parseInteger($split(typicalAgeRange, "-")[0], "#,##0"),
-        "typicalAgeRangeMax": $parseInteger($split(typicalAgeRange, "-")[1], "#,##0"),
-        "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
-    }, ['typicalAgeRange']|,
+        "pathway": input.coverage.pathway, 
+        "spatial": input.coverage.spatial ~> $safeSplit(','),
+        "followup": input.coverage.followup,
+        "typicalAgeRange": $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]),
+        "datasetCompleteness": input.coverage.datasetCompleteness
+    }, 
     "provenance": {
         "origin": {
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(','),
