@@ -150,12 +150,25 @@ $allowedServiceCategory := [
     'Varies based on project'
 ];
 
+$allowedDataUseLimitation := [
+    'General research use',
+    'Genetic studies only',
+    'No general methods research',
+    'No restriction',
+    'Research-specific restrictions',
+    'Research use only',
+    'No linkage'
+];
+
 $getMaterialType := function($tissue){
     $lowercase($tissue.materialType)
 };
 
+$isValidString := function($str) { $type($str) = "string" and $str != null and $str != "" };
+$isValidArray := function($arr) { $type($arr) = "array"  };
+
 $tryMatchEnum := function($x, $allowed){(
-    $cleaned := $replace($x, ";", "");
+    $cleaned := $x ? $x : ""; /*$replace($x, ";", "");*/
     $lowered := $join([$uppercase($substring($cleaned, 0, 1)), $substring($lowercase($cleaned), 1, $length($cleaned))]);
     $match := $filter($allowed, function($v, $i, $a){(
         $allowedLowered := $join([$uppercase($substring($v, 0, 1)), $substring($lowercase($v), 1, $length($v))]);
@@ -163,19 +176,16 @@ $tryMatchEnum := function($x, $allowed){(
     )})
 )};
 
-$cleanEnum := function($x, $allowed){
-    $isValidString := function($str) { $type($str) = "string" and $str != null and $str != "" };
-    $isValidArray := function($arr) { $type($arr) = "array" and $count($arr) > 0 };
 
-    ($isValidString($x) or $isValidArray($x)) ?
-        ($isValidString($x) ? 
-            $map($split($x, ","), function($v){
-                $tryMatchEnum($v, $allowed)
-            }) : 
-            $map($x, function($v){
-                $tryMatchEnum($v, $allowed)
-            })
-        ) : null
+$cleanEnum := function($x, $allowed){
+    ($isValidString($x) ? 
+        $map($split($x, ","), function($v){
+            $tryMatchEnum($v, $allowed)
+        }) : 
+        ($isValidArray($x) ? [$map($x, function($v){
+            $tryMatchEnum($v, $allowed)
+        })] : null )
+    )
 };
 
 $cleanEnumSingle := function($x, $allowed){
@@ -229,7 +239,7 @@ $cleanEnumSingle := function($x, $allowed){
         "temporal": { /* input.provenance.temporal */
             "endDate": input.provenance.temporal.endDate,
             "startDate": input.provenance.temporal.startDate,
-            "timeLag": $cleanEnumSingle(input.provenance.temporal.timeLag, $allowedTimeLag),
+            "timeLag": $cleanEnumSingle(input.provenance.temporal.timeLag, $allowedTimeLag) ~> $defaultValue('Not applicable'),
             "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency),
             "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
         }
@@ -239,19 +249,20 @@ $cleanEnumSingle := function($x, $allowed){
             "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null)
         }|,  
         "usage": usage ? usage ~> |$|{
-            "dataUseRequirements": $$.input.accessibility.usage.dataUseRequirement,
-            "dataUseLimitation": $safeSplit($$.input.accessibility.usage.dataUseLimitation,","),
+            "dataUseRequirements": $safeSplit($$$.input.accessibility.usage.dataUseRequirement,",") , /* ~> $cleanEnum($allowedDataUseRe),*/
+            "dataUseLimitation": $safeSplit($$.input.accessibility.usage.dataUseLimitation,",") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue('No linkage'),
             "resourceCreator": $$.input.accessibility.usage.resourceCreator.name
         }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": $$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes ?
-                $safeSplit($$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes, ",") : null,
+                $safeSplit($$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes, ",") ~> $cleanEnum($allowedEncodings)  : null,
             "language": $$.input.accessibility.formatAndStandards.languages,
             "format": $$.input.accessibility.formatAndStandards.formats,
             "conformsTo": $safeSplit($$.input.accessibility.formatAndStandards.conformsTo, ",")
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
     "enrichmentAndLinkage": input.linkage ~> |$|{
+        "investigations": investigations ~> $safeSplit(","),
         "derivedFrom": $$.input.linkage.datasetLinkage.isDerivedFrom,
         "isPartOf": $$.input.linkage.datasetLinkage.isPartOf,
         "linkableDatasets": $$.input.linkage.datasetLinkage.linkedDatasets,
