@@ -233,10 +233,8 @@ $cleanEnumSingle := function($x, $allowed){
     },
     "coverage":  input.coverage ~> |$|
     {
-        "spatial": spatial, /* ~> $safeSplit(','),  something not right here...  3.0.0  spatial: Union[CommaSeparatedValues, List[Url]] = */
         "typicalAgeRangeMin": $parseInteger($split(typicalAgeRange, "-")[0], "#,##0"),
         "typicalAgeRangeMax": $parseInteger($split(typicalAgeRange, "-")[1], "#,##0"),
-        "datasetCompleteness": datasetCompleteness,
         "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
     }['typicalAgeRange','gender']|, 
     "provenance": {
