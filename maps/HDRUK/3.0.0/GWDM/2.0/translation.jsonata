@@ -179,9 +179,9 @@ $tryMatchEnum := function($x, $allowed){(
 
 $cleanEnum := function($x, $allowed){
     ($isValidString($x) ? 
-        $map($split($x, ","), function($v){
+        [$map($split($x, ","), function($v){
             $tryMatchEnum($v, $allowed)
-        }) : 
+        })] : 
         ($isValidArray($x) ? [$map($x, function($v){
             $tryMatchEnum($v, $allowed)
         })] : null )
