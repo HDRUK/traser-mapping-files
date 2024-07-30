@@ -182,7 +182,7 @@ $isValidString := function($str) { $type($str) = "string" and $str != null and $
 $isValidArray := function($arr) { $type($arr) = "array"  };
 
 $tryMatchEnum := function($x, $allowed){(
-    $cleaned := $x ? $x : ""; /*$replace($x, ";", "");*/
+    $cleaned := $x ? $x : ""; 
     $lowered := $join([$uppercase($substring($cleaned, 0, 1)), $substring($lowercase($cleaned), 1, $length($cleaned))]);
     $match := $filter($allowed, function($v, $i, $a){(
         $allowedLowered := $join([$uppercase($substring($v, 0, 1)), $substring($lowercase($v), 1, $length($v))]);
