@@ -160,6 +160,20 @@ $allowedDataUseLimitation := [
     'No linkage'
 ];
 
+$allowedDataUseRequirements := [
+    'Collaboration required',
+    'Ethics approval required',
+    'Geographical restrictions',
+    'Institution-specific restrictions',
+    'Not for profit use',
+    'Project-specific restrictions',
+    'Publication moratorium',
+    'Publication required',
+    'Return to database or resource',
+    'Time limit on use',
+    'User-specific restriction'
+];
+
 $getMaterialType := function($tissue){
     $lowercase($tissue.materialType)
 };
@@ -240,7 +254,7 @@ $cleanEnumSingle := function($x, $allowed){
             "endDate": input.provenance.temporal.endDate,
             "startDate": input.provenance.temporal.startDate,
             "timeLag": $cleanEnumSingle(input.provenance.temporal.timeLag, $allowedTimeLag) ~> $defaultValue('Not applicable'),
-            "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency),
+            "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency) ~> $defaultValue("Other"),
             "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
         }
     },
@@ -249,24 +263,24 @@ $cleanEnumSingle := function($x, $allowed){
             "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null)
         }|,  
         "usage": usage ? usage ~> |$|{
-            "dataUseRequirements": $safeSplit($$$.input.accessibility.usage.dataUseRequirement,",") , /* ~> $cleanEnum($allowedDataUseRe),*/
-            "dataUseLimitation": $safeSplit($$.input.accessibility.usage.dataUseLimitation,",") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
-            "resourceCreator": $$.input.accessibility.usage.resourceCreator.name
+            "dataUseRequirements": $safeSplit(dataUseRequirement,",")  ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
+            "dataUseLimitation": $safeSplit(dataUseLimitation,",") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
+            "resourceCreator": resourceCreator.name
         }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": $$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes ?
-                $safeSplit($$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes, ",") ~> $cleanEnum($allowedEncodings)  : null,
+                $safeSplit($$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes, ",") ~> $cleanEnum($allowedEncodings)  : [],
             "language": $$.input.accessibility.formatAndStandards.languages,
             "format": $$.input.accessibility.formatAndStandards.formats,
             "conformsTo": $safeSplit($$.input.accessibility.formatAndStandards.conformsTo, ",")
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
     "enrichmentAndLinkage": input.linkage ~> |$|{
-        "investigations": investigations ~> $safeSplit(","),
-        "derivedFrom": $$.input.linkage.datasetLinkage.isDerivedFrom,
-        "isPartOf": $$.input.linkage.datasetLinkage.isPartOf,
-        "linkableDatasets": $$.input.linkage.datasetLinkage.linkedDatasets,
-        "similarToDatasets": $$.input.linkage.datasetLinkage.isMemberOf
+        "investigations": $defaultValue($$.extra.linkages.investigrations,investigations ~> $safeSplit(",")),
+        "derivedFrom": $defaultValue($$.extra.linkages.derivedFrom, isDerivedFrom ~> $safeSplit(",")),
+        "isPartOf": $defaultValue($$.extra.linkages.derivedFrom, isPartOf),
+        "linkableDatasets": $defaultValue($$.extra.linkages.linkableDatasets, linkedDatasets),
+        "similarToDatasets": $defaultValue($$.extra.linkages.similarToDatasets, isMemberOf)
     }, ['dataUses','isGeneratedUsing','associatedMedia','isReferenceIn','syntheticDataWebLink','datasetLinkage']|,
     "observations": input.observations ~> $defaultValue([]),
     "structuralMetadata": {
