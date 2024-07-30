@@ -231,12 +231,11 @@ $cleanEnumSingle := function($x, $allowed){
         "associatedMedia": input.linkage.associatedMedia,
         "inPipeline": input.summary.inPipeline
     },
-    "coverage":  input.coverage ~> |$|
-    {
+    "coverage":  input.coverage ~> |$|{
         "typicalAgeRangeMin": $parseInteger($split(typicalAgeRange, "-")[0], "#,##0"),
         "typicalAgeRangeMax": $parseInteger($split(typicalAgeRange, "-")[1], "#,##0"),
         "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
-    }['typicalAgeRange','gender']|, 
+    },['typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
     "provenance": {
         "origin": {
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
