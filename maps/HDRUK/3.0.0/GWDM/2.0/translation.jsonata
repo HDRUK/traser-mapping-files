@@ -9,12 +9,18 @@ $safeSplit := function($x,$delim){
 };
 
 $nullableValues := ["",''," ","\"","Not Applicable","Not Available",
-                     "Not applicable",
+                     "Not applicable",'[]',
                      "NOT AVAILABLE","NOT APPLICABLE",[null]];
 
 
 $nullString := function($x){
   ($x in $nullableValues or $type($x) != "string" or $not($exists($x)) ) ? null : $x
+};
+
+$nullList := function($x){
+    [$map($x, function($xx){
+        $filter($nullString($xx), function($item){ $item != null })
+    })]
 };
 
 
@@ -307,8 +313,8 @@ $cleanEnumSingle := function($x, $allowed){
         "inPipeline": input.summary.inPipeline
     },
     "coverage":  input.coverage ~> |$|{
-        "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0"),
-        "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0"),
+        "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $defaultValue(null),
+        "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null),
         "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
     },['typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
     "provenance": {
@@ -346,9 +352,9 @@ $cleanEnumSingle := function($x, $allowed){
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
     "enrichmentAndLinkage": input.linkage ~> |$|{
-        "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")),
-        "investigations": $defaultValue($$.extra.linkages.investigrations,investigations ~> $safeSplit(";,;")),
-        "derivedFrom": $defaultValue($$.extra.linkages.derivedFrom, isDerivedFrom ~> $safeSplit(";,;")),
+        "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")) ~> $nullList,
+        "investigations": $defaultValue($$.extra.linkages.investigrations,investigations ~> $safeSplit(";,;")) ~> $nullList,
+        "derivedFrom": $defaultValue($$.extra.linkages.derivedFrom, isDerivedFrom ~> $safeSplit(";,;")) ~> $nullList,
         "isPartOf": $defaultValue($$.extra.linkages.derivedFrom, isPartOf),
         "linkableDatasets": $defaultValue($$.extra.linkages.linkableDatasets, linkedDatasets),
         "similarToDatasets": $defaultValue($$.extra.linkages.similarToDatasets, isMemberOf)
