@@ -250,7 +250,7 @@ $cleanEnumSingle := function($x, $allowed){
         }|,  
         "usage": usage ? usage ~> |$|{
             "dataUseRequirements": $safeSplit($$$.input.accessibility.usage.dataUseRequirement,",") , /* ~> $cleanEnum($allowedDataUseRe),*/
-            "dataUseLimitation": $safeSplit($$.input.accessibility.usage.dataUseLimitation,",") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue('No linkage'),
+            "dataUseLimitation": $safeSplit($$.input.accessibility.usage.dataUseLimitation,",") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
             "resourceCreator": $$.input.accessibility.usage.resourceCreator.name
         }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
