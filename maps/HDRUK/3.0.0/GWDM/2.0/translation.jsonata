@@ -8,6 +8,16 @@ $safeSplit := function($x,$delim){
     $x ? $x ~> $split($delim) : []
 };
 
+$nullableValues := ["",''," ","\"","Not Applicable","Not Available",
+                     "Not applicable",
+                     "NOT AVAILABLE","NOT APPLICABLE",[null]];
+
+
+$nullString := function($x){
+  ($x in $nullableValues or $type($x) != "string" or $not($exists($x)) ) ? null : $x
+};
+
+
 $allowedPublishingFrequency := [
     "Static",
     "Irregular",
@@ -311,8 +321,8 @@ $cleanEnumSingle := function($x, $allowed){
             "imageContrast": input.provenance.origin.imageContrast
         },
         "temporal": { /* input.provenance.temporal */
-            "endDate": input.provenance.temporal.endDate,
-            "startDate": input.provenance.temporal.startDate,
+            "endDate": input.provenance.temporal.endDate ~> $nullString,
+            "startDate": input.provenance.temporal.startDate ~> $nullString ~> $defaultValue("1970-01-01"),
             "timeLag": $cleanEnumSingle(input.provenance.temporal.timeLag, $allowedTimeLag) ~> $defaultValue('Not applicable'),
             "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency) ~> $defaultValue("Other"),
             "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
@@ -329,10 +339,10 @@ $cleanEnumSingle := function($x, $allowed){
         }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": $$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes ?
-                $safeSplit($$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes, ",") ~> $cleanEnum($allowedEncodings)  : [],
+                $safeSplit($$.input.accessibility.formatAndStandards.vocabularyEncodingSchemes, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
             "language": $$.input.accessibility.formatAndStandards.languages,
             "format": $$.input.accessibility.formatAndStandards.formats,
-            "conformsTo": $safeSplit($$.input.accessibility.formatAndStandards.conformsTo, ",")
+            "conformsTo": $safeSplit($$.input.accessibility.formatAndStandards.conformsTo, ";,;")
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
     "enrichmentAndLinkage": input.linkage ~> |$|{
