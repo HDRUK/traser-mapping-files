@@ -271,8 +271,9 @@ $cleanEnumSingle := function($x, $allowed){
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
     "enrichmentAndLinkage": input.linkage ~> |$|{
-        "investigations": $defaultValue($$.extra.linkages.investigrations,investigations ~> $safeSplit(",")),
-        "derivedFrom": $defaultValue($$.extra.linkages.derivedFrom, isDerivedFrom ~> $safeSplit(",")),
+        "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")),
+        "investigations": $defaultValue($$.extra.linkages.investigrations,investigations ~> $safeSplit(";,;")),
+        "derivedFrom": $defaultValue($$.extra.linkages.derivedFrom, isDerivedFrom ~> $safeSplit(";,;")),
         "isPartOf": $defaultValue($$.extra.linkages.derivedFrom, isPartOf),
         "linkableDatasets": $defaultValue($$.extra.linkages.linkableDatasets, linkedDatasets),
         "similarToDatasets": $defaultValue($$.extra.linkages.similarToDatasets, isMemberOf)
