@@ -1,7 +1,7 @@
 (
 /*function to enforce any arrays to be strings */
 $to_str := function($x){
-  $type($x)="array" ? $join($x,',') : $x
+  $type($x)="array" ? $join($x,';,;') : $x
 };
 
 $extract_media := function($x){

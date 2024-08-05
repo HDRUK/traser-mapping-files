@@ -360,8 +360,8 @@ $cleanEnumSingle := function($x, $allowed){
             "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null)
         }|,  
         "usage": usage ? usage ~> |$|{
-            "dataUseRequirements": $safeSplit(dataUseRequirement,",")  ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
-            "dataUseLimitation": $safeSplit(dataUseLimitation,",") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
+            "dataUseRequirements": $safeSplit(dataUseRequirement,";,;")  ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
+            "dataUseLimitation": $safeSplit(dataUseLimitation,";,;") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
             "resourceCreator": resourceCreator.name
         }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
