@@ -19,7 +19,7 @@ $fixObservedNode := function($obs){(
         $lowercase($obs.observedNode) = "findings" ? "Findings" : null;
     $obs ~> |$| {
         "measuredNode": $node
-    }|
+    },['observedNode']|
 )};
 
 input ~> |$| {
