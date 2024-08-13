@@ -14,11 +14,11 @@ $fixAccessMode := function($x){
 };
 
 $fixObservedNode := function($obs){(
-    $node := $lowercase($obs.observedNode) = "persons" ? "Person" :
-        $lowercase($obs.observedNode) = "events" ? "Event" :
+    $node := $lowercase($obs.observedNode) = "persons" ? "Persons" :
+        $lowercase($obs.observedNode) = "events" ? "Events" :
         $lowercase($obs.observedNode) = "findings" ? "Findings" : null;
     $obs ~> |$| {
-        "observedNode": $node
+        "measuredNode": $node
     }|
 )};
 

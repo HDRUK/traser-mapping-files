@@ -103,7 +103,7 @@ $allowedPurpose := [
     'Audit',
     'Administrative',
     'Financial',
-    'Statuatory',
+    'Statutory',
     'Other'
 ];
 
@@ -184,6 +184,7 @@ $allowedDatasetSubType := [
     'Multiomics',
     'Metagenomics',
     'Genomics',
+    'Lipidomics',
     'Education',
     'Crime and Justice',
     'Ethnicity',
@@ -321,9 +322,9 @@ $cleanEnumSingle := function($x, $allowed){
         "keywords": input.summary.keywords ~> $safeSplit(';,;'),
         "doiName": input.summary.doiName,
         "title": input.summary.shortTitle,
-        "dataProvider": {
+        "dataCustodian": {
             "name": input.summary.publisher.name,
-            "identifier": "https://placeholder-for-publisher-page/"&input.summary.publisher.gatewayId,
+            "identifier": input.summary.publisher.gatewayId ? input.summary.publisher.gatewayId ? null,
             "contactPoint": input.summary.contactPoint
         },
         "populationSize": input.summary.populationSize
@@ -343,8 +344,8 @@ $cleanEnumSingle := function($x, $allowed){
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
             "source": input.provenance.origin.source  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSource),
             "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
-            "datasetType": input.summary.datasetType ~> $cleanEnumSingle($allowedDatasetType) ~> $defaultValue("Health and disease"),
-            "datasetSubType": input.summary.datasetSubType ~> $cleanEnumSingle($allowedDatasetSubType) ~> $defaultValue("Not applicable"),
+            "datasetType": input.summary.datasetType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetType) ~> $defaultValue("Health and disease"),
+            "datasetSubType": input.summary.datasetSubType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetSubType) ~> $defaultValue("Not applicable"),
             "imageContrast": input.provenance.origin.imageContrast
         },
         "temporal": { /* input.provenance.temporal */
@@ -384,7 +385,9 @@ $cleanEnumSingle := function($x, $allowed){
     "structuralMetadata": {
         "tables": input.structuralMetadata,
         "syntheticDataWebLink": input.linkage.syntheticDataWebLink
-    }
+    },
+    "demographicFrequency": input.demographicFrequency,
+    "omics": input.omics
 }
 
 )

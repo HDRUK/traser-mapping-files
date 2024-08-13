@@ -33,25 +33,25 @@ $truncate := function($x,$length){
     "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
       $v in extra.controlledKeywords
     })]),
-    "datasetType": input.provenance.origin.datasetType ? input.provenance.origin.datasetType :
-        extra.datasetType ? extra.datasetType : null,
-    "datasetSubType": input.provenance.origin.datasetSubType ? input.provenance.origin.datasetSubType :
-        extra.datasetSubType ? extra.datasetSubType : null,
+    "datasetType": input.provenance.origin.datasetType ? $to_str(input.provenance.origin.datasetType) :
+        extra.datasetType ? $to_str(extra.datasetType) : null,
+    "datasetSubType": input.provenance.origin.datasetSubType ? $to_str(input.provenance.origin.datasetSubType) :
+        extra.datasetSubType ? $to_str(extra.datasetSubType) : null,
     "populationSize": input.summary.populationSize,
     "description": $truncate(input.documentation.description,50000),
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
     "publisher": {
-      "name": extra.publisherName ? extra.publisherName : input.summary.dataProvider.name,
-      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataProvider.identifier, 50)
+      "name": extra.publisherName ? extra.publisherName : input.summary.dataCustodian.name,
+      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataCustodian.identifier, 50)
     },
     "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : null
   },
   "coverage": {
     "pathway": input.coverage.pathway, 
     "spatial": $to_str(input.coverage.spatial),
-    "followup": input.coverage.followup,
+    "followUp": input.coverage.followUp,
     "typicalAgeRange": $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]),
     "datasetCompleteness": input.coverage.datasetCompleteness
   },
@@ -122,7 +122,7 @@ $truncate := function($x,$length){
   },
   "observations": input.observations ? [$map(input.observations,function($r) {
       {
-        "observedNode": $r.observedNode,
+        "measuredNode": $r.measuredNode,
         "measuredValue": $r.measuredValue,
         "observationDate": $r.observationDate,
         "measuredProperty": $r.measuredProperty,
@@ -134,6 +134,8 @@ $truncate := function($x,$length){
       {
         "materialType": $type
       }
-    })] : []
+    })] : [],
+  "demographicFrequency": input.demographicFrequency,
+  "omics": input.omics
 };
 )
