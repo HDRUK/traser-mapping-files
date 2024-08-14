@@ -27,7 +27,7 @@ input ~> |$|
         "access": access ~> |$|
         {
             "accessServiceCategory":  $$.extra.syntheticDataWebLink
-        }, ['accessMode']|
+        }|
     }|,
     "observations": $map(observations, $cleanObservation)[]
 }|

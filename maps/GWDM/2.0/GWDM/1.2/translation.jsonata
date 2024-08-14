@@ -1,25 +1,12 @@
 (
 
-$allowedAccessModes := [
-    "Join research consortium",
-    "New project"
-];
-
-$removeBadAccessMode := function($x){
-    $not($x in $allowedAccessModes) ? null : $x
-};
-
-$fixAccessMode := function($x){
-    $removeBadAccessMode($x)
-};
-
 $fixObservedNode := function($obs){(
     $node := $lowercase($obs.observedNode) = "persons" ? "Persons" :
         $lowercase($obs.observedNode) = "events" ? "Events" :
         $lowercase($obs.observedNode) = "findings" ? "Findings" : null;
     $obs ~> |$| {
-        "measuredNode": $node
-    },['observedNode']|
+        "observedNode": $node
+    }|
 )};
 
 input ~> |$| {
@@ -36,12 +23,6 @@ input ~> |$| {
             "imageContrast": null
         }|
     }| : null,
-    "accessibility": accessibility ~> |$|
-    {
-        "access": access ~> |$|{
-            "accessMode": $$.extra.accessMode ? $fixAccessMode($$.extra.accessMode) : "New project"
-        }|
-    }|,
     "linkage": linkage ? linkage ~> |$|{
         "publicationAboutDataset": null,
         "publicationUsingDataset": $$.input.access.usage.isReferencedBy

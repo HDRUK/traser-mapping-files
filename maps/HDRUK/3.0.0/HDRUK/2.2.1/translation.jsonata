@@ -179,9 +179,9 @@ $allowedDatasetSubType := [
     "Transcriptomics",
     "Epigenomics",
     "Metabolomics",
-    "Multiomics",
     "Metagenomics",
     "Genomics",
+    "Lipidomics",
     "Education",
     "Crime and Justice",
     "Ethnicity",
@@ -322,7 +322,7 @@ $cleanObservation := function($obs){(
         $lowercase($obs.observedNode) = "events" ? "Events" :
         $lowercase($obs.observedNode) = "findings" ? "Findings" : null;
     $obs ~> |$| {
-        "measuredNode": $node
+        "observedNode": $node
     }|
 )};
 
@@ -386,7 +386,6 @@ input ~> |$| {
     "accessibility": accessibility ~> |$|
     {
         "access": access ~> |$|{
-            "accessMode": $$.extra.accessMode ? $fixAccessMode($$.extra.accessMode) : "New project",
             "deliveryLeadTime": $$.input.accessibility.access.deliveryLeadTime ?
                 $cleanEnumSingle($$.input.accessibility.access.deliveryLeadTime, $allowedDeliveryLeadTime) : null
         }|,

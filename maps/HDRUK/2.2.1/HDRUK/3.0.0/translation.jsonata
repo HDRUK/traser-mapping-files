@@ -265,7 +265,7 @@ input ~> |$| {
         "access": access ~> |$|{
             "deliveryLeadTime": $$.input.accessibility.access.deliveryLeadTime ?
                 $cleanEnumSingle($$.input.accessibility.access.deliveryLeadTime, $allowedDeliveryLeadTime) : null
-        }, ['accessMode','investigations']|,
+        }, ['investigations']|,
         "usage": usage ? usage ~> |$|
         {
             "dataUseLimitation": $$.input.accessibility.usage.dataUseLimitation ? 

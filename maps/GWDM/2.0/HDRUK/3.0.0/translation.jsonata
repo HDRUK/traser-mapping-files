@@ -79,8 +79,7 @@ $truncate := function($x,$length){
       "accessRights": input.accessibility.access.accessRights ~> $to_str,
       "accessService": input.accessibility.access.accessService,
       "accessRequestCost": $to_str(input.accessibility.access.accessRequestCost), /* may need to be fixed */
-      "accessServiceCategory": $to_str(input.accessibility.access.accessServiceCategory),
-      "accessMode": input.accessibility.access.accessMode
+      "accessServiceCategory": $to_str(input.accessibility.access.accessServiceCategory)
     },
     "usage": {
       "dataUseLimitation": input.accessibility.usage.dataUseLimitation ? 
@@ -122,7 +121,7 @@ $truncate := function($x,$length){
   },
   "observations": input.observations ? [$map(input.observations,function($r) {
       {
-        "measuredNode": $r.measuredNode,
+        "observedNode": $r.observedNode,
         "measuredValue": $r.measuredValue,
         "observationDate": $r.observationDate,
         "measuredProperty": $r.measuredProperty,
