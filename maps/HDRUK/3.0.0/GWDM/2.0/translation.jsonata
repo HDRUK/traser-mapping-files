@@ -324,7 +324,7 @@ $cleanEnumSingle := function($x, $allowed){
         "title": input.summary.shortTitle,
         "dataCustodian": {
             "name": input.summary.publisher.name,
-            "identifier": input.summary.publisher.gatewayId ? input.summary.publisher.gatewayId ? null,
+            "identifier": input.summary.publisher.gatewayId,
             "contactPoint": input.summary.contactPoint
         },
         "populationSize": input.summary.populationSize
