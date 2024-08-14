@@ -338,14 +338,14 @@ $cleanEnumSingle := function($x, $allowed){
         "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $defaultValue(null),
         "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null),
         "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
-    },['typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
+    },['followup','typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
     "provenance": {
         "origin": {
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
             "source": input.provenance.origin.source  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSource),
             "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
-            "datasetType": input.summary.datasetType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetType) ~> $defaultValue("Health and disease"),
-            "datasetSubType": input.summary.datasetSubType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetSubType) ~> $defaultValue("Not applicable"),
+            "datasetType": input.summary.datasetType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetType) ~> $defaultValue(["Health and disease"]),
+            "datasetSubType": input.summary.datasetSubType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetSubType) ~> $defaultValue(["Not applicable"]),
             "imageContrast": input.provenance.origin.imageContrast
         },
         "temporal": { /* input.provenance.temporal */
