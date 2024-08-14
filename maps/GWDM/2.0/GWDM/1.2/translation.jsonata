@@ -15,8 +15,9 @@ input ~> |$| {
     }|,
     "coverage": coverage ? coverage ~> |$|
         {
-            "datasetCompleteness": $$.extra.datasetCompleteness ? $$.extra.datasetCompleteness : null
-        }, ['biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic','gender'] | : null,
+            "datasetCompleteness": $$.extra.datasetCompleteness ? $$.extra.datasetCompleteness : null,
+            "followUp": $$.input.coverage.followup ? $$.input.coverage.followup : null
+        }, ['followup','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic','gender'] | : null,
     "provenance": provenance ? provenance ~> |$|
     {
         "origin": origin ~> |$|{
