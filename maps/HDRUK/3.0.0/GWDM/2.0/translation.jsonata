@@ -358,7 +358,8 @@ $cleanEnumSingle := function($x, $allowed){
     },
     "accessibility": input.accessibility ~> |$|{
         "access": access ~> |$|{
-            "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null)
+            "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null),
+            "jurisdiction": $safeSplit(jurisdiction, ";,;")
         }|,  
         "usage": usage ? usage ~> |$|{
             "dataUseRequirements": $safeSplit(dataUseRequirement,";,;")  ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
@@ -368,7 +369,7 @@ $cleanEnumSingle := function($x, $allowed){
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": vocabularyEncodingSchemes ?
                 $safeSplit(vocabularyEncodingSchemes, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
-            "language": languages,
+            "language": $safeSplit(languages, ";,;"),
             "format": formats,
             "conformsTo": $safeSplit(conformsTo, ";,;") ~> $cleanEnum($allowedStandards) ~> $defaultValue([])
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
