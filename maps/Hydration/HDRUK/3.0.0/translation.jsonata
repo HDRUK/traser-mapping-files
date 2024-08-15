@@ -51,7 +51,7 @@ $hiddenFields := $append(
         "revisions",
         "issued",
         "modified",
-        "dataProvider",
+        "dataCustodian",
         "populationSize"
     ],
     $hiddenByDataType(dataTypes)
@@ -64,7 +64,7 @@ $textArea := function($component){
         "placeholder": $component.examples[0],
         "label": $component.description,
         "limit": $component.types.maxLength,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "hidden": $isHidden($component.location)
     }
 };
@@ -76,7 +76,7 @@ $textField := function($component){
         "placeholder": $component.examples[0],
         "label": $component.description,
         "limit": $component.types.maxLength,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "hidden": $isHidden($component.location)
     }
 };
@@ -92,7 +92,7 @@ $selectBox := function($component){
         "options": $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
         "name": $component.title,
         "label": $component.description,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "hidden": $isHidden($component.location)
     }
 };
@@ -102,7 +102,7 @@ $datePicker := function($component){
         "component": "DatePicker",
         "name": $component.title,
         "label": $component.description,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "hidden": $isHidden($component.location)
     }
 };
@@ -114,7 +114,7 @@ $autoComplete := function($component){
         "name": $component.title,
         "label": $component.description,
         "placeholder": $component.examples[0],
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "hidden": $isHidden($component.location)
     }
 };
@@ -127,7 +127,7 @@ $numberBox := function($component){
         "placeholder": $component.examples[0],
         "label": $component.description,
         "limit": $component.types.maxLength,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "hidden": $isHidden($component.location)
     }
 };
@@ -166,7 +166,7 @@ $getItemsType := function($types){
 $listValidation := function($component){
     {
         "title": $component.title,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "type": "array",
         "of": $getItemsType($component.types)
     }
@@ -175,7 +175,7 @@ $listValidation := function($component){
 $stringValidation := function($component){
     {
         "title": $component.title,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "type": $component.types.type,
         "min": $component.types.minLength,
         "max": $component.types.maxLength
@@ -185,7 +185,7 @@ $stringValidation := function($component){
 $formatValidation := function($component){
     {
         "title": $component.title,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "type": $component.types.type,
         "format": $component.types.format
     }
@@ -194,7 +194,7 @@ $formatValidation := function($component){
 $enumValidation := function($component){
     {
         "title": $component.title,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "type": $component.types.type,
         "enum": $component.types.options,
         "enum_titles": $component.types.options
@@ -204,7 +204,7 @@ $enumValidation := function($component){
 $regexValidation := function($component){
     {
         "title": $component.title,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "type": $component.types.type,
         "pattern": $component.types.pattern
     }
@@ -213,7 +213,7 @@ $regexValidation := function($component){
 $intValidation := function($component){
     {
         "title": $component.title,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "type": "integer",
         "positive": true
     }
@@ -222,7 +222,7 @@ $intValidation := function($component){
 $dateValidation := function($component){
     {
         "title": $component.title,
-        "required": $component.required,
+        "required": $not($component.is_optional),
         "type": "date"
     }
 };
@@ -249,7 +249,11 @@ $arrayFields := [
     "derivedFrom",
     "isPartOf",
     "linkableDatasets",
-    "similarToDatasets"
+    "similarToDatasets",
+    "demographicFrequency.age",
+    "demographicFrequency.ethnicity",
+    "demographicFrequency.genderAssignedAtBirth",
+    "demographicFrequency.disease"
 ];
 
 $isArrayField := function($location) {
@@ -300,8 +304,22 @@ $define_array_components := function($components){(
     $ispart_components := $define_array_fields($components, "enrichmentAndLinkage.isPartOf", "Is Part Of Array");
     $linkable_components := $define_array_fields($components, "enrichmentAndLinkage.linkableDatasets", "Linkable Datasets Array");
     $similar_to_components := $define_array_fields($components, "enrichmentAndLinkage.similarToDatasets", "Similar To Datasets Array");
+    $demoAge := $define_array_fields($components, "demographicFrequency.age", "Demographic Frequency Age Array");
+    $demoEthnicity := $define_array_fields($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
+    $demoGender := $define_array_fields($components, "demographicFrequency.genderAssignedAtBirth", "Demographic Frequency Gender Array");
+    $demoDisease := $define_array_fields($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
 
-    [$derived_from_components, $ispart_components, $linkable_components, $similar_to_components, $obs_components]
+    [
+        $derived_from_components, 
+        $ispart_components, 
+        $linkable_components, 
+        $similar_to_components, 
+        $obs_components,
+        $demoAge,
+        $demoEthnicity,
+        $demoGender,
+        $demoDisease
+    ]
 )};
 
 $define_single_component := function($component){
@@ -339,8 +357,22 @@ $all_array_validation := function($components){(
     $ispart_validation := $define_array_validation($components, "enrichmentAndLinkage.isPartOf", "Is Part Of Array");
     $linkable_validation := $define_array_validation($components, "enrichmentAndLinkage.linkableDatasets", "Linkable Datasets Array");
     $similar_to_validation := $define_array_validation($components, "enrichmentAndLinkage.similarToDatasets", "Similar To Datasets Array");
+    $demoAge := $define_array_validation($components, "demographicFrequency.age", "Demographic Frequency Age Array");
+    $demoEthnicity := $define_array_validation($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
+    $demoGender := $define_array_validation($components, "demographicFrequency.genderAssignedAtBirth", "Demographic Frequency Gender Array");
+    $demoDisease := $define_array_validation($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
 
-    [$derived_from_validation, $ispart_validation, $linkable_validation, $similar_to_validation, $obs_validation]
+    [
+        $derived_from_validation, 
+        $ispart_validation, 
+        $linkable_validation, 
+        $similar_to_validation, 
+        $obs_validation,
+        $demoAge,
+        $demoEthnicity,
+        $demoGender,
+        $demoDisease
+    ]
 )};
 
 {
