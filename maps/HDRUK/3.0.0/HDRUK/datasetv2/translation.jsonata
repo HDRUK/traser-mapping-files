@@ -8,6 +8,9 @@ $null_string := function($x){
   ($x in $nullable_values or $type($x) != "string" or $not($exists($x)) ) ? null : $x
 };
 
+$null_array := function($x){
+  [$filter([$map($x, function($xx){$xx ~> $null_string})],function($xx){$xx != null})]
+};
 
 $defaultValue := function($value,$defaultValue){
     $value ? $value : $defaultValue
@@ -17,17 +20,78 @@ $safeSplit := function($x,$delim){
     $x ? ($type($x) = 'array' ? $x : $split($x, $delim)) : []
 };
 
+$map_materials := {
+  "AVAILABILITY TO BE CONFIRMED": "Availability to be confirmed",
+  "Availability to be confirmed": "Availability to be confirmed",
+  "Available": "Availability to be confirmed",
+  "BONE MARROW": "Bone marrow",
+  "Bone marrow": "Bone marrow",
+  "CANCER CELL LINES": "Cancer cell lines",
+  "CDNA/MRNA": "CDNA/MRNA",
+  "CORE BIOPSY": "Core biopsy",
+  "Cancer cell lines": "Cancer cell lines",
+  "Core biopsy": "Core biopsy",
+  "DNA": "DNA",
+  "FAECES": "Faeces",
+  "Faeces": "Faeces",
+  "IMMORTALIZED CELL LINES": "Immortalized cell lines",
+  "IN PROGRESS": "Availability to be confirmed",
+  "Immortalized cell lines": "Immortalized cell lines",
+  "In Progress": "Availability to be confirmed",
+  "Influenza virology": "Other",
+  "Linkages have been made with some local": "Availability to be confirmed",
+  "MICRORNA": "MicroRNA",
+  "N/A": "None/not available",
+  "NOT AVAILABLE": "None/not available",
+  "NOT AVAILABLE ": "None/not available",
+  "NOT AVALIABLE": "None/not available",
+  "No": "None/not available",
+  "No physical sample available currently but there is the potential to link via the UKCRC Tissue Directory - discussions underway.": "Availability to be confirmed",
+  "Not Available": "None/not available",
+  "Not Known": "Availability to be confirmed",
+  "Not available": "None/not available",
+  "Not avaliable": "None/not available",
+  "OTHER": "Other",
+  "On application": "Availability to be confirmed",
+  "PERIPHERAL BLOOD CELLS": "Peripheral blood cells",
+  "PLASMA": "Plasma",
+  "PM TISSUE": "PM Tissue",
+  "PM tissue": "PM Tissue",
+  "PRIMARY CELLS": "Primary cells",
+  "Peripheral blood cells": "Peripheral blood cells",
+  "Plasma": "Plasma",
+  "Primary cells": "Primary cells",
+  "RNA": "RNA",
+  "SALIVA": "Saliva",
+  "SERUM": "Serum",
+  "SWABS": "Swabs",
+  "Saliva": "Saliva",
+  "Serum": "Serum",
+  "Swabs": "Swabs",
+  "TISSUE": "Tissue",
+  "Tissue": "Tissue",
+  "URINE": "Urine",
+  "Urine": "Urine",
+  "WHOLE BLOOD": "Whole blood",
+  "Whole blood": "Whole blood",
+  "cDNA/mRNA": "CDNA/MRNA",
+  "microRNA": "MicroRNA",
+  "separately administered bioresources": "Other"
+};
+
 $map_deliveryLeadTime := {
   "LESS 1 WEEK"       : "Less than 1 week",
   "1-2 WEEKS"         : "1-2 weeks",
   "2-4 WEEKS"         : "2-4 weeks",
   "1-2 MONTHS"        : "1-2 months",
   "2-6 MONTHS"        : "2-6 months",
-  "MORE 6 MONTHS"     : "More than 6 months",
+  "MORE 6 MONTHS"     : "6 months plus",
+  "6 MONTHS PLUS"     : "6 months plus",
   "VARIABLE"          : "Variable",
   "NOT APPLICABLE"    : "Not applicable",
   "OTHER"             : "Other"
 };
+
 
 $map_purpose := {
   /*"STUDY"             : "Research cohort",*/
@@ -125,8 +189,70 @@ $map_observedNodes := {
   "FINDINGS"       : "Findings"
 };
 
+$allowedEncodings := [
+  "LOCAL",
+  "OPCS4",
+  "READ",
+  "SNOMED CT",
+  "SNOMED RT",
+  "DM PLUS D",
+  "DM+D",
+  "NHS NATIONAL CODES",
+  "NHS SCOTLAND NATIONAL CODES",
+  "NHS WALES NATIONAL CODES",
+  "ODS",
+  "LOINC",
+  "ICD10",
+  "ICD10CM",
+  "ICD10PCS",
+  "ICD9CM",
+  "ICD9",
+  "ICDO3",
+  "AMT",
+  "APC",
+  "ATC",
+  "CIEL",
+  "HPO",
+  "CPT4",
+  "DPD",
+  "DRG",
+  "HEMONC",
+  "JMDC",
+  "KCD7",
+  "MULTUM",
+  "NAACCR",
+  "NDC",
+  "NDFRT",
+  "OXMIS",
+  "RXNORM",
+  "RXNORM EXTENSION",
+  "SPL",
+  "OTHER"
+];
+
+$allowedStandards = [
+    "HL7 FHIR",
+    "HL7 V2",
+    "HL7 CDA",
+    "HL7 CCOW",
+    "LOINC",
+    "DICOM",
+    "I2B2",
+    "IHE",
+    "OMOP",
+    "OPENEHR",
+    "SENTINEL",
+    "PCORNET",
+    "CDISC",
+    "NHS DATA DICTIONARY",
+    "NHS SCOTLAND DATA DICTIONARY",
+    "NHS WALES DATA DICTIONARY",
+    "LOCAL",
+    "OTHER"
+];
+
 $applyMap := function($x,$theMap){
-  $type($x) = 'array' ? [$map($x, function($el){ $applyMap($el,$theMap) })] : ($x ? $lookup($theMap,$x) ~> $null_string : null)
+  $type($x) = 'array' ? [$map($x, function($el){ $applyMap($el,$theMap)})] ~> $null_array : ($x ? $lookup($theMap,$x) ~> $null_string : null)
 };             
 
 $to_str := function($x){
@@ -140,6 +266,11 @@ $to_str := function($x){
   ) : $x
 };
 
+$checkList := function($x, $allowed){
+  [$filter($x, function($v){
+      $v in $allowed
+  })]
+};
 
 
 $fixAccrualPeriodicity := function($x){
@@ -184,17 +315,22 @@ $null_to_number := function($x){
 
 input ~> |$| 
 {
-    "issued": $get_date(issued),
-    "modified": $get_date(modified),
+    "issued": issued ~> $get_date,
+    "modified": modified ~> $get_date,
     "revisions": revisions,
     "version": version ~> $null_string,
     "summary": summary ~> |$| 
     {
-      "dataProvider": publisher ~> $cleanAllValues ~> |$|
+      "dataProvider": 
       {
-        "identifier": "https://placeholder-for-publisher-page/" & identifier
-      }|,
-      "keywords": keywords, 
+        "identifier": "https://placeholder-for-publisher-page/" & publisher.identifier ~> $null_string,
+        "name": publisher.name  ~> $null_string,
+        "logo": publisher.logo  ~> $null_string,
+        "description": publisher.description  ~> $null_string,
+        "contactPoint": publisher.contactPoint  ~> $null_string,
+        "memberOf": publisher.memberOf  ~> $null_string
+      },
+      "keywords": keywords ~> $null_array, 
       "alternateIdentifiers": alternateIdentifiers ~> $to_str ~> $null_string,
       "doiName": doiName ~> $to_str ~>  $extract_doi ~> $null_string,
       "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_number
@@ -207,7 +343,7 @@ input ~> |$|
     },['isPartOf']|,
     "coverage": coverage ~> $cleanAllValues ~> |$|
     {
-      "materialType": physicalSampleAvailability,
+      "materialType": physicalSampleAvailability ~> $safeSplit(";,;") ~> $applyMap($map_materials),
       "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $defaultValue(null),
       "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null)
     },['physicalSampleAvailability','typicalAgeRange']|,
@@ -218,22 +354,22 @@ input ~> |$|
         "source": source ~> $safeSplit(",") ~> $applyMap($map_source),
         "datasetType": $$.extra.datasetType ~> $defaultValue("Health and disease"),
         "datasetSubType": $$.extra.datasetSubType ~> $defaultValue("Not applicable"),
-        "collectionSource": collectionSituation ~> $safeSplit(",") ~> $applyMap($map_collectionSource)
+        "collectionSource": collectionSituation ~> $safeSplit(";,;") ~> $applyMap($map_collectionSource)
       },['collectionSituation']|,
       "temporal": provenance.temporal ~> $cleanAllValues ~> |$|
          {
           "publishingFrequency": accrualPeriodicity ~> $applyMap($map_accrualPeriodicity),
-          "distributionReleaseDate": distributionReleaseDate ~> $get_date,
-          "startDate": startDate ~> $get_date,
-          "endDate": endDate ~> $get_date,
+          "distributionReleaseDate": distributionReleaseDate ? distributionReleaseDate ~> $get_date : null,
+          "startDate": startDate ? startDate ~> $get_date : "1970-01-01",
+          "endDate": endDate  ? endDate ~> $get_date : null,
           "timeLag": timeLag ~> $applyMap($map_deliveryLeadTime) ~> $defaultValue("Not applicable")
          },['accrualPeriodicity']|
     },
     "accessibility": {
       "usage": accessibility.usage ~> $cleanAllValues ~> |$|
       {
-        "dataUseLimitation": dataUseLimitation ~> $safeSplit(",") ~> $applyMap($map_dataUseLimitations),
-        "dataUseRequirements": dataUseRequirements ~> $safeSplit(",") ~> $applyMap($map_dataUseRequirements)
+        "dataUseLimitation": dataUseLimitation ~> $safeSplit(";,;") ~> $applyMap($map_dataUseLimitations),
+        "dataUseRequirements": dataUseRequirements ~> $safeSplit(";,;") ~> $applyMap($map_dataUseRequirements)
       },['investigations','isReferencedBy']|,
       "access": accessibility.access ~> $cleanAllValues ~> |$|
       {
@@ -242,17 +378,15 @@ input ~> |$|
       },['deliveryTimeLead']|,
       "formatAndStandards": accessibility.formatAndStandards ~> $cleanAllValues ~> |$|
       {
-        "vocabularyEncodingScheme": vocabularyEncodingScheme ~> $safeSplit(";,;"),
-        "conformsTo": conformsTo ~> $safeSplit(";,;"),
+        "vocabularyEncodingScheme": vocabularyEncodingScheme ~> $safeSplit(";,;") ~> $checkList($allowedEncodings),
+        "conformsTo": conformsTo ~> $safeSplit(";,;")  ~> $checkList($allowedStandards),
         "language": language ~> $safeSplit(";,;"),
         "format": format ~>  $safeSplit(";,;")
       }|
     },
-    "enrichmentAndLinkage": enrichmentAndLinkage ~> |$| 
+    "enrichmentAndLinkage": enrichmentAndLinkage ~> |$| /*drop linkages*/
     {
-      "tools": tools,
-      "investigations": $$.input.accessibility.usage.investigations
-    },['qualifiedRelation','derivation']|,
+    },['qualifiedRelation','derivation','tools']|,
     "observations": observations ? [$map(observations,function($obs) {
       {
         "observedNode": $obs.observedNode ~> $uppercase ~> $applyMap($map_observedNodes),
