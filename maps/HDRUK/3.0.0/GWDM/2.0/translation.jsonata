@@ -18,11 +18,10 @@ $nullString := function($x){
 };
 
 $nullList := function($x){
-    [$map($x, function($xx){
-        $filter($nullString($xx), function($item){ $item != null })
+    [$filter($x, function($xx){
+        $map($nullString($xx), function($item){ $item != null })
     })]
 };
-
 
 $allowedPublishingFrequency := [
     "Static",
@@ -376,7 +375,7 @@ $cleanEnumSingle := function($x, $allowed){
     }|,
     "enrichmentAndLinkage": input.linkage ~> |$|{
         "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")) ~> $nullList,
-        "investigations": $defaultValue($$.extra.linkages.investigrations,investigations ~> $safeSplit(";,;")) ~> $nullList,
+        "investigations": $defaultValue($$.extra.linkages.investigations, investigations ~> $safeSplit(";,;")) ~> $nullList,
         "derivedFrom": $defaultValue($$.extra.linkages.derivedFrom, isDerivedFrom ~> $safeSplit(";,;")) ~> $nullList,
         "isPartOf": $defaultValue($$.extra.linkages.derivedFrom, isPartOf),
         "linkableDatasets": $defaultValue($$.extra.linkages.linkableDatasets, linkedDatasets),
