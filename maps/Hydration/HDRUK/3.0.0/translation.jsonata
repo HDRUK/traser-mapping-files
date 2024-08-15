@@ -176,7 +176,7 @@ $stringValidation := function($component){
     {
         "title": $component.title,
         "required": $not($component.is_optional),
-        "type": $component.types.type,
+        "type": $component.types.type ? $component.types.type : "string",
         "min": $component.types.minLength,
         "max": $component.types.maxLength
     }
@@ -241,7 +241,9 @@ $get_validation := function($component){
     $component.types = "int" ? 
         $intValidation($component) :
     $component.types = "date" or $component.types = "datetime" ?
-        $dateValidation($component) : null
+        $dateValidation($component) : 
+    $component.types = "str" ?
+        $stringValidation($component) : null
 };
 
 $arrayFields := [
