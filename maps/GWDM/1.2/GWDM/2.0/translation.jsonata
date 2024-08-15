@@ -1,0 +1,36 @@
+(
+
+$cleanObservation := function($obs){(
+    $node := $lowercase($obs.observedNode) = "person" ? "PERSONS" :
+        $lowercase($obs.observedNode) = "event" ? "EVENTS" :
+        $lowercase($obs.observedNode) = "findings" ? "FINDINGS" : null;
+    $obs ~> |$| {
+        "observedNode": $node
+    }|
+)};
+
+
+input ~> |$| 
+{
+    "linkage": linkage ~> |$|
+    {
+        "syntheticDataWebLink": $$.extra.syntheticDataWebLink
+    }, ['publicationAboutDataset', 'publicationUsingDataset']|,
+    "coverage": coverage ~> |$|
+    {}, ['datasetCompleteness']|,
+    "provenance": provenance ~> |$|
+    {
+        "origin": origin ~> |$|{}, ['imageContrast']|
+    }|,
+    "accessibility": accessibility ~> |$|
+    {
+        "access": access ~> |$|
+        {
+            "accessServiceCategory":  $$.extra.syntheticDataWebLink
+        }, ['accessMode']|
+    }|,
+    "observations": $map(observations, $cleanObservation)[]
+}|
+
+
+)
