@@ -1,0 +1,419 @@
+(
+
+$nullable_values := [""," ","\"","Not Applicable","Not Available",
+                     "Not applicable",
+                     "NOT AVAILABLE","NOT APPLICABLE",[null]];
+
+$null_string := function($x){
+  ($x in $nullable_values or $type($x) != "string" or $not($exists($x)) ) ? null : $x
+};
+
+$null_array := function($x){
+  [$filter([$map($x, function($xx){$xx ~> $null_string})],function($xx){$xx != null})]
+};
+
+$defaultValue := function($value,$defaultValue){
+    $value ? $value : $defaultValue
+};
+
+$safeSplit := function($x,$delim){
+    $x ? ($type($x) = 'array' ? $x : $split($x, $delim)) : []
+};
+
+$map_materials := {
+  "AVAILABILITY TO BE CONFIRMED": "Availability to be confirmed",
+  "Availability to be confirmed": "Availability to be confirmed",
+  "Available": "Availability to be confirmed",
+  "BONE MARROW": "Bone marrow",
+  "Bone marrow": "Bone marrow",
+  "CANCER CELL LINES": "Cancer cell lines",
+  "CDNA/MRNA": "CDNA/MRNA",
+  "CORE BIOPSY": "Core biopsy",
+  "Cancer cell lines": "Cancer cell lines",
+  "Core biopsy": "Core biopsy",
+  "DNA": "DNA",
+  "FAECES": "Faeces",
+  "Faeces": "Faeces",
+  "IMMORTALIZED CELL LINES": "Immortalized cell lines",
+  "IN PROGRESS": "Availability to be confirmed",
+  "Immortalized cell lines": "Immortalized cell lines",
+  "In Progress": "Availability to be confirmed",
+  "Influenza virology": "Other",
+  "Linkages have been made with some local": "Availability to be confirmed",
+  "MICRORNA": "MicroRNA",
+  "N/A": "None/not available",
+  "NOT AVAILABLE": "None/not available",
+  "NOT AVAILABLE ": "None/not available",
+  "NOT AVALIABLE": "None/not available",
+  "No": "None/not available",
+  "No physical sample available currently but there is the potential to link via the UKCRC Tissue Directory - discussions underway.": "Availability to be confirmed",
+  "Not Available": "None/not available",
+  "Not Known": "Availability to be confirmed",
+  "Not available": "None/not available",
+  "Not avaliable": "None/not available",
+  "OTHER": "Other",
+  "On application": "Availability to be confirmed",
+  "PERIPHERAL BLOOD CELLS": "Peripheral blood cells",
+  "PLASMA": "Plasma",
+  "PM TISSUE": "PM Tissue",
+  "PM tissue": "PM Tissue",
+  "PRIMARY CELLS": "Primary cells",
+  "Peripheral blood cells": "Peripheral blood cells",
+  "Plasma": "Plasma",
+  "Primary cells": "Primary cells",
+  "RNA": "RNA",
+  "SALIVA": "Saliva",
+  "SERUM": "Serum",
+  "SWABS": "Swabs",
+  "Saliva": "Saliva",
+  "Serum": "Serum",
+  "Swabs": "Swabs",
+  "TISSUE": "Tissue",
+  "Tissue": "Tissue",
+  "URINE": "Urine",
+  "Urine": "Urine",
+  "WHOLE BLOOD": "Whole blood",
+  "Whole blood": "Whole blood",
+  "cDNA/mRNA": "CDNA/MRNA",
+  "microRNA": "MicroRNA",
+  "separately administered bioresources": "Other"
+};
+
+$map_deliveryLeadTime := {
+  "LESS 1 WEEK"       : "Less than 1 week",
+  "1-2 WEEKS"         : "1-2 weeks",
+  "2-4 WEEKS"         : "2-4 weeks",
+  "1-2 MONTHS"        : "1-2 months",
+  "2-6 MONTHS"        : "2-6 months",
+  "MORE 6 MONTHS"     : "6 months plus",
+  "6 MONTHS PLUS"     : "6 months plus",
+  "VARIABLE"          : "Variable",
+  "NOT APPLICABLE"    : "Not applicable",
+  "OTHER"             : "Other"
+};
+
+
+$map_purpose := {
+  /*"STUDY"             : "Research cohort",*/
+  "STUDY"             : "Study",
+  "DISEASE REGISTRY"  : "Disease registry",
+  "TRIAL"             : "Trial",
+  "CARE"              : "Care",
+  "AUDIT"             : "Audit",
+  "ADMINISTRATIVE"    : "Administrative",
+  "FINANCIAL"         : "Financial",
+  "STATUTORY"         : "Statuatory",
+  "OTHER"             : "Other"
+};
+
+$map_source := {
+  "EPR"                     : "EPR",
+  "ELECTRONIC SURVEY"       : "Electronic survey",
+  "LIMS"                    : "LIMS",
+  "OTHER INFORMATION SYSTEM": "Other",
+  "PAPER BASED"             : "Paper-based",
+  "FREETEXT NLP"            : "Free text NLP",
+  "MACHINE GENERATED"       : "Machine generated",
+  "OTHER"                   : "Other"
+};
+
+$map_accrualPeriodicity := {
+  "STATIC"      : "Static",
+  "IRREGULAR"   : "Irregular",
+  "CONTINUOUS"  : "Continuous",
+  "BIENNIAL"    : "Biennial",
+  "ANNUAL"      : "Annual",
+  "BIANNUAL"    : "Biannual",
+  "QUARTERLY"   : "Quarterly",
+  "BIMONTHLY"   : "Bimonthly",
+  "MONTHLY"     : "Monthly",
+  "BIWEEKLY"    : "Biweekly",
+  "WEEKLY"      : "Weekly",
+  "SEMIWEEKLY"  : "Twice a week",
+  "DAILY"       : "Daily",
+  "OTHER"       : "Other"
+};
+
+$map_collectionSource := {
+  "CLINIC"                  : "Clinic",
+  "PRIMARY CARE"            : "Primary care - Clinic",
+  "ACCIDENT AND EMERGENCY"  : "Secondary care - Accident and Emergency",
+  "OUTPATIENTS"             : "Secondary care - Outpatients",
+  "IN-PATIENTS"             : "Secondary care - In-patients",
+  "PHARMACY"                : "Prescribing - Community pharmacy",
+  "LOCAL AUTHORITY"         : "Local authority",
+  "NATIONAL GOVERNMENT"     : "National government",
+  "COMMUNITY"               : "Community",
+  "SERVICES"                : "Services",
+  "HOME"                    : "Home",
+  "PRIVATE"                 : "Private",
+  "SOCIAL CARE"             : "Social care - Health care at home",
+  /*"SOCIAL CARE"             : "Social care - Other social data",*/
+  "OTHER"                   : "Other"
+};
+
+$map_dataUseLimitations := {
+  "GENERAL RESEARCH USE"                : "General research use",
+  "COMMERCIAL RESEARCH USE"             : "",
+  "GENETIC STUDIES ONLY"                : "Genetic studies only",
+  "NO GENERAL METHODS RESEARCH"         : "No general methods research",
+  "NO RESTRICTION"                      : "No restriction",
+  "GEOGRAPHICAL RESTRICTIONS"           : "",
+  "INSTITUTION SPECIFIC RESTRICTIONS"   : "",
+  "NOT FOR PROFIT USE"                  : "",
+  "PROJECT SPECIFIC RESTRICTIONS"       : "",
+  "RESEARCH SPECIFIC RESTRICTIONS"      : "Research-specific restrictions",
+  "USER SPECIFIC RESTRICTION"           : "",
+  "RESEARCH USE ONLY"                   : "Research use only",
+  "NO LINKAGE"                          : "No linkage"
+};
+
+$map_dataUseRequirements := {
+  "COLLABORATION REQUIRED"              : "Collaboration required",
+  "PROJECT SPECIFIC RESTRICTIONS"       : "Project-specific restrictions",
+  "ETHICS APPROVAL REQUIRED"            : "Ethics approval required",
+  "INSTITUTION SPECIFIC RESTRICTIONS"   : "Institution-specific restrictions",
+  "GEOGRAPHICAL RESTRICTIONS"           : "Geographical restrictions",
+  "PUBLICATION MORATORIUM"              : "Publication moratorium",
+  "PUBLICATION REQUIRED"                : "Publication required",
+  "RETURN TO DATABASE OR RESOURCE"      : "Return to database or resource",
+  "TIME LIMIT ON USE"                   : "Time limit on use",
+  "DISCLOSURE CONTROL"                  : "",
+  "NOT FOR PROFIT USE"                  : "Not for profit use",
+  "USER SPECIFIC RESTRICTION"           : "User-specific restriction"
+};
+
+$map_observedNodes := {
+  "PERSONS"         : "Person",
+  "EVENTS"          : "Event",
+  "FINDINGS"       : "Findings"
+};
+
+$allowedEncodings := [
+  "LOCAL",
+  "OPCS4",
+  "READ",
+  "SNOMED CT",
+  "SNOMED RT",
+  "DM PLUS D",
+  "DM+D",
+  "NHS NATIONAL CODES",
+  "NHS SCOTLAND NATIONAL CODES",
+  "NHS WALES NATIONAL CODES",
+  "ODS",
+  "LOINC",
+  "ICD10",
+  "ICD10CM",
+  "ICD10PCS",
+  "ICD9CM",
+  "ICD9",
+  "ICDO3",
+  "AMT",
+  "APC",
+  "ATC",
+  "CIEL",
+  "HPO",
+  "CPT4",
+  "DPD",
+  "DRG",
+  "HEMONC",
+  "JMDC",
+  "KCD7",
+  "MULTUM",
+  "NAACCR",
+  "NDC",
+  "NDFRT",
+  "OXMIS",
+  "RXNORM",
+  "RXNORM EXTENSION",
+  "SPL",
+  "OTHER"
+];
+
+$allowedStandards = [
+    "HL7 FHIR",
+    "HL7 V2",
+    "HL7 CDA",
+    "HL7 CCOW",
+    "LOINC",
+    "DICOM",
+    "I2B2",
+    "IHE",
+    "OMOP",
+    "OPENEHR",
+    "SENTINEL",
+    "PCORNET",
+    "CDISC",
+    "NHS DATA DICTIONARY",
+    "NHS SCOTLAND DATA DICTIONARY",
+    "NHS WALES DATA DICTIONARY",
+    "LOCAL",
+    "OTHER"
+];
+
+$applyMap := function($x,$theMap){
+  $type($x) = 'array' ? [$map($x, function($el){ $applyMap($el,$theMap)})] ~> $null_array : ($x ? $lookup($theMap,$x) ~> $null_string : null)
+};             
+
+$to_str := function($x){
+  $type($x)="array" ? (
+      $map(
+          $x,
+          function($item){
+              $type($item)="array" ? $to_str($item) : $item
+          }
+      ) ~> $filter(function($x) { $x != null and $x != "" }) ~> $join(";,;")
+  ) : $x
+};
+
+$checkList := function($x, $allowed){
+  [$filter($x, function($v){
+      $v in $allowed
+  })]
+};
+
+
+$fixAccrualPeriodicity := function($x){
+  $x in $keys($fixAccrualPeriodicityValues) ? $lookup($fixAccrualPeriodicityValues,$x): $x
+};
+
+$fixTimeLag := function($x){
+  $x = '6 MONTHS PLUS' ? "MORE 6 MONTHS" : $x
+};
+
+$fixDeliveryLeadTime := function($x){
+  $not($x in deliveryLeadTime_values) ? null : $x
+};
+
+$doi_matcher := /10.\d{4,9}[-._;()/:a-zA-Z0-9]+(?=[\s,/]|$)/i;
+
+$extract_doi := function($x){
+  $match($x,$doi_matcher) ~> 
+  $map(function($m){
+    $m.match
+  }) ~> 
+  $join(",") 
+};
+
+$get_date := function($x){
+  $type($x) = "number" ? $fromMillis($x) : $fromMillis($toMillis($x,'[D01]/[M01]/[Y0001]'))
+};
+
+$force_url := function($x){
+    $x = /^http(s)?:\/\// ? $x : null
+};
+
+$cleanAllValues := function($x){
+  $each($x, function($v, $k) { 
+    {$k: $v  ~> $to_str ~> $null_string}  
+  }) ~> $merge()
+};
+
+$null_to_number := function($x){
+  $exists($x) ? $number($x) : -1
+};
+
+input ~> |$| 
+{
+    "issued": issued ~> $get_date,
+    "modified": modified ~> $get_date,
+    "revisions": revisions,
+    "version": version ~> $null_string,
+    "summary": summary ~> |$| 
+    {
+      "dataProvider": 
+      {
+        "identifier": "https://placeholder-for-publisher-page/" & publisher.identifier ~> $null_string,
+        "name": publisher.name  ~> $null_string,
+        "logo": publisher.logo  ~> $null_string,
+        "description": publisher.description  ~> $null_string,
+        "contactPoint": publisher.contactPoint  ~> $null_string,
+        "memberOf": publisher.memberOf  ~> $null_string
+      },
+      "keywords": keywords ~> $null_array, 
+      "alternateIdentifiers": alternateIdentifiers ~> $to_str ~> $null_string,
+      "doiName": doiName ~> $to_str ~>  $extract_doi ~> $null_string,
+      "populationSize": $$.input.observations[observedNode="PERSONS"]^(observationDate)[0].measuredValue ~> $null_to_number
+    },['publisher']|,
+    "documentation": documentation ~> |$| 
+    {
+      "description": $length(description)=0 ? null : description,
+      "associatedMedia": associatedMedia ~> $to_str ~> $null_string,
+      "inPipeline": $$.extra.inPipeline
+    },['isPartOf']|,
+    "coverage": coverage ~> $cleanAllValues ~> |$|
+    {
+      "materialType": physicalSampleAvailability ~> $safeSplit(";,;") ~> $applyMap($map_materials),
+      "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $defaultValue(null),
+      "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null)
+    },['physicalSampleAvailability','typicalAgeRange']|,
+    "provenance": {
+      "origin": provenance.origin ~> $cleanAllValues ~> |$|
+      {
+        "purpose": purpose ~> $safeSplit(",") ~> $applyMap($map_purpose),
+        "source": source ~> $safeSplit(",") ~> $applyMap($map_source),
+        "datasetType": $$.extra.datasetType ~> $defaultValue("Health and disease"),
+        "datasetSubType": $$.extra.datasetSubType ~> $defaultValue("Not applicable"),
+        "collectionSource": collectionSituation ~> $safeSplit(";,;") ~> $applyMap($map_collectionSource)
+      },['collectionSituation']|,
+      "temporal": provenance.temporal ~> $cleanAllValues ~> |$|
+         {
+          "publishingFrequency": accrualPeriodicity ~> $applyMap($map_accrualPeriodicity),
+          "distributionReleaseDate": distributionReleaseDate ? distributionReleaseDate ~> $get_date : null,
+          "startDate": startDate ? startDate ~> $get_date : "1970-01-01",
+          "endDate": endDate  ? endDate ~> $get_date : null,
+          "timeLag": timeLag ~> $applyMap($map_deliveryLeadTime) ~> $defaultValue("Not applicable")
+         },['accrualPeriodicity']|
+    },
+    "accessibility": {
+      "usage": accessibility.usage ~> $cleanAllValues ~> |$|
+      {
+        "dataUseLimitation": dataUseLimitation ~> $safeSplit(";,;") ~> $applyMap($map_dataUseLimitations),
+        "dataUseRequirements": dataUseRequirements ~> $safeSplit(";,;") ~> $applyMap($map_dataUseRequirements)
+      },['investigations','isReferencedBy']|,
+      "access": accessibility.access ~> $cleanAllValues ~> |$|
+      {
+        "deliveryLeadTime": deliveryTimeLead ~> $applyMap($map_deliveryLeadTime) ~> $defaultValue("Not applicable"),
+        "accessServiceCategory": $$.extra.accessServiceCategory
+      },['deliveryTimeLead']|,
+      "formatAndStandards": accessibility.formatAndStandards ~> $cleanAllValues ~> |$|
+      {
+        "vocabularyEncodingScheme": vocabularyEncodingScheme ~> $safeSplit(";,;") ~> $checkList($allowedEncodings),
+        "conformsTo": conformsTo ~> $safeSplit(";,;")  ~> $checkList($allowedStandards),
+        "language": language ~> $safeSplit(";,;"),
+        "format": format ~>  $safeSplit(";,;")
+      }|
+    },
+    "enrichmentAndLinkage": enrichmentAndLinkage ~> |$| /*drop linkages*/
+    {
+    },['qualifiedRelation','derivation','tools']|,
+    "observations": observations ? [$map(observations,function($obs) {
+      {
+        "observedNode": $obs.observedNode ~> $uppercase ~> $applyMap($map_observedNodes),
+        "measuredValue": $obs.measuredValue,
+        "observationDate": $obs.observationDate,
+        "measuredProperty": $obs.measuredProperty,
+        "disambiguatingDescription": $obs.disambiguatingDescription
+      }
+    })] : [],
+    "structuralMetadata": {
+      "tables" : [$map($$.extra.structuralMetadata, function($smd) { 
+        $count($keys($smd)) > 0 ? 
+        {
+          "name":$smd.tableName,
+          "description":$smd.tableDescription,
+          "columns":[
+            {
+              "name": $smd.columnName,
+              "description": $smd.columnDescription,
+              "dataType": $smd.dataType,
+              "sensitive": $smd.sensitive ~> $null_string = null ? false : $smd.sensitive
+            }
+          ]
+        } : null
+      })] 
+    }
+},
+['datasetv2.identifier','datasetv2.issued','datasetv2.modified'] 
+|
+)
