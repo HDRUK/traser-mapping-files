@@ -8,7 +8,8 @@ $isHidden := function($location){
 
 $allOptionalFields := [
     "materialType",
-    "imageContrast"
+    "imageContrast",
+    "omics"
 ];
 
 $neededFieldsMap := {
@@ -17,13 +18,14 @@ $neededFieldsMap := {
     "Measurements/Tests": ["materialType"],
     "Imaging types": ["imageContrast"],
     "Imaging area of the body": ["imageContrast"],
-    "Omics": ["materialType"],
+    "Omics": ["materialType","omics"],
     "Socioeconomic": [],
     "Lifestyle": [],
     "Registry": ["materialType"],
     "Environment and energy": [],
     "Information and communication": [],
-    "Politics": []
+    "Politics": [],
+    "": ["imageContrast","materialType","omics"]
 };
 
 $getNeededFields := function($dataTypes, $neededFieldsMap) {(
