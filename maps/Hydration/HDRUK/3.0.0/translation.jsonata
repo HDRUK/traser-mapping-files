@@ -117,7 +117,8 @@ $autoComplete := function($component){
         "label": $component.description,
         "placeholder": $component.examples[0],
         "required": $not($component.is_optional),
-        "hidden": $isHidden($component.location)
+        "hidden": $isHidden($component.location),
+        "freeSolo": $component.types.options ? false : true
     }
 };
 
