@@ -184,8 +184,8 @@ $map_dataUseRequirements := {
 };
 
 $map_observedNodes := {
-  "PERSONS"         : "Person",
-  "EVENTS"          : "Event",
+  "PERSONS"         : "Persons",
+  "EVENTS"          : "Events",
   "FINDINGS"       : "Findings"
 };
 
@@ -321,7 +321,7 @@ input ~> |$|
     "version": version ~> $null_string,
     "summary": summary ~> |$| 
     {
-      "dataProvider": 
+      "dataCustodian": 
       {
         "identifier": "https://placeholder-for-publisher-page/" & publisher.identifier ~> $null_string,
         "name": publisher.name  ~> $null_string,
@@ -345,8 +345,9 @@ input ~> |$|
     {
       "materialType": physicalSampleAvailability ~> $safeSplit(";,;") ~> $applyMap($map_materials),
       "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $defaultValue(null),
-      "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null)
-    },['physicalSampleAvailability','typicalAgeRange']|,
+      "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null),
+      "followUp": followup
+    },['physicalSampleAvailability','typicalAgeRange','followup']|,
     "provenance": {
       "origin": provenance.origin ~> $cleanAllValues ~> |$|
       {
