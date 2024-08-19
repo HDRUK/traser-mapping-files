@@ -369,7 +369,7 @@ $cleanEnumSingle := function($x, $allowed){
             "vocabularyEncodingScheme": vocabularyEncodingSchemes ?
                 $safeSplit(vocabularyEncodingSchemes, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
             "language": $safeSplit(languages, ";,;"),
-            "format": formats ? formats : [],
+            "format": $safeSplit(formats, ";,;"),
             "conformsTo": $safeSplit(conformsTo, ";,;") ~> $cleanEnum($allowedStandards) ~> $defaultValue([])
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
