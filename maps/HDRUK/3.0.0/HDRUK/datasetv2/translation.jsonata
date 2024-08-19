@@ -323,7 +323,7 @@ input ~> |$|
     {
       "dataCustodian": 
       {
-        "identifier": "https://placeholder-for-publisher-page/" & publisher.identifier ~> $null_string,
+        "identifier": "placeholder",
         "name": publisher.name  ~> $null_string,
         "logo": publisher.logo  ~> $null_string,
         "description": publisher.description  ~> $null_string,
@@ -353,8 +353,8 @@ input ~> |$|
       {
         "purpose": purpose ~> $safeSplit(",") ~> $applyMap($map_purpose),
         "source": source ~> $safeSplit(",") ~> $applyMap($map_source),
-        "datasetType": $$.extra.datasetType ~> $defaultValue("Health and disease"),
-        "datasetSubType": $$.extra.datasetSubType ~> $defaultValue("Not applicable"),
+        "datasetType": $$.extra.datasetType ~> $defaultValue(["Health and disease"]),
+        "datasetSubType": $$.extra.datasetSubType ~> $defaultValue(["Not applicable"]),
         "collectionSource": collectionSituation ~> $safeSplit(";,;") ~> $applyMap($map_collectionSource)
       },['collectionSituation']|,
       "temporal": provenance.temporal ~> $cleanAllValues ~> |$|
@@ -375,7 +375,8 @@ input ~> |$|
       "access": accessibility.access ~> $cleanAllValues ~> |$|
       {
         "deliveryLeadTime": deliveryTimeLead ~> $applyMap($map_deliveryLeadTime) ~> $defaultValue("Not applicable"),
-        "accessServiceCategory": $$.extra.accessServiceCategory
+        "accessServiceCategory": $$.extra.accessServiceCategory,
+        "jurisdiction": jurisdiction ~> $safeSplit(";,;") 
       },['deliveryTimeLead']|,
       "formatAndStandards": accessibility.formatAndStandards ~> $cleanAllValues ~> |$|
       {
