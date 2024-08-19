@@ -65,8 +65,8 @@ $truncate := function($x,$length){
     "temporal": {
       "endDate": input.provenance.temporal.endDate,
       "startDate": input.provenance.temporal.startDate,
-      "timeLag": $uppercase(input.provenance.temporal.timeLag),
-      "accrualPeriodicity": $uppercase(input.provenance.temporal.publishingFrequency),
+      "timeLag": input.provenance.temporal.timeLag ? input.provenance.temporal.timeLag : null,
+      "accrualPeriodicity": input.provenance.temporal.publishingFrequency ? input.provenance.temporal.publishingFrequency : null,
       "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
     }
   },
