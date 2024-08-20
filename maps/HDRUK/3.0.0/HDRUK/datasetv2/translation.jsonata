@@ -134,6 +134,16 @@ $map_accrualPeriodicity := {
   "OTHER"       : "Other"
 };
 
+$map_followUp := {
+  "0 - 6 MONTHS"       : "0 - 6 Months",
+  "6 - 12 MONTHS"      : "6 - 12 Months",
+  "1 - 10 YEARS"       : "1 - 10 Years",
+  "> 10 YEARS"         : "> 10 Years",
+  "UNKNOWN"            : "Unknown",
+  "OTHER"              : "Other",
+  "CONTINUOUS"         : "Continuous"
+};
+
 $map_collectionSource := {
   "CLINIC"                  : "Clinic",
   "PRIMARY CARE"            : "Primary care - Clinic",
@@ -328,7 +338,7 @@ input ~> |$|
         "logo": publisher.logo  ~> $null_string,
         "description": publisher.description  ~> $null_string,
         "contactPoint": publisher.contactPoint  ~> $null_string,
-        "memberOf": publisher.memberOf  ~> $null_string
+        "memberOf": "Other" /*these are all placeholders*/
       },
       "keywords": keywords ~> $null_array, 
       "alternateIdentifiers": alternateIdentifiers ~> $to_str ~> $null_string,
@@ -346,7 +356,7 @@ input ~> |$|
       "materialType": physicalSampleAvailability ~> $safeSplit(";,;") ~> $applyMap($map_materials),
       "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $defaultValue(null),
       "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null),
-      "followUp": followup
+      "followUp": followup ~> $applyMap($map_followUp)
     },['physicalSampleAvailability','typicalAgeRange','followup']|,
     "provenance": {
       "origin": provenance.origin ~> $cleanAllValues ~> |$|
