@@ -52,7 +52,8 @@ $truncate := function($x,$length){
     "pathway": input.coverage.pathway, 
     "spatial": $to_str(input.coverage.spatial),
     "followUp": input.coverage.followUp,
-    "typicalAgeRange": $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]),
+    "typicalAgeRange": input.coverage.typicalAgeRangeMin & input.coverage.typicalAgeRangeMax ?
+        $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]) : null,
     "datasetCompleteness": input.coverage.datasetCompleteness
   },
   "provenance": {
@@ -134,7 +135,7 @@ $truncate := function($x,$length){
         "materialType": $type
       }
     })] : [],
-  "demographicFrequency": input.demographicFrequency,
-  "omics": input.omics
+  "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : {},
+  "omics": input.omics ? input.omics : {}
 };
 )
