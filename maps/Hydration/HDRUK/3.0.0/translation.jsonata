@@ -262,7 +262,6 @@ $arrayFields := [
     "similarToDatasets",
     "demographicFrequency.age",
     "demographicFrequency.ethnicity",
-    "demographicFrequency.genderAssignedAtBirth",
     "demographicFrequency.disease"
 ];
 
@@ -316,7 +315,6 @@ $define_array_components := function($components){(
     $similar_to_components := $define_array_fields($components, "enrichmentAndLinkage.similarToDatasets", "Similar To Datasets Array");
     $demoAge := $define_array_fields($components, "demographicFrequency.age", "Demographic Frequency Age Array");
     $demoEthnicity := $define_array_fields($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
-    $demoGender := $define_array_fields($components, "demographicFrequency.genderAssignedAtBirth", "Demographic Frequency Gender Array");
     $demoDisease := $define_array_fields($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
 
     [
@@ -327,7 +325,6 @@ $define_array_components := function($components){(
         $obs_components,
         $demoAge,
         $demoEthnicity,
-        $demoGender,
         $demoDisease
     ]
 )};
@@ -369,7 +366,6 @@ $all_array_validation := function($components){(
     $similar_to_validation := $define_array_validation($components, "enrichmentAndLinkage.similarToDatasets", "Similar To Datasets Array");
     $demoAge := $define_array_validation($components, "demographicFrequency.age", "Demographic Frequency Age Array");
     $demoEthnicity := $define_array_validation($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
-    $demoGender := $define_array_validation($components, "demographicFrequency.genderAssignedAtBirth", "Demographic Frequency Gender Array");
     $demoDisease := $define_array_validation($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
 
     [
@@ -380,7 +376,6 @@ $all_array_validation := function($components){(
         $obs_validation,
         $demoAge,
         $demoEthnicity,
-        $demoGender,
         $demoDisease
     ]
 )};
