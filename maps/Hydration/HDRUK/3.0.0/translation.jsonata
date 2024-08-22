@@ -163,6 +163,11 @@ $getItemsType := function($types){
         {
             "type": $types.type,
             "format": $types.format
+        } : 
+    $types.pattern ?
+        {
+            "type": $types.type,
+            "pattern": $types.pattern
         } : null
 };
 
@@ -218,7 +223,7 @@ $intValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": "integer",
-        "positive": true
+        "min": -1
     }
 };
 
