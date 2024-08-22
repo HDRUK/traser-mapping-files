@@ -80,16 +80,26 @@ $map_materials := {
 };
 
 $map_deliveryLeadTime := {
-  "LESS 1 WEEK"       : "Less than 1 week",
-  "1-2 WEEKS"         : "1-2 weeks",
-  "2-4 WEEKS"         : "2-4 weeks",
-  "1-2 MONTHS"        : "1-2 months",
-  "2-6 MONTHS"        : "2-6 months",
-  "MORE 6 MONTHS"     : "6 months plus",
-  "6 MONTHS PLUS"     : "6 months plus",
-  "VARIABLE"          : "Variable",
-  "NOT APPLICABLE"    : "Not applicable",
-  "OTHER"             : "Other"
+  "LESS 1 WEEK"     : "Less than 1 week",
+  "1-2 WEEKS"       : "1-2 weeks",
+  "2-4 WEEKS"       : "2-4 weeks",
+  "1-2 MONTHS"      : "1-2 months",
+  "2-6 MONTHS"      : "2-6 months",
+  "MORE 6 MONTHS"   : "More than 6 months",
+  "VARIABLE"        : "Variable",
+  "NO TIMELAG"      : "Not applicable",
+  "NOT APPLICABLE"  : "Not applicable",
+  "OTHER"           : "Other"
+};
+
+$map_followUp := {
+  "0 - 6 MONTHS"  : "0 - 6 months",
+  "6 - 12 MONTHS" : "6 - 12 months",
+  "1 - 10 YEARS"  : "1 - 10 years",
+  "> 10 YEARS"    : "> 10 years",
+  "UNKNOWN"       : "Unknown",
+  "CONTINUOUS"    :  "Continuous",
+  "OTHER"         : "Other"   
 };
 
 
@@ -102,7 +112,7 @@ $map_purpose := {
   "AUDIT"             : "Audit",
   "ADMINISTRATIVE"    : "Administrative",
   "FINANCIAL"         : "Financial",
-  "STATUTORY"         : "Statuatory",
+  "STATUTORY"         : "Statutory",
   "OTHER"             : "Other"
 };
 
@@ -158,22 +168,21 @@ $map_collectionSource := {
   "HOME"                    : "Home",
   "PRIVATE"                 : "Private",
   "SOCIAL CARE"             : "Social care - Health care at home",
-  /*"SOCIAL CARE"             : "Social care - Other social data",*/
   "OTHER"                   : "Other"
 };
 
 $map_dataUseLimitations := {
   "GENERAL RESEARCH USE"                : "General research use",
-  "COMMERCIAL RESEARCH USE"             : "",
+  "COMMERCIAL RESEARCH USE"             : "Commercial research use",
   "GENETIC STUDIES ONLY"                : "Genetic studies only",
   "NO GENERAL METHODS RESEARCH"         : "No general methods research",
   "NO RESTRICTION"                      : "No restriction",
-  "GEOGRAPHICAL RESTRICTIONS"           : "",
-  "INSTITUTION SPECIFIC RESTRICTIONS"   : "",
-  "NOT FOR PROFIT USE"                  : "",
-  "PROJECT SPECIFIC RESTRICTIONS"       : "",
+  "GEOGRAPHICAL RESTRICTIONS"           : "Geographical restrictions",
+  "INSTITUTION SPECIFIC RESTRICTIONS"   : "Institution-specific restrictions",
+  "NOT FOR PROFIT USE"                  : "Not for profit use",
+  "PROJECT SPECIFIC RESTRICTIONS"       : "Project-specific restrictions",
   "RESEARCH SPECIFIC RESTRICTIONS"      : "Research-specific restrictions",
-  "USER SPECIFIC RESTRICTION"           : "",
+  "USER SPECIFIC RESTRICTION"           : "User-specific restrictions",
   "RESEARCH USE ONLY"                   : "Research use only",
   "NO LINKAGE"                          : "No linkage"
 };
@@ -188,15 +197,22 @@ $map_dataUseRequirements := {
   "PUBLICATION REQUIRED"                : "Publication required",
   "RETURN TO DATABASE OR RESOURCE"      : "Return to database or resource",
   "TIME LIMIT ON USE"                   : "Time limit on use",
-  "DISCLOSURE CONTROL"                  : "",
+  "DISCLOSURE CONTROL"                  : "Disclosure control",
   "NOT FOR PROFIT USE"                  : "Not for profit use",
-  "USER SPECIFIC RESTRICTION"           : "User-specific restriction"
+  "USER SPECIFIC RESTRICTION"           : "User-specific restriction",
 };
 
 $map_observedNodes := {
   "PERSONS"         : "Persons",
   "EVENTS"          : "Events",
   "FINDINGS"       : "Findings"
+};
+
+$map_memberOf := {
+  "HUB"       : "Hub",
+  "ALLIANCE"  : "Alliance",
+  "OTHER"     : "Other",
+  "NCS"       : "NCS"
 };
 
 $allowedEncodings := [
