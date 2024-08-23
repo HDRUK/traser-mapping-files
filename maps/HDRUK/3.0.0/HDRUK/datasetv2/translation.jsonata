@@ -199,7 +199,7 @@ $map_dataUseRequirements := {
   "TIME LIMIT ON USE"                   : "Time limit on use",
   "DISCLOSURE CONTROL"                  : "Disclosure control",
   "NOT FOR PROFIT USE"                  : "Not for profit use",
-  "USER SPECIFIC RESTRICTION"           : "User-specific restriction",
+  "USER SPECIFIC RESTRICTION"           : "User-specific restriction"
 };
 
 $map_observedNodes := {
