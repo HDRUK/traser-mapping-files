@@ -147,7 +147,7 @@ $allowedDatasetSubType := [
     'Cardiovascular',
     'Cancer',
     'Rare diseases',
-    'Metabolic and Endocrine',
+    'Metabolic and endocrine',
     'Neurological',
     'Reproductive',
     'Maternity and neonatology',
@@ -156,8 +156,8 @@ $allowedDatasetSubType := [
     'Musculoskeletal',
     'Vision',
     'Renal and urogenital',
-    'Oral and Gastrointestinal',
-    'Cognitive Function',
+    'Oral and gastrointestinal',
+    'Cognitive function',
     'Hearing',
     'Others',
     'Vaccines',
@@ -180,12 +180,11 @@ $allowedDatasetSubType := [
     'Transcriptomics',
     'Epigenomics',
     'Metabolomics',
-    'Multiomics',
     'Metagenomics',
     'Genomics',
     'Lipidomics',
     'Education',
-    'Crime and Justice',
+    'Crime and justice',
     'Ethnicity',
     'Housing ',
     'Labour',
@@ -199,11 +198,11 @@ $allowedDatasetSubType := [
     'Finances',
     'Family circumstance',
     'Smoking',
-    'Physical Activity',
+    'Physical activity',
     'Dietary habits',
     'Alcohol',
-    'Disease Registry (research)',
-    'National Disease Registries and Audits',
+    'Disease registry (research)',
+    'National disease registries and audits',
     'Births and Deaths',
     'Not applicable'
 ];
@@ -254,25 +253,32 @@ $allowedServiceCategory := [
 
 $allowedDataUseLimitation := [
     'General research use',
+    'Commercial research use',
     'Genetic studies only',
     'No general methods research',
     'No restriction',
+    'Geographical restrictions',
+    'Institution-specific restrictions',
+    'Not for profit use',
+    'Project-specific restrictions',
     'Research-specific restrictions',
+    'User-specific restrictions',
     'Research use only',
     'No linkage'
 ];
 
 $allowedDataUseRequirements := [
     'Collaboration required',
-    'Ethics approval required',
-    'Geographical restrictions',
-    'Institution-specific restrictions',
-    'Not for profit use',
     'Project-specific restrictions',
+    'Ethics approval required',
+    'Institution-specific restrictions',
+    'Geographical restrictions',
     'Publication moratorium',
     'Publication required',
     'Return to database or resource',
     'Time limit on use',
+    'Disclosure control',
+    'Not for profit use',
     'User-specific restriction'
 ];
 
@@ -361,7 +367,7 @@ $cleanEnumSingle := function($x, $allowed){
             "jurisdiction": $safeSplit(jurisdiction, ";,;")
         }|,  
         "usage": usage ? usage ~> |$|{
-            "dataUseRequirements": $safeSplit(dataUseRequirement,";,;")  ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
+            "dataUseRequirements": $safeSplit(dataUseRequirement,";,;") ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
             "dataUseLimitation": $safeSplit(dataUseLimitation,";,;") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
             "resourceCreator": resourceCreator.name
         }, ['dataUseRequirement']|,
