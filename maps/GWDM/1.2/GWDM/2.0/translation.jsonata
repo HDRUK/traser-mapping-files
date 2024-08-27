@@ -1,14 +1,68 @@
 (
 
+$nullable_values := [""," ","\"","Not Applicable","Not Available",
+                     "Not applicable",
+                     "NOT AVAILABLE","NOT APPLICABLE",[null]];
+
+$null_string := function($x){
+  ($x in $nullable_values or $type($x) != "string" or $not($exists($x)) ) ? null : $x
+};
+
+$null_array := function($x){
+  [$filter([$map($x, function($xx){$xx ~> $null_string})],function($xx){$xx != null})]
+};
+
 $cleanObservation := function($obs){(
-    $node := $lowercase($obs.observedNode) = "person" ? "PERSONS" :
-        $lowercase($obs.observedNode) = "event" ? "EVENTS" :
+    $node := $lowercase($obs.observedNode) = "persons" ? "PERSONS" :
+        $lowercase($obs.observedNode) = "events" ? "EVENTS" :
         $lowercase($obs.observedNode) = "findings" ? "FINDINGS" : null;
     $obs ~> |$| {
         "observedNode": $node
     }|
 )};
 
+$applyMap := function($x,$theMap){
+  $type($x) = 'array' ? [$map($x, function($el){ $applyMap($el,$theMap)})] ~> $null_array : ($x ? $lookup($theMap,$x) ~> $null_string : null)
+};             
+
+$followupMap := {
+  "0 - 6 months"  : "0 - 6 MONTHS",
+  "6 - 12 months" : "6 - 12 MONTHS",
+  "1 - 10 years"  : "1 - 10 YEARS",
+  "> 10 years"    : "> 10 YEARS",
+  "Unknown"       : "UNKNOWN",
+  "Continuous"    : "CONTINUOUS",
+  "Other"         : "OTHER"   
+};
+
+$timelagMap := {
+  "Less than 1 week"    : "LESS 1 WEEK",
+  "1-2 weeks"           : "1-2 WEEKS",
+  "2-4 weeks"           : "2-4 WEEKS",
+  "1-2 months"          : "1-2 MONTHS",
+  "2-6 months"          : "2-6 MONTHS",
+  "More than 6 months"  : "MORE 6 MONTHS",
+  "Variable"            : "VARIABLE",
+  "Not applicable"      : "NOT APPLICABLE",
+  "Other"               : "OTHER"
+};
+
+$accrualMap := {
+  "Static"       : "STATIC",
+  "Irregular"    : "IRREGULAR",
+  "Continuous"   : "CONTINUOUS",
+  "Biennial"     : "BIENNIAL",
+  "Annual"       : "ANNUAL",
+  "Biannual"     : "BIANNUAL",
+  "Quarterly"    : "QUARTERLY",
+  "Bimonthly"    : "BIMONTHLY",
+  "Monthly"      : "MONTHLY",
+  "Biweekly"     : "BIWEEKLY",
+  "Weekly"       : "WEEKLY",
+  "Twice a week" : "SEMIWEEKLY",
+  "Daily"        : "DAILY",
+  "Other"        : "OTHER"
+};
 
 input ~> |$| 
 {
@@ -17,20 +71,28 @@ input ~> |$|
         "syntheticDataWebLink": $$.extra.syntheticDataWebLink
     }, ['publicationAboutDataset', 'publicationUsingDataset']|,
     "coverage": coverage ~> |$|
-    {}, ['datasetCompleteness']|,
+    {
+        "followup": followUp ~> $applyMap($map_followUp) ~> $null_string
+    }, ['datasetCompleteness','followUp']|,
     "provenance": provenance ~> |$|
     {
-        "origin": origin ~> |$|{}, ['imageContrast']|
+        "origin": origin ~> |$|{}, ['imageContrast']|,
+        "temporal": temporal ~> |$|
+            {
+                "timeLag": timeLag ~> $applyMap($timeLag) ~> $null_string,
+                "accrualPeriodicity": accrualPeriodicity ~> $applyMap($accrualMap) ~> $null_string
+            }|
     }|,
     "accessibility": accessibility ~> |$|
     {
         "access": access ~> |$|
         {
-            "accessServiceCategory":  $$.extra.syntheticDataWebLink
-        }, ['accessMode']|
+            "accessServiceCategory":  $$.extra.syntheticDataWebLink,
+            "deliveryLeadTime": deliveryLeadTime ~> $applyMap($timelagMap) ~> $null_string
+        }|
     }|,
     "observations": $map(observations, $cleanObservation)[]
-}|
+},['demographicFrequency','omics']|
 
 
 )

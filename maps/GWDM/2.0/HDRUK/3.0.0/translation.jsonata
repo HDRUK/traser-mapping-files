@@ -33,26 +33,27 @@ $truncate := function($x,$length){
     "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
       $v in extra.controlledKeywords
     })]),
-    "datasetType": input.provenance.origin.datasetType ? input.provenance.origin.datasetType :
-        extra.datasetType ? extra.datasetType : null,
-    "datasetSubType": input.provenance.origin.datasetSubType ? input.provenance.origin.datasetSubType :
-        extra.datasetSubType ? extra.datasetSubType : null,
+    "datasetType": input.provenance.origin.datasetType ? $to_str(input.provenance.origin.datasetType) :
+        extra.datasetType ? $to_str(extra.datasetType) : null,
+    "datasetSubType": input.provenance.origin.datasetSubType ? $to_str(input.provenance.origin.datasetSubType) :
+        extra.datasetSubType ? $to_str(extra.datasetSubType) : null,
     "populationSize": input.summary.populationSize,
     "description": $truncate(input.documentation.description,50000),
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
     "publisher": {
-      "name": extra.publisherName ? extra.publisherName : input.summary.dataProvider.name,
-      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataProvider.identifier, 50)
+      "name": extra.publisherName ? extra.publisherName : input.summary.dataCustodian.name,
+      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataCustodian.identifier, 50)
     },
     "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : null
   },
   "coverage": {
     "pathway": input.coverage.pathway, 
     "spatial": $to_str(input.coverage.spatial),
-    "followup": input.coverage.followup,
-    "typicalAgeRange": $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]),
+    "followUp": input.coverage.followUp,
+    "typicalAgeRange": input.coverage.typicalAgeRangeMin & input.coverage.typicalAgeRangeMax ?
+        $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]) : null,
     "datasetCompleteness": input.coverage.datasetCompleteness
   },
   "provenance": {
@@ -65,8 +66,8 @@ $truncate := function($x,$length){
     "temporal": {
       "endDate": input.provenance.temporal.endDate,
       "startDate": input.provenance.temporal.startDate,
-      "timeLag": $uppercase(input.provenance.temporal.timeLag),
-      "accrualPeriodicity": $uppercase(input.provenance.temporal.publishingFrequency),
+      "timeLag": input.provenance.temporal.timeLag ? input.provenance.temporal.timeLag : null,
+      "accrualPeriodicity": input.provenance.temporal.publishingFrequency ? input.provenance.temporal.publishingFrequency : null,
       "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
     }
   },
@@ -79,8 +80,7 @@ $truncate := function($x,$length){
       "accessRights": input.accessibility.access.accessRights ~> $to_str,
       "accessService": input.accessibility.access.accessService,
       "accessRequestCost": $to_str(input.accessibility.access.accessRequestCost), /* may need to be fixed */
-      "accessServiceCategory": $to_str(input.accessibility.access.accessServiceCategory),
-      "accessMode": input.accessibility.access.accessMode
+      "accessServiceCategory": $to_str(input.accessibility.access.accessServiceCategory)
     },
     "usage": {
       "dataUseLimitation": input.accessibility.usage.dataUseLimitation ? 
@@ -134,6 +134,8 @@ $truncate := function($x,$length){
       {
         "materialType": $type
       }
-    })] : []
+    })] : [],
+  "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : {},
+  "omics": input.omics ? input.omics : {}
 };
 )

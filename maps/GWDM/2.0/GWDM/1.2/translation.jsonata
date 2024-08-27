@@ -1,21 +1,60 @@
 (
 
-$allowedAccessModes := [
-    "Join research consortium",
-    "New project"
-];
+$nullable_values := [""," ","\"","Not Applicable","Not Available",
+                     "Not applicable",
+                     "NOT AVAILABLE","NOT APPLICABLE",[null]];
 
-$removeBadAccessMode := function($x){
-    $not($x in $allowedAccessModes) ? null : $x
+$null_string := function($x){
+  ($x in $nullable_values or $type($x) != "string" or $not($exists($x)) ) ? null : $x
 };
 
-$fixAccessMode := function($x){
-    $removeBadAccessMode($x)
+$null_array := function($x){
+  [$filter([$map($x, function($xx){$xx ~> $null_string})],function($xx){$xx != null})]
+};
+
+$map_followUp := {
+  "0 - 6 MONTHS"  : "0 - 6 months",
+  "6 - 12 MONTHS" : "6 - 12 months",
+  "1 - 10 YEARS"  : "1 - 10 years",
+  "> 10 YEARS"    : "> 10 years",
+  "UNKNOWN"       : "Unknown",
+  "CONTINUOUS"    :  "Continuous",
+  "OTHER"         : "Other"   
+};
+
+$map_deliveryLeadTime := {
+  "LESS 1 WEEK"     : "Less than 1 week",
+  "1-2 WEEKS"       : "1-2 weeks",
+  "2-4 WEEKS"       : "2-4 weeks",
+  "1-2 MONTHS"      : "1-2 months",
+  "2-6 MONTHS"      : "2-6 months",
+  "MORE 6 MONTHS"   : "More than 6 months",
+  "VARIABLE"        : "Variable",
+  "NO TIMELAG"      : "Not applicable",
+  "NOT APPLICABLE"  : "Not applicable",
+  "OTHER"           : "Other"
+};
+
+$map_accrualPeriodicity := {
+  "STATIC"      : "Static",
+  "IRREGULAR"   : "Irregular",
+  "CONTINUOUS"  : "Continuous",
+  "BIENNIAL"    : "Biennial",
+  "ANNUAL"      : "Annual",
+  "BIANNUAL"    : "Biannual",
+  "QUARTERLY"   : "Quarterly",
+  "BIMONTHLY"   : "Bimonthly",
+  "MONTHLY"     : "Monthly",
+  "BIWEEKLY"    : "Biweekly",
+  "WEEKLY"      : "Weekly",
+  "SEMIWEEKLY"  : "Twice a week",
+  "DAILY"       : "Daily",
+  "OTHER"       : "Other"
 };
 
 $fixObservedNode := function($obs){(
-    $node := $lowercase($obs.observedNode) = "persons" ? "Person" :
-        $lowercase($obs.observedNode) = "events" ? "Event" :
+    $node := $lowercase($obs.observedNode) = "persons" ? "Persons" :
+        $lowercase($obs.observedNode) = "events" ? "Events" :
         $lowercase($obs.observedNode) = "findings" ? "Findings" : null;
     $obs ~> |$| {
         "observedNode": $node
@@ -28,18 +67,25 @@ input ~> |$| {
     }|,
     "coverage": coverage ? coverage ~> |$|
         {
-            "datasetCompleteness": $$.extra.datasetCompleteness ? $$.extra.datasetCompleteness : null
-        }, ['biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic','gender'] | : null,
+            "datasetCompleteness": $$.extra.datasetCompleteness ? $$.extra.datasetCompleteness : null,
+            "followUp": followup ~> $applyMap($map_deliveryLeadTime) ~> $null_string
+        }, ['followup','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic','gender'] | : null,
     "provenance": provenance ? provenance ~> |$|
     {
         "origin": origin ~> |$|{
             "imageContrast": null
-        }|
+        }|,
+        "temporal": temporal ~> |$|
+            {
+                "timeLag": timeLag ~> $applyMap($map_deliveryLeadTime) ~> $null_string,
+                "accrualPeriodicity": accrualPeriodicity ~> $applyMap($map_accrualPeriodicity) ~> $null_string
+            }|
     }| : null,
     "accessibility": accessibility ~> |$|
     {
-        "access": access ~> |$|{
-            "accessMode": $$.extra.accessMode ? $fixAccessMode($$.extra.accessMode) : "New project"
+        "access": access ~> |$|
+        {
+            "deliveryLeadTime": deliveryLeadTime ~> $applyMap($map_deliveryLeadTime) ~> $null_string
         }|
     }|,
     "linkage": linkage ? linkage ~> |$|{
