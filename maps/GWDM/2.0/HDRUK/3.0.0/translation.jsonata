@@ -12,6 +12,14 @@ $truncate := function($x,$length){
     $x ? $substring($x,0,$length) : null
 };
 
+$null_to_number := function($x){
+  $exists($x) ? $number($x) : -1
+};
+
+$auto_fill_population_size := function($populationSize, $observations){
+    $populationSize = -1 ? $observations[observedNode="Persons"]^(observationDate)[0].measuredValue ~> $null_to_number : $populationSize ~> $null_to_number
+};
+
 {
   "required": {
     "gatewayId": extra.id ? extra.id : $truncate(input.identifier,50),
@@ -37,7 +45,7 @@ $truncate := function($x,$length){
         extra.datasetType ? $to_str(extra.datasetType) : null,
     "datasetSubType": input.provenance.origin.datasetSubType ? $to_str(input.provenance.origin.datasetSubType) :
         extra.datasetSubType ? $to_str(extra.datasetSubType) : null,
-    "populationSize": input.summary.populationSize,
+    "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
     "description": $truncate(input.documentation.description,50000),
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
