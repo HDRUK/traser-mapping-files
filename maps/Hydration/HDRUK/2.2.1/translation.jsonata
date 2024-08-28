@@ -193,7 +193,7 @@ $get_validation := function($component){
         $stringValidation($component) :
     $component.types.format ?
         $formatValidation($component) :
-    $component.types.options ?
+    $component.types.options ? 
         $enumValidation($component) :
     $component.types.pattern ?
         $regexValidation($component) :

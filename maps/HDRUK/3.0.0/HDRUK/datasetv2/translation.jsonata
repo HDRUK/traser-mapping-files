@@ -85,7 +85,7 @@ $map_deliveryLeadTime := {
   "2-4 WEEKS"       : "2-4 weeks",
   "1-2 MONTHS"      : "1-2 months",
   "2-6 MONTHS"      : "2-6 months",
-  "MORE 6 MONTHS"   : "More than 6 months",
+  "MORE 6 MONTHS"   : "6 months plus",
   "VARIABLE"        : "Variable",
   "NO TIMELAG"      : "Not applicable",
   "NOT APPLICABLE"  : "Not applicable",
