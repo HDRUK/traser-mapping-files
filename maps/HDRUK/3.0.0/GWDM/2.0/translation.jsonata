@@ -4,6 +4,11 @@ $defaultValue := function($value,$defaultValue){
     $value ? $value : $defaultValue
 };
 
+$ageRangeDefault := function($value, $defaultValue){
+    $value ? $value :
+        $value = 0 ? $value : $defaultvalue
+};
+
 $safeSplit := function($x,$delim){
     $x ? $x ~> $split($delim) : []
 };
@@ -340,8 +345,8 @@ $cleanEnumSingle := function($x, $allowed){
         "inPipeline": input.summary.inPipeline
     },
     "coverage":  input.coverage ~> |$|{
-        "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $defaultValue(null),
-        "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null),
+        "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $ageRangeDefault(null),
+        "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $ageRangeDefault(null),
         "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
     },['followup','typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
     "provenance": {
