@@ -126,7 +126,7 @@ $allowedDatasetType := [
     'Politics'
 ];
 
-$allowedStandards = [
+$allowedStandards := [
     'HL7 FHIR',
     'HL7 V2',
     'HL7 CDA',
