@@ -196,7 +196,7 @@ $formatValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": $component.types.type,
-        "pattern": "[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)"
+        "pattern": url_regex
     } :
     {
         "title": $component.title,
