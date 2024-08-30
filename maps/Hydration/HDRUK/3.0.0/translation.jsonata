@@ -191,6 +191,13 @@ $stringValidation := function($component){
 };
 
 $formatValidation := function($component){
+    $component.types.format = "uri" ?
+    {
+        "title": $component.title,
+        "required": $not($component.is_optional),
+        "type": $component.types.type,
+        "pattern": url_regex
+    } :
     {
         "title": $component.title,
         "required": $not($component.is_optional),

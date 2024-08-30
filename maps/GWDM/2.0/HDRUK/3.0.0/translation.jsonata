@@ -20,6 +20,32 @@ $auto_fill_population_size := function($populationSize, $observations){
     $populationSize = -1 ? $observations[observedNode="Persons"]^(observationDate)[0].measuredValue ~> $null_to_number : $populationSize ~> $null_to_number
 };
 
+$joinTypicalAgeRange := function($min, $max){(
+    $minStr := $min ? $string($min) : $min = 0 ? $string($min) : null;
+    $maxStr := $max ? $string($max) : null;
+    $minStr ? $maxStr ? $join([$minStr, "-", $maxStr]) : null : null
+)};
+
+$getDatasetLinkage := function(){(
+    $datasetLinkage := {
+      "isDerivedFrom":$to_str(input.enrichmentAndLinkage.derivedFrom),
+      "isPartOf":$to_str(input.enrichmentAndLinkage.isPartOf),
+      "isMemberOf": $to_str(input.enrichmentAndLinkage.similarToDatasets),
+      "linkedDatasets":$to_str(input.enrichmentAndLinkage.linkableDatasets)
+    };
+    $datasetLinkage = {} ? null : $datasetLinkage
+)};
+
+$getOrigin := function(){(
+    $origin := {
+      "purpose": $to_str(input.provenance.origin.purpose),
+      "source": $to_str(input.provenance.origin.source),
+      "collectionSituation": $to_str(input.provenance.origin.collectionSource),
+      "imageContrast": input.provenance.origin.imageContrast
+    };
+    $origin = {} ? null : $origin
+)};
+
 {
   "required": {
     "gatewayId": extra.id ? extra.id : $truncate(input.identifier,50),
@@ -60,17 +86,11 @@ $auto_fill_population_size := function($populationSize, $observations){
     "pathway": input.coverage.pathway, 
     "spatial": $to_str(input.coverage.spatial),
     "followUp": input.coverage.followUp,
-    "typicalAgeRange": input.coverage.typicalAgeRangeMin & input.coverage.typicalAgeRangeMax ?
-        $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]) : null,
+    "typicalAgeRange": $joinTypicalAgeRange(input.coverage.typicalAgeRangeMin, input.coverage.typicalAgeRangeMax),
     "datasetCompleteness": input.coverage.datasetCompleteness
   },
   "provenance": {
-    "origin": {
-      "purpose": $to_str(input.provenance.origin.purpose),
-      "source": $to_str(input.provenance.origin.source),
-      "collectionSituation": $to_str(input.provenance.origin.collectionSource),
-      "imageContrast": input.provenance.origin.imageContrast
-    },
+    "origin": $getOrigin(),
     "temporal": {
       "endDate": input.provenance.temporal.endDate,
       "startDate": input.provenance.temporal.startDate,
@@ -117,12 +137,7 @@ $auto_fill_population_size := function($populationSize, $observations){
     "dataUses": extra.dataUses ? extra.dataUses : null,
     "isReferenceIn": null,
     "tools": $to_str(input.enrichmentAndLinkage.tools),
-    "datasetLinkage":{
-      "isDerivedFrom":$to_str(input.enrichmentAndLinkage.derivedFrom),
-      "isPartOf":$to_str(input.enrichmentAndLinkage.isPartOf),
-      "isMemberOf": $to_str(input.enrichmentAndLinkage.similarToDatasets),
-      "linkedDatasets":$to_str(input.enrichmentAndLinkage.linkableDatasets)
-    },
+    "datasetLinkage": $getDatasetLinkage(),
     "investigations":$to_str(input.enrichmentAndLinkage.investigations),
     "syntheticDataWebLink": $to_str(input.structuralMetadata.syntheticDataWebLink),
     "publicationAboutDataset": input.enrichmentAndLinkage.publicationAboutDataset,
@@ -143,7 +158,7 @@ $auto_fill_population_size := function($populationSize, $observations){
         "materialType": $type
       }
     })] : [],
-  "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : {},
-  "omics": input.omics ? input.omics : {}
+  "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : null,
+  "omics": input.omics ? input.omics : null
 };
 )
