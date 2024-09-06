@@ -4,6 +4,11 @@ $defaultValue := function($value,$defaultValue){
     $value ? $value : $defaultValue
 };
 
+$ageRangeDefault := function($value, $defaultValue){
+    $value ? $value :
+        $value = 0 ? $value : $defaultvalue
+};
+
 $safeSplit := function($x,$delim){
     $x ? $x ~> $split($delim) : []
 };
@@ -18,11 +23,10 @@ $nullString := function($x){
 };
 
 $nullList := function($x){
-    [$map($x, function($xx){
-        $filter($nullString($xx), function($item){ $item != null })
+    [$filter($x, function($xx){
+        $map($nullString($xx), function($item){ $item != null })
     })]
 };
-
 
 $allowedPublishingFrequency := [
     "Static",
@@ -47,7 +51,7 @@ $allowedTimeLag := [
     "2-4 weeks",
     "1-2 months",
     "2-6 months",
-    "6 months plus",
+    "More than 6 months",
     "Variable",
     "Not applicable",
     "Other"
@@ -103,7 +107,7 @@ $allowedPurpose := [
     'Audit',
     'Administrative',
     'Financial',
-    'Statuatory',
+    'Statutory',
     'Other'
 ];
 
@@ -122,7 +126,7 @@ $allowedDatasetType := [
     'Politics'
 ];
 
-$allowedStandards = [
+$allowedStandards := [
     'HL7 FHIR',
     'HL7 V2',
     'HL7 CDA',
@@ -148,7 +152,7 @@ $allowedDatasetSubType := [
     'Cardiovascular',
     'Cancer',
     'Rare diseases',
-    'Metabolic and Endocrine',
+    'Metabolic and endocrine',
     'Neurological',
     'Reproductive',
     'Maternity and neonatology',
@@ -157,8 +161,8 @@ $allowedDatasetSubType := [
     'Musculoskeletal',
     'Vision',
     'Renal and urogenital',
-    'Oral and Gastrointestinal',
-    'Cognitive Function',
+    'Oral and gastrointestinal',
+    'Cognitive function',
     'Hearing',
     'Others',
     'Vaccines',
@@ -181,11 +185,11 @@ $allowedDatasetSubType := [
     'Transcriptomics',
     'Epigenomics',
     'Metabolomics',
-    'Multiomics',
     'Metagenomics',
     'Genomics',
+    'Lipidomics',
     'Education',
-    'Crime and Justice',
+    'Crime and justice',
     'Ethnicity',
     'Housing ',
     'Labour',
@@ -199,11 +203,11 @@ $allowedDatasetSubType := [
     'Finances',
     'Family circumstance',
     'Smoking',
-    'Physical Activity',
+    'Physical activity',
     'Dietary habits',
     'Alcohol',
-    'Disease Registry (research)',
-    'National Disease Registries and Audits',
+    'Disease registry (research)',
+    'National disease registries and audits',
     'Births and Deaths',
     'Not applicable'
 ];
@@ -254,25 +258,32 @@ $allowedServiceCategory := [
 
 $allowedDataUseLimitation := [
     'General research use',
+    'Commercial research use',
     'Genetic studies only',
     'No general methods research',
     'No restriction',
+    'Geographical restrictions',
+    'Institution-specific restrictions',
+    'Not for profit use',
+    'Project-specific restrictions',
     'Research-specific restrictions',
+    'User-specific restrictions',
     'Research use only',
     'No linkage'
 ];
 
 $allowedDataUseRequirements := [
     'Collaboration required',
-    'Ethics approval required',
-    'Geographical restrictions',
-    'Institution-specific restrictions',
-    'Not for profit use',
     'Project-specific restrictions',
+    'Ethics approval required',
+    'Institution-specific restrictions',
+    'Geographical restrictions',
     'Publication moratorium',
     'Publication required',
     'Return to database or resource',
     'Time limit on use',
+    'Disclosure control',
+    'Not for profit use',
     'User-specific restriction'
 ];
 
@@ -321,9 +332,9 @@ $cleanEnumSingle := function($x, $allowed){
         "keywords": input.summary.keywords ~> $safeSplit(';,;'),
         "doiName": input.summary.doiName,
         "title": input.summary.shortTitle,
-        "dataProvider": {
+        "dataCustodian": {
             "name": input.summary.publisher.name,
-            "identifier": "https://placeholder-for-publisher-page/"&input.summary.publisher.gatewayId,
+            "identifier": input.summary.publisher.gatewayId,
             "contactPoint": input.summary.contactPoint
         },
         "populationSize": input.summary.populationSize
@@ -334,17 +345,17 @@ $cleanEnumSingle := function($x, $allowed){
         "inPipeline": input.summary.inPipeline
     },
     "coverage":  input.coverage ~> |$|{
-        "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $defaultValue(null),
-        "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $defaultValue(null),
+        "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $ageRangeDefault(null),
+        "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $ageRangeDefault(null),
         "materialType": $$.input.tissuesSamplesCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
-    },['typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
+    },['followup','typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
     "provenance": {
         "origin": {
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
             "source": input.provenance.origin.source  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSource),
             "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
-            "datasetType": input.summary.datasetType ~> $cleanEnumSingle($allowedDatasetType) ~> $defaultValue("Health and disease"),
-            "datasetSubType": input.summary.datasetSubType ~> $cleanEnumSingle($allowedDatasetSubType) ~> $defaultValue("Not applicable"),
+            "datasetType": input.summary.datasetType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetType) ~> $defaultValue(["Health and disease"]),
+            "datasetSubType": input.summary.datasetSubType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetSubType) ~> $defaultValue(["Not applicable"]),
             "imageContrast": input.provenance.origin.imageContrast
         },
         "temporal": { /* input.provenance.temporal */
@@ -357,24 +368,25 @@ $cleanEnumSingle := function($x, $allowed){
     },
     "accessibility": input.accessibility ~> |$|{
         "access": access ~> |$|{
-            "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null)
+            "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null),
+            "jurisdiction": $safeSplit(jurisdiction, ";,;")
         }|,  
         "usage": usage ? usage ~> |$|{
-            "dataUseRequirements": $safeSplit(dataUseRequirement,";,;")  ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
+            "dataUseRequirements": $safeSplit(dataUseRequirement,";,;") ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
             "dataUseLimitation": $safeSplit(dataUseLimitation,";,;") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
             "resourceCreator": resourceCreator.name
         }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": vocabularyEncodingSchemes ?
                 $safeSplit(vocabularyEncodingSchemes, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
-            "language": languages,
-            "format": formats,
+            "language": $safeSplit(languages, ";,;"),
+            "format": $safeSplit(formats, ";,;"),
             "conformsTo": $safeSplit(conformsTo, ";,;") ~> $cleanEnum($allowedStandards) ~> $defaultValue([])
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
     "enrichmentAndLinkage": input.linkage ~> |$|{
         "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")) ~> $nullList,
-        "investigations": $defaultValue($$.extra.linkages.investigrations,investigations ~> $safeSplit(";,;")) ~> $nullList,
+        "investigations": $defaultValue($$.extra.linkages.investigations, investigations ~> $safeSplit(";,;")) ~> $nullList,
         "derivedFrom": $defaultValue($$.extra.linkages.derivedFrom, isDerivedFrom ~> $safeSplit(";,;")) ~> $nullList,
         "isPartOf": $defaultValue($$.extra.linkages.derivedFrom, isPartOf),
         "linkableDatasets": $defaultValue($$.extra.linkages.linkableDatasets, linkedDatasets),
@@ -384,7 +396,9 @@ $cleanEnumSingle := function($x, $allowed){
     "structuralMetadata": {
         "tables": input.structuralMetadata,
         "syntheticDataWebLink": input.linkage.syntheticDataWebLink
-    }
+    },
+    "demographicFrequency": input.demographicFrequency,
+    "omics": input.omics
 }
 
 )

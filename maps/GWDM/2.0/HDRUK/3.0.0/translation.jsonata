@@ -12,6 +12,40 @@ $truncate := function($x,$length){
     $x ? $substring($x,0,$length) : null
 };
 
+$null_to_number := function($x){
+  $exists($x) ? $number($x) : -1
+};
+
+$auto_fill_population_size := function($populationSize, $observations){
+    $populationSize = -1 ? $observations[observedNode="Persons"]^(observationDate)[0].measuredValue ~> $null_to_number : $populationSize ~> $null_to_number
+};
+
+$joinTypicalAgeRange := function($min, $max){(
+    $minStr := $min ? $string($min) : $min = 0 ? $string($min) : null;
+    $maxStr := $max ? $string($max) : null;
+    $minStr ? $maxStr ? $join([$minStr, "-", $maxStr]) : null : null
+)};
+
+$getDatasetLinkage := function(){(
+    $datasetLinkage := {
+      "isDerivedFrom":$to_str(input.enrichmentAndLinkage.derivedFrom),
+      "isPartOf":$to_str(input.enrichmentAndLinkage.isPartOf),
+      "isMemberOf": $to_str(input.enrichmentAndLinkage.similarToDatasets),
+      "linkedDatasets":$to_str(input.enrichmentAndLinkage.linkableDatasets)
+    };
+    $datasetLinkage = {} ? null : $datasetLinkage
+)};
+
+$getOrigin := function(){(
+    $origin := {
+      "purpose": $to_str(input.provenance.origin.purpose),
+      "source": $to_str(input.provenance.origin.source),
+      "collectionSituation": $to_str(input.provenance.origin.collectionSource),
+      "imageContrast": input.provenance.origin.imageContrast
+    };
+    $origin = {} ? null : $origin
+)};
+
 {
   "required": {
     "gatewayId": extra.id ? extra.id : $truncate(input.identifier,50),
@@ -33,40 +67,35 @@ $truncate := function($x,$length){
     "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
       $v in extra.controlledKeywords
     })]),
-    "datasetType": input.provenance.origin.datasetType ? input.provenance.origin.datasetType :
-        extra.datasetType ? extra.datasetType : null,
-    "datasetSubType": input.provenance.origin.datasetSubType ? input.provenance.origin.datasetSubType :
-        extra.datasetSubType ? extra.datasetSubType : null,
-    "populationSize": input.summary.populationSize,
+    "datasetType": input.provenance.origin.datasetType ? $to_str(input.provenance.origin.datasetType) :
+        extra.datasetType ? $to_str(extra.datasetType) : null,
+    "datasetSubType": input.provenance.origin.datasetSubType ? $to_str(input.provenance.origin.datasetSubType) :
+        extra.datasetSubType ? $to_str(extra.datasetSubType) : null,
+    "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
     "description": $truncate(input.documentation.description,50000),
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
     "publisher": {
-      "name": extra.publisherName ? extra.publisherName : input.summary.dataProvider.name,
-      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataProvider.identifier, 50)
+      "name": extra.publisherName ? extra.publisherName : input.summary.dataCustodian.name,
+      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataCustodian.identifier, 50)
     },
     "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : null
   },
   "coverage": {
     "pathway": input.coverage.pathway, 
     "spatial": $to_str(input.coverage.spatial),
-    "followup": input.coverage.followup,
-    "typicalAgeRange": $join([$string(input.coverage.typicalAgeRangeMin), "-", $string(input.coverage.typicalAgeRangeMax)]),
+    "followUp": input.coverage.followUp,
+    "typicalAgeRange": $joinTypicalAgeRange(input.coverage.typicalAgeRangeMin, input.coverage.typicalAgeRangeMax),
     "datasetCompleteness": input.coverage.datasetCompleteness
   },
   "provenance": {
-    "origin": {
-      "purpose": $to_str(input.provenance.origin.purpose),
-      "source": $to_str(input.provenance.origin.source),
-      "collectionSituation": $to_str(input.provenance.origin.collectionSource),
-      "imageContrast": input.provenance.origin.imageContrast
-    },
+    "origin": $getOrigin(),
     "temporal": {
       "endDate": input.provenance.temporal.endDate,
       "startDate": input.provenance.temporal.startDate,
-      "timeLag": $uppercase(input.provenance.temporal.timeLag),
-      "accrualPeriodicity": $uppercase(input.provenance.temporal.publishingFrequency),
+      "timeLag": input.provenance.temporal.timeLag ? input.provenance.temporal.timeLag : null,
+      "accrualPeriodicity": input.provenance.temporal.publishingFrequency ? input.provenance.temporal.publishingFrequency : null,
       "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
     }
   },
@@ -79,8 +108,7 @@ $truncate := function($x,$length){
       "accessRights": input.accessibility.access.accessRights ~> $to_str,
       "accessService": input.accessibility.access.accessService,
       "accessRequestCost": $to_str(input.accessibility.access.accessRequestCost), /* may need to be fixed */
-      "accessServiceCategory": $to_str(input.accessibility.access.accessServiceCategory),
-      "accessMode": input.accessibility.access.accessMode
+      "accessServiceCategory": $to_str(input.accessibility.access.accessServiceCategory)
     },
     "usage": {
       "dataUseLimitation": input.accessibility.usage.dataUseLimitation ? 
@@ -109,12 +137,7 @@ $truncate := function($x,$length){
     "dataUses": extra.dataUses ? extra.dataUses : null,
     "isReferenceIn": null,
     "tools": $to_str(input.enrichmentAndLinkage.tools),
-    "datasetLinkage":{
-      "isDerivedFrom":$to_str(input.enrichmentAndLinkage.derivedFrom),
-      "isPartOf":$to_str(input.enrichmentAndLinkage.isPartOf),
-      "isMemberOf": $to_str(input.enrichmentAndLinkage.similarToDatasets),
-      "linkedDatasets":$to_str(input.enrichmentAndLinkage.linkableDatasets)
-    },
+    "datasetLinkage": $getDatasetLinkage(),
     "investigations":$to_str(input.enrichmentAndLinkage.investigations),
     "syntheticDataWebLink": $to_str(input.structuralMetadata.syntheticDataWebLink),
     "publicationAboutDataset": input.enrichmentAndLinkage.publicationAboutDataset,
@@ -134,6 +157,8 @@ $truncate := function($x,$length){
       {
         "materialType": $type
       }
-    })] : []
+    })] : [],
+  "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : null,
+  "omics": input.omics ? input.omics : null
 };
 )

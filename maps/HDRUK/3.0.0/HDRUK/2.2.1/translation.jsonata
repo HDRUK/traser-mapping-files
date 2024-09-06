@@ -179,9 +179,9 @@ $allowedDatasetSubType := [
     "Transcriptomics",
     "Epigenomics",
     "Metabolomics",
-    "Multiomics",
     "Metagenomics",
     "Genomics",
+    "Lipidomics",
     "Education",
     "Crime and Justice",
     "Ethnicity",
@@ -248,8 +248,8 @@ $allowedDeliveryLeadTime := [
 ];
 
 $allowedNodes := [
-    "Person",
-    "Event",
+    "Persons",
+    "Events",
     "Findings",
     "Number of scans per modality"
 ];
@@ -318,8 +318,8 @@ $cleanEnumSingle := function($x, $allowed){
 };
 
 $cleanObservation := function($obs){(
-    $node := $lowercase($obs.observedNode) = "persons" ? "Person" :
-        $lowercase($obs.observedNode) = "events" ? "Event" :
+    $node := $lowercase($obs.observedNode) = "persons" ? "Persons" :
+        $lowercase($obs.observedNode) = "events" ? "Events" :
         $lowercase($obs.observedNode) = "findings" ? "Findings" : null;
     $obs ~> |$| {
         "observedNode": $node
@@ -344,7 +344,7 @@ $cleanDataTable := function($table){(
 
 input ~> |$| {
     "summary": summary ~> |$|{
-        "dataProvider": $$.input.summary.publisher
+        "dataCustodian": $$.input.summary.publisher
     }, ['datasetType','datasetSubType','publisher']|,
     "documentation": documentation ? documentation ~> |$|
     {
@@ -358,7 +358,8 @@ input ~> |$| {
             "typicalAgeRangeMax": $parseInteger($ageRangeMax($$.input.coverage.typicalAgeRange), "#,##0"),
             "datasetCompleteness": $$.extra.datasetCompleteness ? $$.extra.datasetCompleteness : null,
             "materialType": $$.input.tissuesSampleCollection.materialType ? 
-                $filter($$.input.tissuesSampleCollection.materialType, $removeBadMaterialType)[] : ["None/not available"]
+                $filter($$.input.tissuesSampleCollection.materialType, $removeBadMaterialType)[] : ["None/not available"],
+            "followUp": $$.input.followup ? $$.input.followup : null
         }, ['typicalAgeRange','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic'] | : null,
     "provenance": provenance ? provenance ~> |$|
     {
@@ -385,7 +386,6 @@ input ~> |$| {
     "accessibility": accessibility ~> |$|
     {
         "access": access ~> |$|{
-            "accessMode": $$.extra.accessMode ? $fixAccessMode($$.extra.accessMode) : "New project",
             "deliveryLeadTime": $$.input.accessibility.access.deliveryLeadTime ?
                 $cleanEnumSingle($$.input.accessibility.access.deliveryLeadTime, $allowedDeliveryLeadTime) : null
         }|,
