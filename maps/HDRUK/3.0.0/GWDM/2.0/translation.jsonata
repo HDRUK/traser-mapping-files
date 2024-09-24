@@ -287,8 +287,35 @@ $allowedDataUseRequirements := [
     'User-specific restriction'
 ];
 
+$allowedMaterialTypes := [
+    "None/not available",
+    "Bone marrow",
+    "Cancer cell lines",
+    "CDNA/MRNA",
+    "Core biopsy",
+    "DNA",
+    "Entire body organ",
+    "Faeces",
+    "Immortalized cell lines",
+    "Isolated pathogen",
+    "MicroRNA",
+    "Peripheral blood cells",
+    "Plasma",
+    "PM Tissue",
+    "Primary cells",
+    "RNA",
+    "Saliva",
+    "Serum",
+    "Swabs",
+    "Tissue",
+    "Urine",
+    "Whole blood",
+    "Availability to be confirmed",
+    "Other"
+];
+
 $getMaterialType := function($tissue){
-    $lowercase($tissue.materialType)
+    $tissue.materialType ~> $cleanEnumSingle($allowedMaterialTypes) ~> $defaultValue("None/not available")
 };
 
 $isValidString := function($str) { $type($str) = "string" and $str != null and $str != "" };
@@ -347,7 +374,7 @@ $cleanEnumSingle := function($x, $allowed){
     "coverage":  input.coverage ~> |$|{
         "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $ageRangeDefault(null),
         "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $ageRangeDefault(null),
-        "materialType": $$.input.tissuesSampleCollection ? $map($$.input.tissuesSamplesCollection, $getMaterialType) : ["None/not available"]
+        "materialType": $$.input.tissuesSampleCollection ? $map($$.input.tissuesSampleCollection, $getMaterialType) : ["None/not available"]
     },['followup','typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
     "provenance": {
         "origin": {
