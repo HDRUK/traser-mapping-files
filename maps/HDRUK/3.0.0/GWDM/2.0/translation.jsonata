@@ -374,7 +374,7 @@ $cleanEnumSingle := function($x, $allowed){
     "coverage":  input.coverage ~> |$|{
         "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $ageRangeDefault(null),
         "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $ageRangeDefault(null),
-        "materialType": $$.input.tissuesSampleCollection ? $map($$.input.tissuesSampleCollection, $getMaterialType) : ["None/not available"]
+        "materialType": $$.input.tissuesSampleCollection ? [$map($$.input.tissuesSampleCollection, $getMaterialType)] : ["None/not available"]
     },['followup','typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
     "provenance": {
         "origin": {
