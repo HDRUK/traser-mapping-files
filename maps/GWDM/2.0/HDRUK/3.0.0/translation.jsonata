@@ -30,7 +30,7 @@ $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
       "isDerivedFrom": input.enrichmentAndLinkage.derivedFrom,
-      "isPartOf": input.enrichmentAndLinkage,
+      "isPartOf": input.enrichmentAndLinkage.isPartOf,
       "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
       "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
     };
