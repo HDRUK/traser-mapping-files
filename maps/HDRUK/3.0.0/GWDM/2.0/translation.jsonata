@@ -319,13 +319,13 @@ $getMaterialType := function($tissue){
 };
 
 $getDatasetLinkage := function($outputField, $inputField) {
-    $defaultValue($outputField, $map(
+    $defaultValue($outputField, [$map(
         $inputField ? $split($inputField, ";,;") : [],function($item) {{
             "pid": null, 
             "title": $contains($trim($item), "http") ? null : $trim($item), 
                         "url": $contains($trim($item), "http") ? $trim($item) : null
         }}
-    ))
+    )])
 };
 
 
