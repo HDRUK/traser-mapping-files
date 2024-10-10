@@ -323,7 +323,7 @@ $getDatasetLinkage := function($outputField, $inputField) {
         $inputField ? $split($inputField, ";,;") : [],function($item) {{
             "pid": null, 
             "title": $contains($trim($item), "http") ? null : $trim($item), 
-                        "url": $contains($trim($item), "http") ? $trim($item) : null
+            "url": $contains($trim($item), "http") ? $trim($item) : null
         }}
     )])
 };
