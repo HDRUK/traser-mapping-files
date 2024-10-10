@@ -29,10 +29,10 @@ $joinTypicalAgeRange := function($min, $max){(
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
-      "isDerivedFrom": $join($map($filter(input.enrichmentAndLinkage.derivedFrom, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "isPartOf": $join($map($filter(input.enrichmentAndLinkage.isPartOf, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "isMemberOf": $join($map($filter(input.enrichmentAndLinkage.similarToDatasets, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "linkedDatasets": $join($map($filter(input.enrichmentAndLinkage.linkableDatasets, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;")
+      "isDerivedFrom": input.enrichmentAndLinkage.derivedFrom,
+      "isPartOf": input.enrichmentAndLinkage,
+      "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
+      "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
     };
     $count($filter($datasetLinkage, function($v) { $v != null })) = 0 ? null : $datasetLinkage
   )
