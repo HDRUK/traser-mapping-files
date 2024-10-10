@@ -319,15 +319,15 @@ $getMaterialType := function($tissue){
 };
 
 $getDatasetLinkage := function($outputField, $inputField) {
-    $defaultValue($outputField,$map($inputField ? $split($inputField, ";,;") : [],function($item) {[
-            $map($split($item, ","),function($subItem){{
-                "pid": null, 
-                "title": $contains($trim($subItem), "http") ? null : $trim($subItem), 
-                "url": $contains($trim($subItem), "http") ? $trim($subItem) : null
-            }})
-        ]}
+    $defaultValue($outputField, $map(
+        $inputField ? $split($inputField, ";,;") : [],function($item) {[{
+            "pid": null, 
+            "title": $contains($trim($item), "http") ? null : $trim($item), 
+            "url": $contains($trim($item), "http") ? $trim($item) : null
+        }]}
     ))
 };
+
 
 $isValidString := function($str) { $type($str) = "string" and $str != null and $str != "" };
 $isValidArray := function($arr) { $type($arr) = "array"  };
