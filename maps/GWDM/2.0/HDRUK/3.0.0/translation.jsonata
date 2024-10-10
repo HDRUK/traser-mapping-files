@@ -26,17 +26,15 @@ $joinTypicalAgeRange := function($min, $max){(
     $minStr ? $maxStr ? $join([$minStr, "-", $maxStr]) : null : null
 )};
 
-$getDatasetLinkage := function() {
-  (
+$getDatasetLinkage := function() {(
     $datasetLinkage := {
-      "isDerivedFrom": $join($map($filter(input.enrichmentAndLinkage.derivedFrom, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "isPartOf": $join($map($filter(input.enrichmentAndLinkage.isPartOf, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "isMemberOf": $join($map($filter(input.enrichmentAndLinkage.similarToDatasets, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "linkedDatasets": $join($map($filter(input.enrichmentAndLinkage.linkableDatasets, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;")
+        "isDerivedFrom": $join($map(input.enrichmentAndLinkage.derivedFrom, function($v) { $v.url ? $v.url : $v.title }), ";,;"),
+        "isPartOf": $join($map(input.enrichmentAndLinkage.isPartOf, function($v) { $v.url ? $v.url : $v.title }), ";,;"),
+        "isMemberOf": $join($map(input.enrichmentAndLinkage.similarToDatasets, function($v) { $v.url ? $v.url : $v.title }), ";,;"),
+        "linkedDatasets": $join($map(input.enrichmentAndLinkage.linkableDatasets, function($v) { $v.url ? $v.url : $v.title }), ";,;")
     };
     $count($filter($datasetLinkage, function($v) { $v != null })) = 0 ? null : $datasetLinkage
-  )
-};
+)};
 
 $getOrigin := function(){(
     $origin := {
