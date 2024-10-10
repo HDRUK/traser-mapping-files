@@ -26,14 +26,14 @@ $joinTypicalAgeRange := function($min, $max){(
     $minStr ? $maxStr ? $join([$minStr, "-", $maxStr]) : null : null
 )};
 
-$getDatasetLinkage := function() {(
+$getDatasetLinkage := function(){(
     $datasetLinkage := {
-        "isDerivedFrom": $join($map(input.enrichmentAndLinkage.derivedFrom, function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-        "isPartOf": $join($map(input.enrichmentAndLinkage.isPartOf, function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-        "isMemberOf": $join($map(input.enrichmentAndLinkage.similarToDatasets, function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-        "linkedDatasets": $join($map(input.enrichmentAndLinkage.linkableDatasets, function($v) { $v.url ? $v.url : $v.title }), ";,;")
+      "isDerivedFrom":$to_str(input.enrichmentAndLinkage.derivedFrom),
+      "isPartOf":$to_str(input.enrichmentAndLinkage.isPartOf),
+      "isMemberOf": $to_str(input.enrichmentAndLinkage.similarToDatasets),
+      "linkedDatasets":$to_str(input.enrichmentAndLinkage.linkableDatasets)
     };
-    $count($filter($datasetLinkage, function($v) { $v != null })) = 0 ? null : $datasetLinkage
+    $datasetLinkage = {} ? null : $datasetLinkage
 )};
 
 $getOrigin := function(){(
