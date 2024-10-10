@@ -318,14 +318,20 @@ $getMaterialType := function($tissue){
     $tissue.materialType ~> $cleanEnumSingle($allowedMaterialTypes) ~> $defaultValue("None/not available")
 };
 
-$getDatasetLinkage := function($outputField, $inputField) {
-    $defaultValue($outputField, [$map(
-        $inputField ? $split($inputField, ";,;") : [],function($item) {{
-            "pid": null, 
-            "title": $contains($trim($item), "http") ? null : $trim($item), 
-            "url": $contains($trim($item), "http") ? $trim($item) : null
-        }}
-    )])
+$getDatasetLinkage := function($outputField,$inputField) {
+    $defaultValue(
+        $outputField,
+        [$map(
+            $inputField ? $split($inputField, ";,;") : [],
+            function($item) { 
+                {
+                    "pid": null, 
+                    "title": $contains($trim($item), "http") ? null : $trim($item), 
+                    "url": $contains($trim($item), "http") ? $trim($item) : null 
+                } 
+            }
+        )]
+    )
 };
 
 
