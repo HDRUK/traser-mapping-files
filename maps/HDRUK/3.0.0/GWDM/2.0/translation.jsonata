@@ -208,7 +208,7 @@ $allowedDatasetSubType := [
     'Alcohol',
     'Disease registry (research)',
     'National disease registries and audits',
-    'Births and Deaths',
+    'Births and deaths',
     'Not applicable'
 ];
 
