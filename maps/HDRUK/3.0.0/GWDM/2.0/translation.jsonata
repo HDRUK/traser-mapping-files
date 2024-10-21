@@ -318,23 +318,6 @@ $getMaterialType := function($tissue){
     $tissue.materialType ~> $cleanEnumSingle($allowedMaterialTypes) ~> $defaultValue("None/not available")
 };
 
-$getDatasetLinkage := function($outputField,$inputField) {
-    $defaultValue(
-        $outputField,
-        [$map(
-            $inputField ? $split($inputField, ";,;") : [],
-            function($item) { 
-                {
-                    "pid": null, 
-                    "title": $contains($trim($item), "http") ? null : $trim($item), 
-                    "url": $contains($trim($item), "http") ? $trim($item) : null 
-                } 
-            }
-        )]
-    )
-};
-
-
 $isValidString := function($str) { $type($str) = "string" and $str != null and $str != "" };
 $isValidArray := function($arr) { $type($arr) = "array"  };
 
@@ -433,10 +416,10 @@ $cleanEnumSingle := function($x, $allowed){
     "enrichmentAndLinkage": input.linkage ~> |$|{
         "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")) ~> $nullList,
         "investigations": $defaultValue($$.extra.linkages.investigations, investigations ~> $safeSplit(";,;")) ~> $nullList,
-        "derivedFrom": $getDatasetLinkage($$.extra.linkages.derivedFrom,datasetLinkage.isDerivedFrom),
-        "isPartOf": $getDatasetLinkage($$.extra.linkages.isPartOf,datasetLinkage.isPartOf),
-        "linkableDatasets": $getDatasetLinkage($$.extra.linkages.linkableDatasets,datasetLinkage.linkedDatasets),
-        "similarToDatasets": $getDatasetLinkage($$.extra.linkages.similarToDatasets,datasetLinkage.isMemberOf)
+        "derivedFrom": datasetLinkage.derivedFrom,
+        "isPartOf": datasetLinkage.isPartOf,
+        "linkableDatasets": datasetLinkage.linkableDatasets,
+        "similarToDatasets": datasetLinkage.similarToDatasets
     }, ['dataUses','isGeneratedUsing','associatedMedia','isReferenceIn','syntheticDataWebLink','datasetLinkage']|,
     "observations": input.observations ~> $defaultValue([]),
     "structuralMetadata": {

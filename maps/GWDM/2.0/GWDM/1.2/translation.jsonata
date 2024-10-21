@@ -61,6 +61,17 @@ $fixObservedNode := function($obs){(
     }|
 )};
 
+$getDatasetLinkage := function() {
+  (
+    $datasetLinkage := {
+      "derivedFrom": input.enrichmentAndLinkage.isDerivedFrom,
+      "isPartOf": input.enrichmentAndLinkage.isPartOf,
+      "similarToDatasets": input.enrichmentAndLinkage.isMemberOf,
+      "linkableDatasets": input.enrichmentAndLinkage.linkedDatasets,
+    }
+  )
+};
+
 input ~> |$| {
     "summary": summary ~> |$|{
         "inPipeline": null
@@ -90,7 +101,8 @@ input ~> |$| {
     }|,
     "linkage": linkage ? linkage ~> |$|{
         "publicationAboutDataset": null,
-        "publicationUsingDataset": $$.input.access.usage.isReferencedBy
+        "publicationUsingDataset": $$.input.access.usage.isReferencedBy,
+        "datasetLinkage": $getDatasetLinkage()
     }| : null,
     "observations": observations ? $map(observations, $fixObservedNode)[] : null
 }|
