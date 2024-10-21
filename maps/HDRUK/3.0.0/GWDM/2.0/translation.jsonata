@@ -416,10 +416,10 @@ $cleanEnumSingle := function($x, $allowed){
     "enrichmentAndLinkage": input.linkage ~> |$|{
         "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")) ~> $nullList,
         "investigations": $defaultValue($$.extra.linkages.investigations, investigations ~> $safeSplit(";,;")) ~> $nullList,
-        "derivedFrom": datasetLinkage.derivedFrom,
+        "derivedFrom": datasetLinkage.isDerivedFrom,
         "isPartOf": datasetLinkage.isPartOf,
-        "linkableDatasets": datasetLinkage.linkableDatasets,
-        "similarToDatasets": datasetLinkage.similarToDatasets
+        "linkableDatasets": datasetLinkage.linkedDatasets,
+        "similarToDatasets": datasetLinkage.isMemberOf
     }, ['dataUses','isGeneratedUsing','associatedMedia','isReferenceIn','syntheticDataWebLink','datasetLinkage']|,
     "observations": input.observations ~> $defaultValue([]),
     "structuralMetadata": {

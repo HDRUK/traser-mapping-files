@@ -64,10 +64,10 @@ $fixObservedNode := function($obs){(
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
-      "derivedFrom": input.enrichmentAndLinkage.isDerivedFrom,
+      "isDerivedFrom": input.enrichmentAndLinkage.isDerivedFrom,
       "isPartOf": input.enrichmentAndLinkage.isPartOf,
-      "similarToDatasets": input.enrichmentAndLinkage.isMemberOf,
-      "linkableDatasets": input.enrichmentAndLinkage.linkedDatasets,
+      "isMemberOf": input.enrichmentAndLinkage.isMemberOf,
+      "linkedDatasets": input.enrichmentAndLinkage.linkedDatasets,
     }
   )
 };

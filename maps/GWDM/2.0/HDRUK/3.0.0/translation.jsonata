@@ -29,10 +29,10 @@ $joinTypicalAgeRange := function($min, $max){(
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
-      "derivedFrom": input.enrichmentAndLinkage.derivedFrom,
+      "isDerivedFrom": input.enrichmentAndLinkage.derivedFrom,
       "isPartOf": input.enrichmentAndLinkage.isPartOf,
-      "similarToDatasets": input.enrichmentAndLinkage.similarToDatasets,
-      "linkableDatasets": input.enrichmentAndLinkage.linkableDatasets
+      "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
+      "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
     }
   )
 };
