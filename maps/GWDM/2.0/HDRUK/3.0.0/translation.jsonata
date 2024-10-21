@@ -32,7 +32,7 @@ $getDatasetLinkage := function() {
       "derivedFrom": input.enrichmentAndLinkage.derivedFrom,
       "isPartOf": input.enrichmentAndLinkage.isPartOf,
       "similarToDatasets": input.enrichmentAndLinkage.similarToDatasets,
-      "linkableDatasets": input.enrichmentAndLinkage.linkableDatasets,
+      "linkableDatasets": input.enrichmentAndLinkage.linkableDatasets
     }
   )
 };
