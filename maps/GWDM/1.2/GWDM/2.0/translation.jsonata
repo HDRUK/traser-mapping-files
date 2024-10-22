@@ -67,10 +67,10 @@ $accrualMap := {
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
-      "isDerivedFrom": input.enrichmentAndLinkage.derivedFrom,
-      "isPartOf": input.enrichmentAndLinkage.isPartOf,
-      "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
-      "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets,
+      "isDerivedFrom": $join($map(input.linkage.datasetLinkage.derivedFrom, function($v){$v.title ? $v.title : ''}), ';,;'),
+      "isPartOf": $join($map(input.linkage.datasetLinkage.isPartOf, function($v){$v.title ? $v.title : ''}), ';,;'),
+      "isMemberOf": $join($map(input.linkage.datasetLinkage.similarToDatasets, function($v){$v.title ? $v.title : ''}), ';,;'),
+      "linkedDatasets": $join($map(input.linkage.datasetLinkage.linkableDatasets, function($v){$v.title ? $v.title : ''}), ';,;')
     }
   )
 };
