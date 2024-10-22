@@ -68,10 +68,10 @@ $fixObservedNode := function($obs){(
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
-      "isDerivedFrom": $map($safeSplit(input.linkage.datasetLinkage.isDerivedFrom, ';,;'), function($v){{'title': $v}}),
-      "isPartOf": $map($safeSplit(input.linkage.datasetLinkage.isPartOf, ';,;'), function($v){{'title': $v}}),
-      "isMemberOf": $map($safeSplit(input.linkage.datasetLinkage.isMemberOf, ';,;'), function($v){{'title': $v}}),
-      "linkedDatasets": $map($safeSplit(input.linkage.datasetLinkage.linkedDatasets, ';,;'), function($v){{'title': $v}})
+      "isDerivedFrom": [$map($safeSplit(input.linkage.datasetLinkage.isDerivedFrom, ';,;'), function($v){{'title': $v}})],
+      "isPartOf": [$map($safeSplit(input.linkage.datasetLinkage.isPartOf, ';,;'), function($v){{'title': $v}})],
+      "isMemberOf": [$map($safeSplit(input.linkage.datasetLinkage.isMemberOf, ';,;'), function($v){{'title': $v}})],
+      "linkedDatasets": [$map($safeSplit(input.linkage.datasetLinkage.linkedDatasets, ';,;'), function($v){{'title': $v}})]
     }
   )
 };
