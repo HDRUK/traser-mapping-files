@@ -64,11 +64,23 @@ $accrualMap := {
   "Other"        : "OTHER"
 };
 
+$getDatasetLinkage := function() {
+  (
+    $datasetLinkage := {
+      "isDerivedFrom": $join($map(input.linkage.datasetLinkage.derivedFrom, function($v){$v.title ? $v.title : ''}), ';,;'),
+      "isPartOf": $join($map(input.linkage.datasetLinkage.isPartOf, function($v){$v.title ? $v.title : ''}), ';,;'),
+      "isMemberOf": $join($map(input.linkage.datasetLinkage.similarToDatasets, function($v){$v.title ? $v.title : ''}), ';,;'),
+      "linkedDatasets": $join($map(input.linkage.datasetLinkage.linkableDatasets, function($v){$v.title ? $v.title : ''}), ';,;')
+    }
+  )
+};
+
 input ~> |$| 
 {
     "linkage": linkage ~> |$|
     {
-        "syntheticDataWebLink": $$.extra.syntheticDataWebLink
+        "syntheticDataWebLink": $$.extra.syntheticDataWebLink,
+        "datasetLinkage": $getDatasetLinkage()
     }, ['publicationAboutDataset', 'publicationUsingDataset']|,
     "coverage": coverage ~> |$|
     {
