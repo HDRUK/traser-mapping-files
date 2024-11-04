@@ -9,7 +9,7 @@ $extract_media := function($x){
 };
 
 $truncate := function($x,$length){
-    $x ? $substring($x,0,$length) : null
+  $type($x)="number" ? $x : $x ? $substring($x,0,$length) : null
 };
 
 $null_to_number := function($x){
@@ -80,7 +80,7 @@ $getOrigin := function(){(
     "title": $truncate(input.summary.title,255),
     "publisher": {
       "name": extra.publisherName ? extra.publisherName : input.summary.dataCustodian.name,
-      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataCustodian.identifier, 50)
+      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataCustodian.identifier,50)
     },
     "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : null
   },
