@@ -12,6 +12,10 @@ $null_array := function($x){
   [$filter([$map($x, function($xx){$xx ~> $null_string})],function($xx){$xx != null})]
 };
 
+$safeSplit := function($x,$delim){
+    $x ? $x ~> $split($delim) : []
+};
+
 $map_followUp := {
   "0 - 6 MONTHS"  : "0 - 6 months",
   "6 - 12 MONTHS" : "6 - 12 months",
@@ -61,6 +65,21 @@ $fixObservedNode := function($obs){(
     }|
 )};
 
+$getDatasetLinkage := function() {
+  (
+    $datasetLinkage := {
+      "isDerivedFrom": [$map($safeSplit(input.linkage.datasetLinkage.isDerivedFrom, ';,;'), function($v){{'title': $v}})],
+      "isPartOf": [$map($safeSplit(input.linkage.datasetLinkage.isPartOf, ';,;'), function($v){{'title': $v}})],
+      "isMemberOf": [$map($safeSplit(input.linkage.datasetLinkage.isMemberOf, ';,;'), function($v){{'title': $v}})],
+      "linkedDatasets": [$map($safeSplit(input.linkage.datasetLinkage.linkedDatasets, ';,;'), function($v){{'title': $v}})]
+    }
+  )
+};
+
+$applyMap := function($x,$theMap){
+  $type($x) = 'array' ? [$map($x, function($el){ $applyMap($el,$theMap)})] ~> $null_array : ($x ? $lookup($theMap,$x) ~> $null_string : null)
+};   
+
 input ~> |$| {
     "summary": summary ~> |$|{
         "inPipeline": null
@@ -90,7 +109,8 @@ input ~> |$| {
     }|,
     "linkage": linkage ? linkage ~> |$|{
         "publicationAboutDataset": null,
-        "publicationUsingDataset": $$.input.access.usage.isReferencedBy
+        "publicationUsingDataset": $$.input.access.usage.isReferencedBy,
+        "datasetLinkage": $getDatasetLinkage()
     }| : null,
     "observations": observations ? $map(observations, $fixObservedNode)[] : null
 }|

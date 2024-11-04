@@ -29,12 +29,11 @@ $joinTypicalAgeRange := function($min, $max){(
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
-      "isDerivedFrom": $join($map($filter(input.enrichmentAndLinkage.derivedFrom, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "isPartOf": $join($map($filter(input.enrichmentAndLinkage.isPartOf, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "isMemberOf": $join($map($filter(input.enrichmentAndLinkage.similarToDatasets, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;"),
-      "linkedDatasets": $join($map($filter(input.enrichmentAndLinkage.linkableDatasets, function($v) { $v.url or $v.title }), function($v) { $v.url ? $v.url : $v.title }), ";,;")
-    };
-    $count($filter($datasetLinkage, function($v) { $v != null })) = 0 ? null : $datasetLinkage
+      "isDerivedFrom": input.enrichmentAndLinkage.derivedFrom,
+      "isPartOf": input.enrichmentAndLinkage.isPartOf,
+      "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
+      "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
+    }
   )
 };
 
@@ -79,8 +78,8 @@ $getOrigin := function(){(
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
     "publisher": {
-      "name": extra.publisherName ? extra.publisherName : input.summary.dataCustodian.name,
-      "gatewayId": extra.publisherId ? extra.publisherId : $truncate(input.summary.dataCustodian.identifier,50)
+      "name": input.summary.dataCustodian.name ? input.summary.dataCustodian.name : extra.publisherName ? extra.publisherName : null,
+      "gatewayId": input.summary.dataCustodian.identifier ? $truncate(input.summary.dataCustodian.identifier, 50) : extra.publisherId ? extra.publisherId : null
     },
     "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : null
   },
