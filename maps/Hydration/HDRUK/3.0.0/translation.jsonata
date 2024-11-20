@@ -223,7 +223,8 @@ $regexValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": $component.types.type,
-        "pattern": $component.types.pattern
+        "pattern": $component.types.pattern,
+        "excludeEmptyString": $component.is_optional ? $component.is_optional : undefined
     }
 };
 
