@@ -198,7 +198,6 @@ $formatValidation := function($component){
         "type": $component.types.type,
         "pattern": url_regex,
         "excludeEmptyString": $component.is_optional ? $component.is_optional : undefined
-
     } :
     {
         "title": $component.title,
