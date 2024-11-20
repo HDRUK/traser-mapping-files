@@ -177,7 +177,7 @@ $listValidation := function($component){
         "required": $not($component.is_optional),
         "type": "array",
         "of": $getItemsType($component.types),
-        "excludeEmptyString": ($component.is_optional and $exists($component.types.pattern)) ? true : undefined
+        "excludeEmptyString": ($component.is_optional and $exists($itemsType.pattern)) ? true : undefined
     }
 };
 
