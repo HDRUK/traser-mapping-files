@@ -176,7 +176,8 @@ $listValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": "array",
-        "of": $getItemsType($component.types)
+        "of": $getItemsType($component.types),
+        "excludeEmptyString": ($component.is_optional and $exists($component.types.pattern)) ? true : undefined
     }
 };
 
@@ -196,7 +197,8 @@ $formatValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": $component.types.type,
-        "pattern": url_regex
+        "pattern": url_regex,
+        "excludeEmptyString": $component.is_optional ? $component.is_optional : undefined
     } :
     {
         "title": $component.title,
@@ -221,7 +223,8 @@ $regexValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": $component.types.type,
-        "pattern": $component.types.pattern
+        "pattern": $component.types.pattern,
+        "excludeEmptyString": $component.is_optional ? $component.is_optional : undefined
     }
 };
 
