@@ -197,7 +197,7 @@ $formatValidation := function($component){
         "required": $not($component.is_optional),
         "type": $component.types.type,
         "pattern": url_regex
-        "nullString": $component.is_optional ? true : false
+        "excludeEmptyString": $component.is_optional
 
     } :
     {
