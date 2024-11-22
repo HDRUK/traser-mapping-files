@@ -41,10 +41,11 @@ $getDatasetLinkage := function() {
       ($datasetLinkage.isMemberOf == null) and
       ($datasetLinkage.linkedDatasets == null);
 
-    $result := $isEmpty ? null : $datasetLinkage;
-    $result
+    $isEmpty ? null : $datasetLinkage
   )
 };
+
+
 
 
 
