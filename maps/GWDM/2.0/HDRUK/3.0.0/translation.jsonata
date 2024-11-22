@@ -9,7 +9,7 @@ $extract_media := function($x){
 };
 
 $truncate := function($x,$length){
-    $x ? $substring($x,0,$length) : null
+  $type($x)="number" ? $x : $x ? $substring($x,0,$length) : null
 };
 
 $null_to_number := function($x){
