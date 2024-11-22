@@ -36,15 +36,16 @@ $getDatasetLinkage := function() {
     };
 
     $isEmpty := 
-      $datasetLinkage.isDerivedFrom = null and
-      $datasetLinkage.isPartOf = null and
-      $datasetLinkage.isMemberOf = null and
-      $datasetLinkage.linkedDatasets = null;
+      ($datasetLinkage.isDerivedFrom == null) and
+      ($datasetLinkage.isPartOf == null) and
+      ($datasetLinkage.isMemberOf == null) and
+      ($datasetLinkage.linkedDatasets == null);
 
     $result := $isEmpty ? null : $datasetLinkage;
     $result
   )
 };
+
 
 
 $getOrigin := function(){(
