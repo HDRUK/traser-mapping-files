@@ -35,7 +35,7 @@ $getDatasetLinkage := function() {
       "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
     },
 
-    $isEmpty := $datasetLinkage.isDerivedFrom = null and $datasetLinkage.isPartOf = null and $datasetLinkage.isMemberOf = null and $datasetLinkage.linkedDatasets = null,
+    $isEmpty := $datasetLinkage.isDerivedFrom = null and $datasetLinkage.isPartOf = null and $datasetLinkage.isMemberOf = null and $datasetLinkage.linkedDatasets = null;
     $result := $isEmpty ? null : $datasetLinkage
   )
 };
