@@ -26,6 +26,10 @@ $joinTypicalAgeRange := function($min, $max){(
     $minStr ? $maxStr ? $join([$minStr, "-", $maxStr]) : null : null
 )};
 
+$isEmptyValue := function($value) {
+  $value = null or $value = "" or $value = {}
+};
+
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
@@ -34,14 +38,7 @@ $getDatasetLinkage := function() {
       "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
       "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
     };
-
-    $isEmpty := 
-      ($datasetLinkage.isDerivedFrom == null) and
-      ($datasetLinkage.isPartOf == null) and
-      ($datasetLinkage.isMemberOf == null) and
-      ($datasetLinkage.linkedDatasets == null);
-
-    $isEmpty ? null : $datasetLinkage
+   
   )
 };
 
@@ -150,7 +147,7 @@ $getOrigin := function(){(
     "dataUses": extra.dataUses ? extra.dataUses : null,
     "isReferenceIn": null,
     "tools": $to_str(input.enrichmentAndLinkage.tools),
-    "datasetLinkage": $getDatasetLinkage(),
+    "datasetLinkage": $isEmptyValue($getDatasetLinkage()) ? null : $getDatasetLinkage(),
     "investigations":$to_str(input.enrichmentAndLinkage.investigations),
     "syntheticDataWebLink": $to_str(input.structuralMetadata.syntheticDataWebLink),
     "publicationAboutDataset": input.enrichmentAndLinkage.publicationAboutDataset,
