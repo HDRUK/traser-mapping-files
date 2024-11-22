@@ -34,8 +34,15 @@ $getDatasetLinkage := function() {
       "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
       "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
     };
-    $isEmpty := $datasetLinkage.isDerivedFrom == null and $datasetLinkage.isPartOf == null and $datasetLinkage.isMemberOf == null and $datasetLinkage.linkedDatasets == null;
-    $result := $isEmpty ? null : $datasetLinkage
+
+    $isEmpty := 
+      $datasetLinkage.isDerivedFrom = null and
+      $datasetLinkage.isPartOf = null and
+      $datasetLinkage.isMemberOf = null and
+      $datasetLinkage.linkedDatasets = null;
+
+    $result := $isEmpty ? null : $datasetLinkage;
+    $result
   )
 };
 
