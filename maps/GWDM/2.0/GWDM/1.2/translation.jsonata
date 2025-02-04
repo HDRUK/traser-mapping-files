@@ -80,6 +80,10 @@ $applyMap := function($x,$theMap){
   $type($x) = 'array' ? [$map($x, function($el){ $applyMap($el,$theMap)})] ~> $null_array : ($x ? $lookup($theMap,$x) ~> $null_string : null)
 };   
 
+$applyMapNoneNull := function($x,$theMap){
+  $type($x) = 'array' ? [$map($x, function($el){ $applyMapNoneNull($el,$theMap)})] ~> $null_array : ($x ? $lookup($theMap,$x) : null)
+}; 
+
 input ~> |$| {
     "summary": summary ~> |$|{
         "inPipeline": null
@@ -96,7 +100,7 @@ input ~> |$| {
         }|,
         "temporal": temporal ~> |$|
             {
-                "timeLag": timeLag ~> $applyMap($map_deliveryLeadTime) ~> $null_string,
+                "timeLag": timeLag ~> $applyMapNoneNull($map_deliveryLeadTime),
                 "accrualPeriodicity": accrualPeriodicity ~> $applyMap($map_accrualPeriodicity) ~> $null_string
             }|
     }| : null,
