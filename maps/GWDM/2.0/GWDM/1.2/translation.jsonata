@@ -81,7 +81,7 @@ $applyMap := function($x,$theMap){
 };   
 
 $applyMapNoneNull := function($x,$theMap){
-  $type($x) = 'array' ? [$map($x, function($el){ $applyMapNoneNull($el,$theMap)})] ~> $null_array : ($x ? $lookup($theMap,$x) : null)
+  $type($x) = 'array' ? [$map($x, function($el){ $applyMapNoneNull($el,$theMap)})] ~> $null_array : ($x ? $lookup($theMap,$x) : "Not applicable")
 }; 
 
 input ~> |$| {
