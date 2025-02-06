@@ -1,0 +1,28 @@
+(
+/*
+Notes: 
+    - TRASER (using AJV) will automatically fill missing fields as null (e.g. structuralMetadata)
+    - This map fixes an additional difference in the 2.1.0 publisher field that allowed extra fields and provenance
+*/
+
+input ~> |$| 
+{
+    "summary": summary ~> |$| {
+        "publisher": {
+            "identifier": publisher.identifier,
+            "name": publisher.name,
+            "logo": publisher.logo,
+            "description": publisher.description,
+            "contactPoint": publisher.contactPoint,
+            "memberOf": publisher.memberOf
+        }
+    }|,
+    "provenance": provenance ~> |$|
+    {
+        "temporal": temporal ~> |$|
+        {
+            "accrualPeriodicity": publishingFrequency
+        },["publishingFrequency"]|
+    }|
+}|
+)
