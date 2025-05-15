@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  run_ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Trigger CI workflow in the traser repository
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: ci.yaml
+          repo: HDRUK/traser
+          ref: |-
+            ${{
+              github.ref_name == 'dev' && 'dev'
+            || github.base_ref == 'dev' && 'dev'
+            ||                             'main'
+            }}
+          inputs: |
+            {
+              "traser_mapping_branch": "${{ steps.extract_branch.outputs.branch }}"
+            }
+          token: ${{ secrets.GH_TOKEN }}
