@@ -42,6 +42,12 @@ jobs:
         with:
           version: ">= 363.0.0"
 
+      - name: Delete existing contents from GCS bucket
+        run: |
+          echo "🧹 Deleting existing files from gs://${{ vars.GCP_BUCKET }}/"
+          gcloud storage rm gs://${{ vars.GCP_BUCKET }}/** --recursive || echo "No files to delete or bucket is already clean"
+          echo "✅ Bucket cleaned"
+
       - name: Upload all files to GCS bucket
         run: |
           echo "⬆️ Uploading full repository to gs://${{ vars.GCP_BUCKET }}/"
