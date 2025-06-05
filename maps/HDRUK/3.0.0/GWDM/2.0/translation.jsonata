@@ -193,7 +193,7 @@ $allowedDatasetSubType := [
     'Ethnicity',
     'Housing ',
     'Labour',
-    'Ageing ',
+    'Ageing',
     'Economics',
     'Marital status',
     'Social support',
