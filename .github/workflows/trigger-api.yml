@@ -6,7 +6,6 @@ on:
       - dev
       - preprod
       - master
-      - bugfix/structure-metadata-web-link
 
 permissions:
   id-token: write
@@ -17,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: |-
       ${{
-         github.ref_name == 'bugfix/structure-metadata-web-link' && 'dev'
+         github.ref_name == 'dev' && 'dev'
       || github.ref_name == 'preprod' && 'preprod'
       || github.ref_name == 'master' && 'prod'
       }}
