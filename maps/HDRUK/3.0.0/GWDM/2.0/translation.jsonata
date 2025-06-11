@@ -193,7 +193,7 @@ $allowedDatasetSubType := [
     'Ethnicity',
     'Housing ',
     'Labour',
-    'Ageing ',
+    'Ageing',
     'Economics',
     'Marital status',
     'Social support',
@@ -424,7 +424,7 @@ $cleanEnumSingle := function($x, $allowed){
     "observations": input.observations ~> $defaultValue([]),
     "structuralMetadata": {
         "tables": input.structuralMetadata,
-        "syntheticDataWebLink": input.linkage.syntheticDataWebLink
+        "syntheticDataWebLink": $safeSplit(input.linkage.syntheticDataWebLink, ";,;")
     },
     "demographicFrequency": input.demographicFrequency,
     "omics": input.omics
