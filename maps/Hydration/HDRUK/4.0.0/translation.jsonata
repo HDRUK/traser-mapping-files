@@ -32,7 +32,7 @@ $getNeededFields := function($dataTypes, $neededFieldsMap) {(
     $list :=  $each($neededFieldsMap, function($v, $k) {
         $k in dataTypes ? $v : []
     });
-    $neededFields := $append([], $list).*
+    $neededFields := $reduce($list, $append)
 )};
 
 $setDiff := function($setOne, $setTwo){
