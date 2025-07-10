@@ -1,0 +1,390 @@
+(
+
+$isHidden := function($location){
+    $sum($map($hiddenFields, function($h){
+        $contains($location, $h) ? 1 : 0
+    })) >= 1 ? true : false
+};
+
+$allOptionalFields := [
+    "materialType",
+    "imageContrast",
+    "omics"
+];
+
+$neededFieldsMap := {
+    "Health and disease": ["materialType"],
+    "Treatments/Interventions": ["materialType"],
+    "Measurements/Tests": ["materialType"],
+    "Imaging types": ["imageContrast"],
+    "Imaging area of the body": ["imageContrast"],
+    "Omics": ["materialType","omics"],
+    "Socioeconomic": [],
+    "Lifestyle": [],
+    "Registry": ["materialType"],
+    "Environment and energy": [],
+    "Information and communication": [],
+    "Politics": [],
+    "": ["imageContrast","materialType","omics"]
+};
+
+$getNeededFields := function($dataTypes, $neededFieldsMap) {(
+    $list :=  $each($neededFieldsMap, function($v, $k) {
+        $k in dataTypes ? $v : []
+    });
+    $neededFields := $reduce($list, $append)
+)};
+
+$setDiff := function($setOne, $setTwo){
+    $filter($setOne, function($v) {
+        $not($v in $setTwo)
+    })
+};
+
+$hiddenByDataType := function($dataTypes) {(
+    $neededFields := $getNeededFields($dataTypes, $neededFieldsMap);
+    $toHide := $count($dataTypes) = 0 ? [] : $setDiff($allOptionalFields, $neededFields)
+)};
+
+$hiddenFields := $append(
+    [
+        "identifier",
+        "version",
+        "revisions",
+        "issued",
+        "modified",
+        "dataCustodian",
+        "populationSize"
+    ],
+    $hiddenByDataType(dataTypes)
+);
+
+$textArea := function($component){
+    {
+        "component": "TextArea",
+        "name": $component.title,
+        "placeholder": $component.examples[0],
+        "label": $component.description,
+        "limit": $component.types.maxLength,
+        "required": $not($component.is_optional),
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$textField := function($component){
+    {
+        "component": "TextField",
+        "name": $component.title,
+        "placeholder": $component.examples[0],
+        "label": $component.description,
+        "limit": $component.types.maxLength,
+        "required": $not($component.is_optional),
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$textBoxSize := function($x){
+    $x.types.maxLength > 200 ?
+        $textArea($x) : $textField($x)
+};
+
+$selectBox := function($component){
+    {
+        "component": "Select",
+        "options": $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
+        "name": $component.title,
+        "label": $component.description,
+        "required": $not($component.is_optional),
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$datePicker := function($component){
+    {
+        "component": "DatePicker",
+        "name": $component.title,
+        "label": $component.description,
+        "required": $not($component.is_optional),
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$autoComplete := function($component){
+    {
+        "component": "Autocomplete",
+        "options": $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
+        "name": $component.title,
+        "label": $component.description,
+        "placeholder": $component.examples[0],
+        "required": $not($component.is_optional),
+        "hidden": $isHidden($component.location),
+        "freeSolo": $component.types.options ? false : true
+    }
+};
+
+$numberBox := function($component){
+    {
+        "component": "TextField",
+        "name": $component.title,
+        "type": "number",
+        "placeholder": $component.examples[0],
+        "label": $component.description,
+        "limit": $component.types.maxLength,
+        "required": $not($component.is_optional),
+        "hidden": $isHidden($component.location)
+    }
+};
+
+$get_component := function ($x){
+    $x.is_list ?
+        $autoComplete($x) :
+    $x.types = "int" ?
+        $numberBox($x) :
+    $x.types = "date" ?
+        $datePicker($x) :
+    $x.types.options ? 
+        $selectBox($x) : 
+    $x.types.format ?
+        $textField($x) :
+    $x.types.pattern ?
+        $textField($x) :
+    $x.types.maxLength ?
+        $textBoxSize($x) : $textField($x)
+};
+
+$getItemsType := function($types){
+    $types.options ?
+        {
+            "type": $types.type,
+            "enum": $types.options,
+            "enum_titles": $types.options
+        } :
+    $types.format ?
+        {
+            "type": $types.type,
+            "format": $types.format
+        } : 
+    $types.pattern ?
+        {
+            "type": $types.type,
+            "pattern": $types.pattern
+        } : null
+};
+
+$listValidation := function($component){
+    {
+        "title": $component.title,
+        "required": $not($component.is_optional),
+        "type": "array",
+        "of": $getItemsType($component.types),
+        "excludeEmptyString": ($component.is_optional and $exists($component.types.pattern)) ? true : undefined
+    }
+};
+
+$stringValidation := function($component){
+    {
+        "title": $component.title,
+        "required": $not($component.is_optional),
+        "type": $component.types.type ? $component.types.type : "string",
+        "min": $component.types.minLength,
+        "max": $component.types.maxLength
+    }
+};
+
+$formatValidation := function($component){
+    {
+        "title": $component.title,
+        "required": $not($component.is_optional),
+        "type": $component.types.type,
+        "format": $component.types.format = "uri" ? "url" : $component.types.format
+    }
+};
+
+$enumValidation := function($component){
+    {
+        "title": $component.title,
+        "required": $not($component.is_optional),
+        "type": $component.types.type,
+        "enum": $component.types.options,
+        "enum_titles": $component.types.options
+    }
+};
+
+$regexValidation := function($component){
+    {
+        "title": $component.title,
+        "required": $not($component.is_optional),
+        "type": $component.types.type,
+        "pattern": $component.types.pattern,
+        "excludeEmptyString": $component.is_optional ? $component.is_optional : undefined
+    }
+};
+
+$intValidation := function($component){
+    {
+        "title": $component.title,
+        "required": $not($component.is_optional),
+        "type": "integer",
+        "min": -1
+    }
+};
+
+$dateValidation := function($component){
+    {
+        "title": $component.title,
+        "required": $not($component.is_optional),
+        "type": "date"
+    }
+};
+
+$get_validation := function($component){
+    $component.is_list ?
+        $listValidation($component) :
+    $component.types.maxLength ?
+        $stringValidation($component) :
+    $component.types.format ?
+        $formatValidation($component) :
+    $component.types.options ?
+        $enumValidation($component) :
+    $component.types.pattern ?
+        $regexValidation($component) :
+    $component.types = "int" ? 
+        $intValidation($component) :
+    $component.types = "date" or $component.types = "datetime" ?
+        $dateValidation($component) : 
+    $component.types = "str" ?
+        $stringValidation($component) : null
+};
+
+$arrayFields := [
+    "observations",
+    "derivedFrom",
+    "isPartOf",
+    "linkableDatasets",
+    "similarToDatasets",
+    "demographicFrequency.age",
+    "demographicFrequency.ethnicity",
+    "demographicFrequency.disease"
+];
+
+$isArrayField := function($location) {
+    $sum($map($arrayFields, function($h){
+        $contains($location, $h) ? 1 : 0
+    })) >= 1 ? true : false
+};
+
+$split_array_single_components := function($components){(
+    $array_list := $filter($components, function($v){
+        $isArrayField($v.location)
+    });
+    $single_list := $filter($components, function($v){
+        $not($isArrayField($v.location))
+    });
+    {
+        "array_list": $array_list,
+        "single_list": $single_list
+    }
+)};
+
+$define_components := function($components){(
+    $split := $split_array_single_components($components);
+    $array_components := $define_array_components($split.array_list);
+    $single_components := $map($split.single_list, function($component){
+        $define_single_component($component)
+    });
+    $append($single_components, $array_components)
+)};
+
+$define_array_fields := function($components, $location, $title){(
+    $list := $filter($components, function($v){
+        $contains($v.location, $location)
+    });
+    $components := {
+        "title": $title,
+        "location": $location,
+        "is_array_form": true,
+        "fields": $map($list, function($component){
+            $define_single_component($component)
+        })
+    }
+)};
+
+$define_array_components := function($components){(
+    $obs_components := $define_array_fields($components, "observations", "Observations Array");
+    $derived_from_components := $define_array_fields($components, "enrichmentAndLinkage.derivedFrom", "Derived From Array");
+    $ispart_components := $define_array_fields($components, "enrichmentAndLinkage.isPartOf", "Is Part Of Array");
+    $linkable_components := $define_array_fields($components, "enrichmentAndLinkage.linkableDatasets", "Linkable Datasets Array");
+    $similar_to_components := $define_array_fields($components, "enrichmentAndLinkage.similarToDatasets", "Similar To Datasets Array");
+    $demoAge := $define_array_fields($components, "demographicFrequency.age", "Demographic Frequency Age Array");
+    $demoEthnicity := $define_array_fields($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
+    $demoDisease := $define_array_fields($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
+
+    [
+        $derived_from_components, 
+        $ispart_components, 
+        $linkable_components, 
+        $similar_to_components, 
+        $obs_components,
+        $demoAge,
+        $demoEthnicity,
+        $demoDisease
+    ]
+)};
+
+$define_single_component := function($component){
+    {
+        "title": $component.title,
+        "is_array_form": false,
+        "description": $component.description,
+        "location": $component.location,
+        "guidance": $component.guidance ? $component.guidance : "",
+        "field": $get_component($component)
+    }
+};
+
+$define_validations := function($components){(
+    $split := $split_array_single_components($components);
+    $array_validation := $all_array_validation($split.array_list);
+    $single_validations := $map($split.single_list, $get_validation);
+    $append($single_validations, $array_validation)
+)};
+
+$define_array_validation := function($components, $location, $title){(
+    $list := $filter($components, function($v){
+        $contains($v.location, $location)
+    });
+    {
+        "title": $title,
+        "type": "array",
+        "items": $map($list, $get_validation)
+    }
+)};
+
+$all_array_validation := function($components){(
+    $obs_validation := $define_array_validation($components, "observations", "Observations Array");
+    $derived_from_validation := $define_array_validation($components, "enrichmentAndLinkage.derivedFrom", "Derived From Array");
+    $ispart_validation := $define_array_validation($components, "enrichmentAndLinkage.isPartOf", "Is Part Of Array");
+    $linkable_validation := $define_array_validation($components, "enrichmentAndLinkage.linkableDatasets", "Linkable Datasets Array");
+    $similar_to_validation := $define_array_validation($components, "enrichmentAndLinkage.similarToDatasets", "Similar To Datasets Array");
+    $demoAge := $define_array_validation($components, "demographicFrequency.age", "Demographic Frequency Age Array");
+    $demoEthnicity := $define_array_validation($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
+    $demoDisease := $define_array_validation($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
+
+    [
+        $derived_from_validation, 
+        $ispart_validation, 
+        $linkable_validation, 
+        $similar_to_validation, 
+        $obs_validation,
+        $demoAge,
+        $demoEthnicity,
+        $demoDisease
+    ]
+)};
+
+{
+    "schema_fields": $define_components(schema_fields),
+    "validation": $define_validations(schema_fields)
+}
+
+)
