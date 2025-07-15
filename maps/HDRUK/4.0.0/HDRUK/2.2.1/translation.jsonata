@@ -1,0 +1,423 @@
+(
+
+$allowedAccessModes := [
+    "Join research consortium",
+    "New project"
+];
+
+$removeBadAccessMode := function($x){
+    $not($x in $allowedAccessModes) ? null : $x
+};
+
+$fixAccessMode := function($x){
+    $removeBadAccessMode($x)
+};
+
+$ageRangeMin := function($x){
+    $substringBefore($x, "-")
+};
+
+$ageRangeMax := function($x){
+    $substringAfter($x, "-")
+};
+
+$allowedMaterialTypes := [
+    "None/not available",
+    "Bone marrow",
+    "Cancer cell lines",
+    "CDNA/MRNA",
+    "Core biopsy",
+    "DNA",
+    "Entire body organ",
+    "Faeces",
+    "Immortalized cell lines",
+    "Isolated pathogen",
+    "MicroRNA",
+    "Peripheral blood cells",
+    "Plasma",
+    "PM Tissue",
+    "Primary cells",
+    "RNA",
+    "Saliva",
+    "Serum",
+    "Swabs",
+    "Tissue",
+    "Urine",
+    "Whole blood",
+    "Availability to be confirmed",
+    "Other"
+];
+
+$removeBadMaterialType := function($x){
+    $not($x in $allowedMaterialTypes) ? null : $x
+};
+
+$allowedDataUseLimitation := [
+    "General research use",
+    "Genetic studies only",
+    "No general methods research",
+    "No restriction",
+    "Research-specific restrictions",
+    "Research use only",
+    "No linkage"
+];
+
+$allowedDataUseRequirements := [
+    "Collaboration required",
+    "Ethics approval required",
+    "Geographical restrictions",
+    "Institution-specific restrictions",
+    "Not for profit use",
+    "Project-specific restrictions",
+    "Publication moratorium",
+    "Publication required",
+    "Return to database or resource",
+    "Time limit on use",
+    "User-specific restriction"
+];
+
+$allowedPurpose := [
+    "Research cohort",
+    "Study",
+    "Disease registry",
+    "Trial",
+    "Care",
+    "Audit",
+    "Administrative",
+    "Financial",
+    "Statuatory",
+    "Other"
+];
+
+$allowedSource := [
+    "EPR",
+    "Electronic survey",
+    "LIMS",
+    "Paper-based",
+    "Free text NLP",
+    "Machine generated",
+    "Other"
+];
+
+$allowedSetting := [
+    "Cohort, study, trial",
+    "Clinic",
+    "Primary care - Referrals",
+    "Primary care - Clinic",
+    "Primary care - Out of hours",
+    "Secondary care - Accident and Emergency",
+    "Secondary care - Outpatients",
+    "Secondary care - In-patients",
+    "Secondary care - Ambulance",
+    "Secondary care - ICU",
+    "Prescribing - Community pharmacy",
+    "Prescribing - Hospital",
+    "Patient report outcome",
+    "Wearables",
+    "Local authority",
+    "National government",
+    "Community",
+    "Services",
+    "Home",
+    "Private",
+    "Social care - Health care at home",
+    "Social care - Other social data",
+    "Census",
+    "Other"
+];
+
+$allowedDatasetType := [
+    "Health and disease",
+    "Treatments/Interventions",
+    "Measurements/Tests",
+    "Imaging types",
+    "Imaging area of the body",
+    "Omics",
+    "Socioeconomic",
+    "Lifestyle",
+    "Registry",
+    "Environment and energy",
+    "Information and communication",
+    "Politics"
+];
+
+$allowedDatasetSubType := [
+    "Mental health",
+    "Cardiovascular",
+    "Cancer",
+    "Rare diseases",
+    "Metabolic and Endocrine",
+    "Neurological",
+    "Reproductive",
+    "Maternity and neonatology",
+    "Respiratory",
+    "Immunity",
+    "Musculoskeletal",
+    "Vision",
+    "Renal and urogenital",
+    "Oral and Gastrointestinal",
+    "Cognitive Function",
+    "Hearing",
+    "Others",
+    "Vaccines",
+    "Preventive",
+    "Therapeutic",
+    "Laboratory",
+    "Other diagnostics",
+    "CT",
+    "MRI",
+    "PET",
+    "X-ray",
+    "Ultrasound",
+    "Pathology",
+    "Head",
+    "Chest",
+    "Arm",
+    "Abdomen",
+    "Leg",
+    "Proteomics",
+    "Transcriptomics",
+    "Epigenomics",
+    "Metabolomics",
+    "Metagenomics",
+    "Genomics",
+    "Lipidomics",
+    "Education",
+    "Crime and Justice",
+    "Ethnicity",
+    "Housing ",
+    "Labour",
+    "Ageing",
+    "Economics",
+    "Marital status",
+    "Social support",
+    "Deprivation",
+    "Religion",
+    "Occupation",
+    "Finances",
+    "Family circumstance",
+    "Smoking",
+    "Physical Activity",
+    "Dietary habits",
+    "Alcohol",
+    "Disease Registry (research)",
+    "National Disease Registries and Audits",
+    "Births and Deaths",
+    "Not applicable"
+];
+
+$allowedPublishingFrequency := [
+    "Static",
+    "Irregular",
+    "Continuous",
+    "Biennial",
+    "Annual",
+    "Biannual",
+    "Quarterly",
+    "Bimonthly",
+    "Monthly",
+    "Biweekly",
+    "Weekly",
+    "Twice a week",
+    "Daily",
+    "Other"
+];
+
+$allowedTimeLag := [
+    "Less than 1 week",
+    "1-2 weeks",
+    "2-4 weeks",
+    "1-2 months",
+    "2-6 months",
+    "6 months plus",
+    "Variable",
+    "Not applicable",
+    "Other"
+];
+
+$allowedDeliveryLeadTime := [
+    "Less than 1 week",
+    "1-2 weeks",
+    "2-4 weeks",
+    "1-2 months",
+    "2-6 months",
+    "More than 6 months",
+    "Variable",
+    "Not applicable",
+    "Other"
+];
+
+$allowedNodes := [
+    "Persons",
+    "Events",
+    "Findings",
+    "Number of scans per modality"
+];
+
+$allowedEncodings := [
+    "LOCAL",
+    "OPCS4",
+    "READ",
+    "SNOMED CT",
+    "SNOMED RT",
+    "DM PLUS D",
+    "DM+D",
+    "NHS NATIONAL CODES",
+    "NHS SCOTLAND NATIONAL CODES",
+    "NHS WALES NATIONAL CODES",
+    "ODS",
+    "LOINC",
+    "ICD10",
+    "ICD10CM",
+    "ICD10PCS",
+    "ICD9CM",
+    "ICD9",
+    "ICDO3",
+    "AMT",
+    "APC",
+    "ATC",
+    "CIEL",
+    "HPO",
+    "CPT4",
+    "DPD",
+    "DRG",
+    "HEMONC",
+    "JMDC",
+    "KCD7",
+    "MULTUM",
+    "NAACCR",
+    "NDC",
+    "NDFRT",
+    "OXMIS",
+    "RXNORM",
+    "RXNORM EXTENSION",
+    "SPL",
+    "OTHER"
+];
+
+$tryMatchEnum := function($x, $allowed){(
+    $cleaned := $replace($x, ";", "");
+    $lowered := $join([$uppercase($substring($cleaned, 0, 1)), $substring($lowercase($cleaned), 1, $length($cleaned))]);
+    $match := $filter($allowed, function($v, $i, $a){(
+        $allowedLowered := $join([$uppercase($substring($v, 0, 1)), $substring($lowercase($v), 1, $length($v))]);
+        $allowedLowered = $lowered ? $a[$i] : null
+    )})
+)};
+
+$cleanEnum := function($x, $allowed){
+    $type($x) = "string" ? [$map($split($x, ","), function($v){
+        $tryMatchEnum($v, $allowed)
+    })] : 
+        [$map($x, function($v){
+            $tryMatchEnum($v, $allowed)
+    })]
+};
+
+$cleanEnumSingle := function($x, $allowed){
+    $tryMatchEnum($x, $allowed)
+};
+
+$cleanObservation := function($obs){(
+    $node := $lowercase($obs.observedNode) = "persons" ? "Persons" :
+        $lowercase($obs.observedNode) = "events" ? "Events" :
+        $lowercase($obs.observedNode) = "findings" ? "Findings" : null;
+    $obs ~> |$| {
+        "observedNode": $node
+    }|
+)};
+
+$cleanDatasetType := function($x){(
+    $tryClean := $cleanEnumSingle($$.input.summary.datasetType, $allowedDatasetType);
+    $tryClean ? $tryClean : "Health and disease"
+)};
+
+$cleanDatasetSubType := function($x){(
+    $tryClean := $cleanEnumSingle($$.input.summary.datasetSubType, $allowedDatasetSubType);
+    $tryClean ? $tryClean : "Not applicable"
+)};
+
+$cleanDataTable := function($table){(
+    $table ~> |$| {
+        "columns": $table.elements
+    }, ['elements']|
+)};
+
+input ~> |$| {
+    "summary": summary ~> |$|{
+        "dataCustodian": $$.input.summary.publisher
+    }, ['datasetType','datasetSubType','publisher']|,
+    "documentation": documentation ? documentation ~> |$|
+    {
+        "description": $$.input.documentation.description ? $$.input.documentation.description : null,
+        "associatedMedia": $$.input.linkage.associatedMedia ? $$.input.linkage.associatedMedia : null,
+        "inPipeline": null
+    }, ['isPartOf'] | : null,
+    "coverage": coverage ? coverage ~> |$|
+        {
+            "typicalAgeRangeMin": $parseInteger($ageRangeMin($$.input.coverage.typicalAgeRange), "#,##0"),
+            "typicalAgeRangeMax": $parseInteger($ageRangeMax($$.input.coverage.typicalAgeRange), "#,##0"),
+            "datasetCompleteness": $$.extra.datasetCompleteness ? $$.extra.datasetCompleteness : null,
+            "materialType": $$.input.tissuesSampleCollection.materialType ? 
+                $filter($$.input.tissuesSampleCollection.materialType, $removeBadMaterialType)[] : ["None/not available"],
+            "followUp": $$.input.followup ? $$.input.followup : null
+        }, ['typicalAgeRange','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic'] | : null,
+    "provenance": provenance ? provenance ~> |$|
+    {
+        "origin": origin ~> |$|{
+            "purpose": $$.input.provenance.origin.purpose ? 
+                $cleanEnum($$.input.provenance.origin.purpose, $allowedPurpose) : null,
+            "datasetType": $$.input.summary.datasetType ?
+                $cleanDatasetType($$.input.summary.datasetType) : "Health and disease",
+            "datasetSubType": $$.input.summary.datasetSubType ?
+                $cleanDatasetSubType($$.input.summary.datasetSubType) : null,
+            "source": $$.input.provenance.origin.source ?
+                $cleanEnum($$.input.provenance.origin.source, $allowedSource) : null,
+            "collectionSource": $$.input.provenance.origin.collectionSituation ?
+                $cleanEnum($$.input.provenance.origin.collectionSituation, $allowedSetting) : null,
+            "imageContrast": null
+        }, ['collectionSituation'] |,
+        "temporal": temporal ~> |$| {
+            "publishingFrequency": $$.input.provenance.temporal.publishingFrequency ?
+                $cleanEnumSingle($$.input.provenance.temporal.publishingFrequency, $allowedPublishingFrequency) : null,
+            "timeLag": $$.input.provenance.temporal.timeLag ?
+                $cleanEnumSingle($$.input.provenance.temporal.timeLag, $allowedTimeLag) : null
+        }|
+    }| : null,
+    "accessibility": accessibility ~> |$|
+    {
+        "access": access ~> |$|{
+            "deliveryLeadTime": $$.input.accessibility.access.deliveryLeadTime ?
+                $cleanEnumSingle($$.input.accessibility.access.deliveryLeadTime, $allowedDeliveryLeadTime) : null
+        }|,
+        "usage": usage ? usage ~> |$|
+        {
+            "dataUseLimitation": $$.input.accessibility.usage.dataUseLimitation ? 
+                $cleanEnum($$.input.accessibility.usage.dataUseLimitation, $allowedDataUseLimitation) : null,
+            "dataUseRequirements": $$.input.accessibility.usage.dataUseRequirement ? 
+                $cleanEnum($$.input.accessibility.usage.dataUseRequirement, $allowedDataUseRequirements) : null,
+            "resourceCreator": null
+        }, ['investigations','isReferencedBy']| : null,
+        "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
+            "vocabularyEncodingScheme": $$.input.accessibility.formatAndStandards.vocabularyEncodingScheme ?
+                $cleanEnum($$.input.accessibility.formatAndStandards.vocabularyEncodingScheme, $allowedEncodings) : null
+        }| : null
+    }|,
+    "enrichmentAndLinkage": enrichmentAndLinkage ? enrichmentAndLinkage ~> |$|{
+        "derivedFrom": null,
+        "isPartOf": null,
+        "linkableDatasets": $$.input.enrichmentAndLinkage.qualifiedRelation,
+        "similarToDatasets": null,
+        "investigations": $$.input.access.usage.investigations,
+        "tools": $$input.linkage.tools,
+        "publicationAboutDataset": null,
+        "publicationUsingDataset": $$.input.access.usage.isReferencedBy
+    }, ['derivation','qualifiedRelation','syntheticDataWebLink']| : null,
+    "observations": $map(observations, $cleanObservation)[],
+    "structuralMetadata": 
+        {
+            "tables": $map($$.input.structuralMetadata, $cleanDataTable)[],
+            "syntheticDataWebLink": $$.input.enrichmentAndLinkage.syntheticDataWebLink ? 
+                $$.input.enrichmentAndLinkage.syntheticDataWebLink : null
+        }
+}, ['tissuesSampleCollection'] |
+)
