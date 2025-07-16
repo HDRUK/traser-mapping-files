@@ -28,6 +28,12 @@ $nullList := function($x){
     })]
 };
 
+
+$datasetMap := {
+  "Health and disease"       : ["Mental health","Cardiovascular","Cancer","Rare diseases","Metabolic and endocrine","Neurological","Reproductive","Maternity and neonatology","Respiratory", "Immunity","Musculoskeletal", "Vision", "Renal and urogenital","Oral and gastrointestinal","Cognitive function", "Hearing", "Others"],
+  "Treatments/Interventions"  : ["Vaccines","Preventive","Therapeutic"]
+};
+
 $allowedPublishingFrequency := [
     "Static",
     "Irregular",
@@ -383,8 +389,21 @@ $cleanEnumSingle := function($x, $allowed){
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
             "source": input.provenance.origin.source  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSource),
             "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
-            "datasetType": input.summary.datasetType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetType) ~> $defaultValue(["Health and disease"]),
-            "datasetSubType": input.summary.datasetSubType ~> $safeSplit(';,;') ~> $cleanEnum($allowedDatasetSubType) ~> $defaultValue(["Not applicable"]),
+            "datasetType": [
+                $map(input.summary.datasetType ~> $safeSplit(';,;') , function($dt) {(
+                $mainKey := $dt;
+                $sub := input.summary.datasetSubType ~> $safeSplit(';,;');
+                $lookUpList :=[$lookup($datasetMap, $mainKey)];
+                $allowedSubs := $map($sub , function($sx) {(
+                    $sx in $lookUpList ? $sx : null;
+                )});
+                {
+                    "name": $mainKey,
+                    "subTypes": [$allowedSubs]
+                }
+               
+            )
+            })],
             "imageContrast": input.provenance.origin.imageContrast
         },
         "temporal": { /* input.provenance.temporal */
