@@ -1,0 +1,49 @@
+
+(
+    $datasetMap := {
+  "Health and disease"       : ["Mental health","Cardiovascular","Cancer","Rare diseases","Metabolic and endocrine","Neurological","Reproductive","Maternity and neonatology","Respiratory", "Immunity","Musculoskeletal", "Vision", "Renal and urogenital","Oral and gastrointestinal","Cognitive function", "Hearing", "Others"],
+  "Treatments/Interventions"  : ["Vaccines","Preventive","Therapeutic"],
+  "Measurements/Tests"  : ["Laboratory", "Other diagnostics"],
+  "Imaging types"  : ["CT", "MRI", "PET", "X-ray", "Ultrasound", "Pathology"],
+  "Imaging area of the body"  : ["Head", "Chest", "Arm", "Abdomen", "Leg"],
+  "Omics"  : ["Proteomics", "Transcriptomics", "Epigenomics", "Metabolomics", "Metagenomics", "Genomics", "Lipidomics"],
+  "Socioeconomic"  : ["Education", "Crime and justice", "Ethnicity", "Housing", "Labour", "Ageing", "Economics", "Marital status", "Social support", "Deprivation", "Religion", "Occupation", "Finances", "Family circumstance"],
+  "Lifestyle"  : ["Smoking", "Physical activity", "Dietary habits", "Alcohol"],
+  "Registry"  : ["Disease registry (research)", "National disease registries and audits", "Births and deaths"],
+  "Environment and energy"  : ["Not applicable"],
+  "Information and communication"  : ["Not applicable"],
+  "Politics"  : ["Not applicable"]
+};
+    input ~> |$| {
+
+"provenance": provenance ? provenance ~> |$| {
+        "origin":  origin ? origin ~> |$| {
+            "datasetType": [
+                $map(datasetType , function($dt) {(
+                $mainKey := $dt;
+                $sub := datasetSubType;
+                $lookUpList :=[$lookup($datasetMap, $mainKey)];
+                $allowedSubs := $map($sub , function($sx) {(
+                    $sx in $lookUpList ? $sx : [];
+                )});
+                {
+                    "name": $mainKey,
+                    "subTypes": [$allowedSubs]
+                }
+               
+            )
+            })
+            ]
+
+
+        }, ['datasetSubType'] | : null
+        
+
+    }|,
+    "summary": summary ? summary ~> |$|{
+       "datasetAliases": alternateIdentifiers
+    },['alternateIdentifiers'] | : null
+
+
+
+}|)
