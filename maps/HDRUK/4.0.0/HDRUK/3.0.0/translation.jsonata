@@ -23,9 +23,12 @@
                 $mainKey := $dt;
                 $sub := datasetSubType;
                 $lookUpList :=[$lookup($datasetMap, $mainKey)];
-                $allowedSubs := $map($sub , function($sx) {(
-                    $sx in $lookUpList ? $sx : [];
-                )});
+                $allowedSubs := $filter(
+                    $map($sub, function($sx) {
+                        $sx in $lookUpList ? $sx : null
+                    }),
+                    function($v) { $v }
+                );
                 {
                     "name": $mainKey,
                     "subTypes": [$allowedSubs]
