@@ -82,7 +82,7 @@ $getOrigin := function(){(
                 $dt.name 
             )})]) : null ,
     "datasetSubType": input.provenance.origin.datasetType ? $to_str([$map(input.provenance.origin.datasetType , function($dt) {(
-                $dt.subTypes 
+                $to_str($dt.subTypes)
             )})]) : null,
     "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
     "description": $truncate(input.documentation.description,50000),
