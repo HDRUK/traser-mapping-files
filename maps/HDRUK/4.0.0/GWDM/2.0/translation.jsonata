@@ -405,7 +405,7 @@ $cleanEnumSingle := function($x, $allowed){
                 $sub := input.summary.datasetSubType ~> $safeSplit(';,;');
                 $lookUpList :=[$lookup($datasetMap, $mainKey)];
                 $allowedSubs := $map($sub , function($sx) {(
-                    $sx in $lookUpList ? $sx : null;
+                    $sx in $lookUpList ? $sx : [];
                 )});
                 {
                     "name": $mainKey,
