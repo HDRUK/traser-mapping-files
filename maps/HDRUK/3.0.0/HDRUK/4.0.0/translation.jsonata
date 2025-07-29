@@ -7,9 +7,15 @@
             "datasetType": [$map(datasetType , function($dt) {(
                 $dt.name 
             )})],
-            "datasetSubType": [$map(datasetType , function($dt) {(
-               $dt.subTypes ? $dt.subTypes : "Not applicable"
-            )})]
+             "datasetSubType": [
+          $map(datasetType, function($dt) {
+            $dt.subTypes ?
+              $map($dt.subTypes, function($sx) {
+                $sx = "Occupation" ? "Labour" : $sx = "Economics" ? "Finances" : $sx
+              })
+            : "Not applicable"
+          })
+        ]
 
         }|
     }|,
