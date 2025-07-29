@@ -25,7 +25,10 @@
                 $lookUpList :=[$lookup($datasetMap, $mainKey)];
                 $allowedSubs := $filter(
                     $map($sub, function($sx) {
-                        $sx in $lookUpList ? $sx : null
+                       (
+                        $mapped := $sx = "Labour" ? "Occupation" : $sx = "Finances" ? "Economics" : $sx;
+                        $mapped in $lookUpList ? $mapped : null
+                        )
                     }),
                     function($v) { $v }
                 );
