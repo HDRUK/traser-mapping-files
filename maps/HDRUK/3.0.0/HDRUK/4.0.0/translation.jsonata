@@ -1,0 +1,22 @@
+
+(
+    input ~> |$| {
+
+"provenance": provenance ? provenance ~> |$| {
+        "origin":  origin ? origin ~> |$| {
+            "datasetType": [$map(datasetType , function($dt) {(
+                $dt.name 
+            )})],
+            "datasetSubType": [$map(datasetType , function($dt) {(
+               $dt.subTypes ? $dt.subTypes : "Not applicable"
+            )})]
+
+        }|
+    }|,
+    "summary": summary ? summary ~> |$|{
+       "alternateIdentifiers": datasetAliases
+    },['datasetAliases'] | : null
+
+
+
+}|)
