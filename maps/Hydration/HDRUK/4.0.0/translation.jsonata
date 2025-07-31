@@ -91,7 +91,18 @@ $textBoxSize := function($x){
 $selectBox := function($component){
     {
         "component": "Select",
-        "options": $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
+        "options": $map($component.types.options,
+        function ($o){ 
+             $component.title = 'Dataset type' ? 
+             {
+                 "label":$o.title,"value":$o.title
+             }
+             :
+                {
+                    "label":$o,"value":$o
+                }
+            }
+            ),
         "name": $component.title,
         "label": $component.description,
         "required": $not($component.is_optional),
@@ -136,6 +147,8 @@ $numberBox := function($component){
 };
 
 $get_component := function ($x){
+    $x.title = "Dataset type" ?
+      $selectBox($x) :
     $x.is_list ?
         $autoComplete($x) :
     $x.types = "int" ?
@@ -264,7 +277,8 @@ $arrayFields := [
     "similarToDatasets",
     "demographicFrequency.age",
     "demographicFrequency.ethnicity",
-    "demographicFrequency.disease"
+    "demographicFrequency.disease",
+    "provenance.origin.datasetType"
 ];
 
 $isArrayField := function($location) {
@@ -304,7 +318,30 @@ $define_array_fields := function($components, $location, $title){(
         "location": $location,
         "is_array_form": true,
         "fields": $map($list, function($component){
-            $define_single_component($component)
+            $title = "Dataset Type Array" ? [
+                $define_single_component($component),
+               {
+                "title": 'Dataset subtype',
+                "is_array_form": false,
+                "description": 'Dataset subtype description',
+                "location": "provenance.origin.datasetType.datasetSubType",
+                "guidance": 'Dataset subtype description'
+               ,
+                "field": {
+        "component": "Autocomplete",
+        "options": $map($distinct($reduce( $map($component.types.options,function ($o){
+                           $o.options
+                           
+                        }), $append)),function ($o){{"label":$o,"value":$o}}),
+        "name": "Dataset subtypes",
+        "label": "Dataset subtypes",
+        "placeholder": null,
+        "required": true,
+        "hidden": false,
+        "freeSolo": false
+    }
+            }
+               ] : $define_single_component($component)
         })
     }
 )};
@@ -318,6 +355,7 @@ $define_array_components := function($components){(
     $demoAge := $define_array_fields($components, "demographicFrequency.age", "Demographic Frequency Age Array");
     $demoEthnicity := $define_array_fields($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
     $demoDisease := $define_array_fields($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
+    $datasetType := $define_array_fields($components, "provenance.origin.datasetType", "Dataset Type Array");
 
     [
         $derived_from_components, 
@@ -327,7 +365,8 @@ $define_array_components := function($components){(
         $obs_components,
         $demoAge,
         $demoEthnicity,
-        $demoDisease
+        $demoDisease,
+        $datasetType
     ]
 )};
 
@@ -369,6 +408,7 @@ $all_array_validation := function($components){(
     $demoAge := $define_array_validation($components, "demographicFrequency.age", "Demographic Frequency Age Array");
     $demoEthnicity := $define_array_validation($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
     $demoDisease := $define_array_validation($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
+    $datasetType := $define_array_validation($components, "provenance.origin.datasetType", "Dataset Type Array");
 
     [
         $derived_from_validation, 
@@ -378,7 +418,8 @@ $all_array_validation := function($components){(
         $obs_validation,
         $demoAge,
         $demoEthnicity,
-        $demoDisease
+        $demoDisease,
+        $datasetType
     ]
 )};
 
