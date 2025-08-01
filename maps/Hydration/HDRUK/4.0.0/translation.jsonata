@@ -321,7 +321,7 @@ $define_array_fields := function($components, $location, $title){(
             $title = "Dataset Type Array" ? [
                 $define_single_component($component),
                {
-                "title": 'Dataset subtype',
+                "title": 'Dataset subtypes',
                 "is_array_form": false,
                 "description": 'Dataset subtype description',
                 "location": "provenance.origin.datasetType.datasetSubType",
