@@ -336,7 +336,7 @@ $define_array_fields := function($components, $location, $title){(
         "name": "Dataset subtypes",
         "label": "Dataset subtypes",
         "placeholder": null,
-        "required": true,
+        "required": false,
         "hidden": false,
         "freeSolo": false
     }
