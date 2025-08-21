@@ -396,6 +396,7 @@ $define_array_validation := function($components, $location, $title){(
     {
         "title": $title,
         "required": $title = "Dataset Type Array" ? true : false,
+        "minItems": "Dataset Type Array" ? 0 : false,
         "type": "array",
         "items": $map($list, $get_validation)
     }
