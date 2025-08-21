@@ -317,7 +317,7 @@ $define_array_fields := function($components, $location, $title){(
         "title": $title,
         "location": $location,
         "is_array_form": true,
-        "required": true,
+        "required": $title = "Dataset Type Array" ? true : false,
         "fields": $map($list, function($component){
             $title = "Dataset Type Array" ? [
                 $define_single_component($component),
