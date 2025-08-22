@@ -91,7 +91,18 @@ $textBoxSize := function($x){
 $selectBox := function($component){
     {
         "component": "Select",
-        "options": $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
+        "options": $map($component.types.options,
+        function ($o){ 
+             $component.title = 'Dataset type' ? 
+             {
+                 "label":$o.title,"value":$o.title
+             }
+             :
+                {
+                    "label":$o,"value":$o
+                }
+            }
+            ),
         "name": $component.title,
         "label": $component.description,
         "required": $not($component.is_optional),
@@ -136,6 +147,8 @@ $numberBox := function($component){
 };
 
 $get_component := function ($x){
+    $x.title = "Dataset type" ?
+      $selectBox($x) :
     $x.is_list ?
         $autoComplete($x) :
     $x.types = "int" ?
@@ -264,7 +277,8 @@ $arrayFields := [
     "similarToDatasets",
     "demographicFrequency.age",
     "demographicFrequency.ethnicity",
-    "demographicFrequency.disease"
+    "demographicFrequency.disease",
+    "provenance.origin.datasetType"
 ];
 
 $isArrayField := function($location) {
@@ -303,8 +317,32 @@ $define_array_fields := function($components, $location, $title){(
         "title": $title,
         "location": $location,
         "is_array_form": true,
+        "required": $title = "Dataset Type Array" ? true : false,
         "fields": $map($list, function($component){
-            $define_single_component($component)
+            $title = "Dataset Type Array" ? [
+                $define_single_component($component),
+               {
+                "title": 'Dataset subtypes',
+                "is_array_form": false,
+                "description": 'Dataset subtype description',
+                "location": "provenance.origin.datasetType.datasetSubType",
+                "guidance": 'Types include those listed below. Datasets can have more than one type associated.\\n- **Health and disease**: Includes any data related to mental health, cardiovascular, cancer, rare diseases, metabolic and endocrine, neurological, reproductive, maternity and neonatology, respiratory, immunity, musculoskeletal, vision, renal and urogenital, oral and gastrointestinal, cognitive function or hearing.\\n- **Treatments/Interventions**: Includes any data related to treatment or interventions related to vaccines or which are preventative or therapeutic in nature.\\n- **Measurements/Tests**: Includes any data related to laboratory or other diagnostics.\\n- **Imaging types**: Includes any data related to CT, MRI, PET, x-ray, ultrasound or pathology imaging.\\n- **Imaging area of the body**: Indicates whether the dataset relates to head, chest, arm abdomen or leg imaging.\\n- **Omics**: Includes any data related to proteomics, transcriptomics, epigenomics, metabolomics, multiomics, metagenomics or genomics.\\n- **Socioeconomic**: Includes any data related to education, crime and justice, ethnicity, housing, labour, ageing, economics, marital status, social support, deprivation, religion, occupation, finances or family circumstances.\\n- **Lifestyle**: Includes any data related to smoking, physical activity, dietary habits or alcohol.\\n- **Registry**: Includes any data related to disease registries for research, national disease registries, audits, or birth and deaths records.\\n- **Environment and energy**: Includes any data related to the monitoring or study of environmental or energy factors or events.\\n- **Information and communication**: Includes any data related to the study or application of information and communication.\\n- **Politics**: Includes any data related to political views, activities, voting, etc.'
+               ,
+                "field": {
+                    "component": "Autocomplete",
+                    "options": $map($distinct($reduce( $map($component.types.options,function ($o){
+                        $o.options
+                        
+                        }), $append)),function ($o){{"label":$o,"value":$o}}),
+                    "name": "Dataset subtypes",
+                    "label": "Dataset subtypes",
+                    "placeholder": null,
+                    "required": false,
+                    "hidden": false,
+                    "freeSolo": false
+                }
+            }
+               ] : $define_single_component($component)
         })
     }
 )};
@@ -318,6 +356,7 @@ $define_array_components := function($components){(
     $demoAge := $define_array_fields($components, "demographicFrequency.age", "Demographic Frequency Age Array");
     $demoEthnicity := $define_array_fields($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
     $demoDisease := $define_array_fields($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
+    $datasetType := $define_array_fields($components, "provenance.origin.datasetType", "Dataset Type Array");
 
     [
         $derived_from_components, 
@@ -327,7 +366,8 @@ $define_array_components := function($components){(
         $obs_components,
         $demoAge,
         $demoEthnicity,
-        $demoDisease
+        $demoDisease,
+        $datasetType
     ]
 )};
 
@@ -355,6 +395,8 @@ $define_array_validation := function($components, $location, $title){(
     });
     {
         "title": $title,
+        "required": $title = "Dataset Type Array" ? true : false,
+        "minItems": $title = "Dataset Type Array" ? 1 : 0,
         "type": "array",
         "items": $map($list, $get_validation)
     }
@@ -369,6 +411,7 @@ $all_array_validation := function($components){(
     $demoAge := $define_array_validation($components, "demographicFrequency.age", "Demographic Frequency Age Array");
     $demoEthnicity := $define_array_validation($components, "demographicFrequency.ethnicity", "Demographic Frequency Ethnicity Array");
     $demoDisease := $define_array_validation($components, "demographicFrequency.disease", "Demographic Frequency Disease Array");
+    $datasetType := $define_array_validation($components, "provenance.origin.datasetType", "Dataset Type Array");
 
     [
         $derived_from_validation, 
@@ -378,7 +421,8 @@ $all_array_validation := function($components){(
         $obs_validation,
         $demoAge,
         $demoEthnicity,
-        $demoDisease
+        $demoDisease,
+        $datasetType
     ]
 )};
 

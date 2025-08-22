@@ -81,9 +81,15 @@ $getOrigin := function(){(
     "datasetType": input.provenance.origin.datasetType ? $to_str([$map(input.provenance.origin.datasetType , function($dt) {(
                 $dt.name 
             )})]) : null ,
-    "datasetSubType": input.provenance.origin.datasetType ? $to_str([$map(input.provenance.origin.datasetType , function($dt) {(
-                $to_str($dt.subTypes)
-            )})]) : null,
+    "datasetSubType": input.provenance.origin.datasetType ? $to_str([
+        $map(input.provenance.origin.datasetType, function($dt) {
+            $to_str(
+            $map($dt.subTypes, function($sx) {
+                $sx = "Occupation" ? "Labour" : $sx = "Economics" ? "Finances" : $sx
+            })
+            )
+        })
+        ]) : null,
     "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
     "description": $truncate(input.documentation.description,50000),
     "doiName": input.summary.doiName,
