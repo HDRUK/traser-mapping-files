@@ -382,7 +382,8 @@ $cleanEnumSingle := function($x, $allowed){
             "identifier": input.summary.publisher.gatewayId,
             "contactPoint": input.summary.contactPoint
         },
-        "populationSize": input.summary.populationSize
+        "populationSize": input.summary.populationSize,
+        "datasetAliases": input.summary.datasetAliases
     },
     "documentation": {
         "description": input.summary.description,
