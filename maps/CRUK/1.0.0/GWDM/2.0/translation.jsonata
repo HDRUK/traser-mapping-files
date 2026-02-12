@@ -381,9 +381,11 @@ $cleanEnumSingle := function($x, $allowed){
         "dataCustodian": {
             "name": input.summary.dataCustodian.name,
             "identifier": input.summary.dataCustodian.identifier,
-            "contactPoint": input.summary.dataCustodian.contactPoint
+            "contactPoint": input.summary.dataCustodian.contactPoint,
+            "logo": input.summary.dataCustodian.logo
         },
         "populationSize": input.summary.populationSize,
+        "funders": input.summary.funders,
         "datasetAliases": input.summary.datasetAliases
     },
     "documentation": input.documentation ? {
@@ -458,6 +460,10 @@ $cleanEnumSingle := function($x, $allowed){
         "linkableDatasets": linkableDatasets,
         "similarToDatasets": similarToDatasets
     }| : null,
+    "datasetFilters": input.datasetFilters,
+    "project": input.project,
+    "icons": input.icons,
+    "erd": input.erd,
     "observations": input.observations ~> $defaultValue([]),
     "structuralMetadata": input.structuralMetadata ? {
         "tables": input.structuralMetadata.tables,
