@@ -9,8 +9,8 @@ $ageRangeDefault := function($value, $defaultValue){
         $value = 0 ? $value : $defaultvalue
 };
 
-$safeSplit := function($x,$delim){
-    $x ? $x ~> $split($delim) : []
+$safeSplit := function($x, $delim) {
+    ($x != null and $x != "null" and $type($x) = "string") ? $x ~> $split($delim) : []
 };
 
 $nullableValues := ["",''," ","\"","Not Applicable","Not Available",
