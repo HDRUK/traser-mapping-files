@@ -1,0 +1,52 @@
+(
+{
+    "identifier": input.identifier,
+    "issued": input.issued,
+    "modified": input.modified,
+    "revisions": input.revisions,
+    "version": input.version,
+    "summary": {
+        "abstract": input.summary.abstract,
+        "contactPoint": input.summary.contactPoint,
+        "keywords": input.summary.keywords,
+        "doiName": input.summary.doiName,
+        "title": input.summary.title,
+        "dataCustodian": {
+            "name": input.summary.dataCustodian.name,
+            "identifier": input.summary.dataCustodian.identifier,
+            "contactPoint": input.summary.dataCustodian.contactPoint,
+            "logo": input.summary.dataCustodian.logo
+        },
+        "populationSize": input.summary.populationSize,
+        "funders": input.summary.funders,
+        "datasetAliases": input.summary.datasetAliases
+    },
+    "documentation": input.documentation ? {
+        "description": input.documentation.description,
+        "associatedMedia": input.documentation.associatedMedia,
+        "inPipeline": input.documentation.inPipeline
+    } : null,
+    "coverage": input.coverage ? {
+        "typicalAgeRangeMin": input.coverage.typicalAgeRangeMin,
+        "typicalAgeRangeMax": input.coverage.typicalAgeRangeMax,
+        "materialType": input.coverage.materialType,
+        "datasetCompleteness": input.coverage.datasetCompleteness,
+        "pathway": input.coverage.pathway,
+        "followUp": input.coverage.followUp
+    } : null,
+    "provenance": input.provenance ? {
+        "origin": input.provenance.origin,
+        "temporal": input.provenance.temporal
+    } : null,
+    "accessibility": input.accessibility,
+    "enrichmentAndLinkage": input.enrichmentAndLinkage,
+    "datasetFilters": input.datasetFilters,
+    "project": input.project,
+    "icons": input.icons,
+    "erd": input.erd,
+    "observations": input.observations,
+    "structuralMetadata": input.structuralMetadata,
+    "demographicFrequency": input.demographicFrequency,
+    "omics": input.omics
+}
+)
