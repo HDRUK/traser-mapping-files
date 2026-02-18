@@ -366,15 +366,18 @@ $cleanEnumSingle := function($x, $allowed){
 
 
 {
-    "identifier": input.required.gatewayPid,
-    "issued": input.required.issued,
-    "modified": input.required.modified,
-    "revisions": input.required.revisions,
-    "version": input.required.version,
+    "required": {
+        "gatewayId": input.required.gatewayId,
+        "gatewayPid": input.required.gatewayPid,
+        "issued": input.required.issued,
+        "modified": input.required.modified,
+        "revisions": input.required.revisions,
+        "version": input.required.version
+    },
     "summary": {
         "abstract": input.summary.abstract,
         "contactPoint": input.summary.contactPoint,
-        "keywords": input.summary.keywords ~> $safeSplit(';,;'),
+        "keywords": input.summary.keywords ~> $nullString,
         "doiName": input.summary.doiName,
         "title": input.summary.shortTitle,
         "dataCustodian": {
@@ -385,11 +388,6 @@ $cleanEnumSingle := function($x, $allowed){
         "populationSize": input.summary.populationSize,
         "datasetAliases": input.summary.datasetAliases
     },
-    "documentation": {
-        "description": input.summary.description,
-        "associatedMedia": input.linkage.associatedMedia,
-        "inPipeline": input.summary.inPipeline
-    },
     "coverage":  input.coverage ~> |$|{
         "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $ageRangeDefault(null),
         "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $ageRangeDefault(null),
@@ -397,44 +395,23 @@ $cleanEnumSingle := function($x, $allowed){
     },['followup','typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
     "provenance": {
         "origin": {
-            "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
-            "source": input.provenance.origin.source  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSource),
-            "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
-            "datasetType": [
-                $map(input.summary.datasetType ~> $safeSplit(';,;') , function($dt) {(
-                $mainKey := $dt;
-                $sub := input.summary.datasetSubType ~> $safeSplit(';,;');
-                $lookUpList :=[$lookup($datasetMap, $mainKey)];
-                $allowedSubs := $filter(
-                    $map($sub, function($sx) {
-                      (
-                    $mapped := $sx = "Labour" ? "Occupation" : $sx = "Finances" ? "Economics" : $sx;
-                    $mapped in $lookUpList ? $mapped : null
-                    )
-                    }),
-                    function($v) { $v }
-                );
-                {
-                    "name": $mainKey,
-                    "subTypes": [$allowedSubs]
-                }
-               
-            )
-            })],
+            "purpose": input.provenance.origin.purpose ~> $nullString,
+            "source": input.provenance.origin.source ~> $nullString,
+            "collectionSituation": input.provenance.origin.collectionSituation ~> $nullString,
             "imageContrast": input.provenance.origin.imageContrast
         },
         "temporal": { /* input.provenance.temporal */
             "endDate": input.provenance.temporal.endDate ~> $nullString,
             "startDate": input.provenance.temporal.startDate ~> $nullString ~> $defaultValue("1970-01-01"),
             "timeLag": $cleanEnumSingle(input.provenance.temporal.timeLag, $allowedTimeLag) ~> $defaultValue('Not applicable'),
-            "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency) ~> $defaultValue("Other"),
+            "accrualPeriodicity": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency) ~> $defaultValue("Other"),
             "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
         }
     },
     "accessibility": input.accessibility ~> |$|{
         "access": access ~> |$|{
             "accessServiceCategory": accessServiceCategory ~> $cleanEnumSingle($allowedServiceCategory) ~> $defaultValue(null),
-            "jurisdiction": $safeSplit(jurisdiction, ";,;")
+            "jurisdiction": jurisdiction ~> $nullString
         }|,  
         "usage": usage ? usage ~> |$|{
             "dataUseRequirements": $safeSplit(dataUseRequirement,";,;") ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
@@ -449,21 +426,22 @@ $cleanEnumSingle := function($x, $allowed){
             "conformsTo": $safeSplit(conformsTo, ";,;") ~> $cleanEnum($allowedStandards) ~> $defaultValue([])
         }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
-    "enrichmentAndLinkage": input.linkage ~> |$|{
-        "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")) ~> $nullList,
-        "investigations": $defaultValue($$.extra.linkages.investigations, investigations ~> $safeSplit(";,;")) ~> $nullList,
-        "derivedFrom": datasetLinkage.isDerivedFrom,
-        "isPartOf": datasetLinkage.isPartOf,
-        "linkableDatasets": datasetLinkage.linkedDatasets,
-        "similarToDatasets": datasetLinkage.isMemberOf
-    }, ['dataUses','isGeneratedUsing','associatedMedia','isReferenceIn','syntheticDataWebLink','datasetLinkage']|,
+    "linkage": input.linkage ~> |$|{
+        "tools": $type(tools) = "string" ? tools : ($type(tools) = "array" and $count(tools) > 0 ? $join(tools, ",") : null),
+        "isGeneratedUsing": $type(investigations) = "string" ? investigations : ($type(investigations) = "array" and $count(investigations) > 0 ? $join(investigations, ",") : null),
+        "associatedMedia": $type(associatedMedia) = "string" ? associatedMedia : null,
+        "dataUses": $type(dataUses) = "string" ? dataUses : null,
+        "isReferenceIn": $type(isReferenceIn) = "string" ? isReferenceIn : null,
+        "datasetLinkage": datasetLinkage
+    }|,
     "observations": input.observations ~> $defaultValue([]),
-    "structuralMetadata": {
-        "tables": input.structuralMetadata,
-        "syntheticDataWebLink": $safeSplit(input.linkage.syntheticDataWebLink, ";,;")
-    },
+    "structuralMetadata": $type(input.structuralMetadata) = "array" ? input.structuralMetadata : null,
     "demographicFrequency": input.demographicFrequency,
-    "omics": input.omics
+    "omics": input.omics,
+    "datasetFilters": null,
+    "project": null,
+    "icons": null,
+    "erd": null
 }
 
 )
