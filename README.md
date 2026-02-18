@@ -44,4 +44,3 @@ This project leverages **[JSONata](https://jsonata.org/)** for powerful, flexibl
 ---
 
 For further support, please raise an issue or contribute via a pull request!
-
