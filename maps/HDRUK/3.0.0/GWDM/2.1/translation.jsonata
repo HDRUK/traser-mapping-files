@@ -427,7 +427,11 @@ $cleanEnumSingle := function($x, $allowed){
         "syntheticDataWebLink": $safeSplit(input.linkage.syntheticDataWebLink, ";,;")
     },
     "demographicFrequency": input.demographicFrequency,
-    "omics": input.omics
+    "omics": input.omics,
+    "datasetFilters": null,
+    "project": null,
+    "icons": null,
+    "erd": null
 }
 
 )

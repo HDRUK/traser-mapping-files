@@ -1,4 +1,12 @@
 (
-/* GWDM 2.0 to 2.1: schema structure is identical (only root title differs: Gwdm21 vs Gwdm20). Pass-through. */
-input
+/* GWDM 2.0 to 2.1: 2.1 adds optional root properties datasetFilters, project, icons, erd. Merge input with these (from input or null). */
+$merge([
+    input,
+    {
+        "datasetFilters": $exists(input.datasetFilters) ? input.datasetFilters : null,
+        "project": $exists(input.project) ? input.project : null,
+        "icons": $exists(input.icons) ? input.icons : null,
+        "erd": $exists(input.erd) ? input.erd : null
+    }
+])
 )
