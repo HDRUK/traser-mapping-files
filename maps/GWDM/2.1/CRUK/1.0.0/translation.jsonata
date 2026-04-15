@@ -56,7 +56,12 @@ $normaliseTimeLag := function($x) {
 };
 
 $lineSeparated := function($x) {
-  $type($x) = "array" ? $join($x, "\n") : $x
+  $type($x) = "array"
+    ? $join(
+        $map($x, function($g){ $string($g.grantNumber ? $g.grantNumber : $g.pid) }),
+        "\n"
+      )
+    : $x
 };
 
 $normaliseErd := function($x) {
