@@ -98,6 +98,24 @@ $appendOtherDataTypesToDescription := function($base) {
   )
 };
 
+$escapeFilterValue := function($x) {
+  $replace($string($x), "'", "\\'")
+};
+
+$normaliseDatasetFilters := function($x) {
+  (
+    $items := $type($x) = "array" ? $x : [];
+    $count($items) = 0 ? null :
+      $map($items, function($f) {
+        "{'id':'" & $escapeFilterValue($f.id) &
+        "','label':'" & $escapeFilterValue($f.label) &
+        "','category':'" & $escapeFilterValue($f.category) &
+        "','primaryGroup':'" & $escapeFilterValue($f.primaryGroup) &
+        "','description':'" & $escapeFilterValue($f.description) & "'}"
+      })
+  )
+};
+
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
@@ -249,7 +267,7 @@ $getOrigin := function(){(
   "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : null,
   "omics": input.omics ? input.omics : null,
 
-  "datasetFilters": $exists(input.datasetFilters) ? input.datasetFilters : null,
+  "datasetFilters": $exists(input.datasetFilters) ? $normaliseDatasetFilters(input.datasetFilters) : null,
   "project": $normaliseProject(input.project),
   "icons": $exists(input.icons) ? input.icons : null,
   "erd": $exists(input.erd) ? $normaliseErd(input.erd) : null
