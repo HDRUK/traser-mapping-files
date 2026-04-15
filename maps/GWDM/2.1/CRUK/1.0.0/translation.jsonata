@@ -55,6 +55,22 @@ $normaliseTimeLag := function($x) {
   )
 };
 
+$lineSeparated := function($x) {
+  $type($x) = "array" ? $join($x, "\n") : $x
+};
+
+$normaliseErd := function($x) {
+  $x = null ? null :
+  $type($x) = "string" ? { "image": $string($x), "description": null } :
+  $x
+};
+
+$normaliseProject := function($x) {
+  $exists($x) ? $x :
+  $exists(input.projectGrants) ? { "grantNumbers": $lineSeparated(input.projectGrants) } :
+  null
+};
+
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
@@ -204,6 +220,11 @@ $getOrigin := function(){(
       }
     })] : [],
   "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : null,
-  "omics": input.omics ? input.omics : null
+  "omics": input.omics ? input.omics : null,
+
+  "datasetFilters": $exists(input.datasetFilters) ? input.datasetFilters : null,
+  "project": $normaliseProject(input.project),
+  "icons": $exists(input.icons) ? input.icons : null,
+  "erd": $exists(input.erd) ? $normaliseErd(input.erd) : null
 };
 )
