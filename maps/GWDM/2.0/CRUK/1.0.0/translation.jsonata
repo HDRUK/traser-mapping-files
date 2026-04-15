@@ -32,6 +32,29 @@ $isEmptyValue := function($value) {
   $value = null or $value = "" or $value = {}
 };
 
+$allowedTimeLag := [
+  "Less than 1 week",
+  "1-2 weeks",
+  "2-4 weeks",
+  "1-2 months",
+  "2-6 months",
+  "More than 6 months",
+  "Variable",
+  "Not applicable",
+  "Other"
+];
+
+$normaliseTimeLag := function($x) {
+  (
+    $v := $string($x);
+    $v = "" or $v = "null" ? "Not applicable" :
+    $v in $allowedTimeLag ? $v :
+    $lowercase($v) = "not applicable" ? "Not applicable" :
+    $lowercase($v) = "n/a" ? "Not applicable" :
+    "Other"
+  )
+};
+
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
@@ -116,7 +139,7 @@ $getOrigin := function(){(
     "temporal": {
       "endDate": input.provenance.temporal.endDate,
       "startDate": input.provenance.temporal.startDate,
-      "timeLag": input.provenance.temporal.timeLag ? input.provenance.temporal.timeLag : null,
+      "timeLag": $normaliseTimeLag(input.provenance.temporal.timeLag),
       "accrualPeriodicity": input.provenance.temporal.publishingFrequency ? input.provenance.temporal.publishingFrequency : null,
       "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
     }
