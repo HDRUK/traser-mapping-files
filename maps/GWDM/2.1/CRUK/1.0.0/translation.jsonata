@@ -98,26 +98,9 @@ $appendOtherDataTypesToDescription := function($base) {
   )
 };
 
-$escapeFilterValue := function($x) {
-  (
-    $s := $string($x);
-    $s := $replace($s, "\\\\", "\\\\\\\\");
-    $replace($s, "\"", "\\\\\"")
-  )
-};
-
+/* GWDM 2.1 now models datasetFilters as objects (not stringified objects). */
 $normaliseDatasetFilters := function($x) {
-  (
-    $items := $type($x) = "array" ? $x : [];
-    $count($items) = 0 ? null :
-      $map($items, function($f) {
-        "{\"id\":\"" & $escapeFilterValue($f.id) &
-        "\",\"label\":\"" & $escapeFilterValue($f.label) &
-        "\",\"category\":\"" & $escapeFilterValue($f.category) &
-        "\",\"primaryGroup\":\"" & $escapeFilterValue($f.primaryGroup) &
-        "\",\"description\":\"" & $escapeFilterValue($f.description) & "\"}"
-      })
-  )
+  $type($x) = "array" ? $x : null
 };
 
 $getDatasetLinkage := function() {
@@ -271,7 +254,7 @@ $getOrigin := function(){(
   "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : null,
   "omics": input.omics ? input.omics : null,
 
-  "datasetFilters": $exists(input.datasetFilters) ? $normaliseDatasetFilters(input.datasetFilters) : null,
+  "datasetFilters": $normaliseDatasetFilters(input.datasetFilters),
   "projectGrants": $exists(input.projectGrants) ? input.projectGrants : null,
   "icons": $exists(input.icons) ? input.icons : null,
   "erd": $exists(input.erd) ? $normaliseErd(input.erd) : null
