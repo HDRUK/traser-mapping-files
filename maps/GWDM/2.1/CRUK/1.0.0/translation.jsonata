@@ -99,7 +99,11 @@ $appendOtherDataTypesToDescription := function($base) {
 };
 
 $escapeFilterValue := function($x) {
-  $replace($string($x), "'", "\\'")
+  (
+    $s := $string($x);
+    $s := $replace($s, "\\\\", "\\\\\\\\");
+    $replace($s, "\"", "\\\\\"")
+  )
 };
 
 $normaliseDatasetFilters := function($x) {
@@ -107,11 +111,11 @@ $normaliseDatasetFilters := function($x) {
     $items := $type($x) = "array" ? $x : [];
     $count($items) = 0 ? null :
       $map($items, function($f) {
-        "{'id':'" & $escapeFilterValue($f.id) &
-        "','label':'" & $escapeFilterValue($f.label) &
-        "','category':'" & $escapeFilterValue($f.category) &
-        "','primaryGroup':'" & $escapeFilterValue($f.primaryGroup) &
-        "','description':'" & $escapeFilterValue($f.description) & "'}"
+        "{\"id\":\"" & $escapeFilterValue($f.id) &
+        "\",\"label\":\"" & $escapeFilterValue($f.label) &
+        "\",\"category\":\"" & $escapeFilterValue($f.category) &
+        "\",\"primaryGroup\":\"" & $escapeFilterValue($f.primaryGroup) &
+        "\",\"description\":\"" & $escapeFilterValue($f.description) & "\"}"
       })
   )
 };
