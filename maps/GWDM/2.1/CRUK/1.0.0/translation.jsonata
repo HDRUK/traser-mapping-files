@@ -272,7 +272,7 @@ $getOrigin := function(){(
   "omics": input.omics ? input.omics : null,
 
   "datasetFilters": $exists(input.datasetFilters) ? $normaliseDatasetFilters(input.datasetFilters) : null,
-  "project": $normaliseProject(input.project),
+  "projectGrants": $exists(input.projectGrants) ? input.projectGrants : null,
   "icons": $exists(input.icons) ? input.icons : null,
   "erd": $exists(input.erd) ? $normaliseErd(input.erd) : null
 };

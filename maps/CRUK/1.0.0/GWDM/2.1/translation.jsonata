@@ -363,8 +363,27 @@ $cleanEnumSingle := function($x, $allowed){
     $tryMatchEnum($x, $allowed)
 };
 
+$projectToProjectGrants := function($p) {
+    (
+        $p = null ? null :
+        [
+            {
+                "pid": null,
+                "projectGrantName": $p.projectName,
+                "leadResearcher": $p.leadResearcher,
+                "leadResearchInstitute": $p.leadResearchInstitute,
+                "grantNumber": $p.grantNumbers,
+                "projectGrantStartDate": $p.projectStartDate,
+                "projectGrantEndDate": $p.projectEndDate,
+                "projectGrantScope": $p.projectScope
+            }
+        ]
+    )
+};
 
-
+$projectGrantsFromGwdm := function() {
+    $exists(input.projectGrants) ? input.projectGrants : $projectToProjectGrants(input.project)
+};
 
 {
     "identifier": input.identifier,
@@ -461,7 +480,7 @@ $cleanEnumSingle := function($x, $allowed){
         "similarToDatasets": similarToDatasets
     }| : null,
     "datasetFilters": input.datasetFilters,
-    "project": input.project,
+    "projectGrants": $projectGrantsFromGwdm(),
     "icons": input.icons,
     "erd": input.erd,
     "observations": input.observations ~> $defaultValue([]),
