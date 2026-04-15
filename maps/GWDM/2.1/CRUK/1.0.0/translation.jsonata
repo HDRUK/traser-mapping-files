@@ -76,6 +76,28 @@ $normaliseProject := function($x) {
   null
 };
 
+$formatOtherDataTypes := function($x) {
+  (
+    $items := $type($x) = "array" ? $x : [];
+    $count($items) = 0 ? null :
+      $join(
+        $map($items, function($d) {
+          "- " & $string($d.title) &
+          ($d.format ? (" (" & $string($d.format) & ")") : "") &
+          ($d.description ? (": " & $string($d.description)) : "")
+        }),
+        "\n"
+      )
+  )
+};
+
+$appendOtherDataTypesToDescription := function($base) {
+  (
+    $extra := $formatOtherDataTypes(input.otherDataTypes);
+    $extra ? ($base ? ($base & "\n\nOther data types:\n" & $extra) : ("Other data types:\n" & $extra)) : $base
+  )
+};
+
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
@@ -137,7 +159,7 @@ $getOrigin := function(){(
         })
         ]) : null,
     "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
-    "description": $truncate(input.documentation.description,50000),
+    "description": $truncate($appendOtherDataTypesToDescription(input.documentation.description),50000),
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
