@@ -43,6 +43,24 @@
       },
       {
             "output_model": "HDRUK",
+            "output_version": "4.0.0",
+            "input_model": "HDRUK",
+            "input_version": "3.0.0"
+      },
+      {
+            "output_model": "HDRUK",
+            "output_version": "4.0.0",
+            "input_model": "GWDM",
+            "input_version": "2.0"
+      },
+      {
+            "output_model": "HDRUK",
+            "output_version": "4.0.0",
+            "input_model": "GWDM",
+            "input_version": "2.1"
+      },
+      {
+            "output_model": "HDRUK",
             "output_version": "3.0.0",
             "input_model": "HDRUK",
             "input_version": "datasetv2"
@@ -50,18 +68,6 @@
       {
             "output_model": "HDRUK",
             "output_version": "3.0.0",
-            "input_model": "HDRUK",
-            "input_version": "4.0.0"
-      },
-      {
-            "output_model": "HDRUK",
-            "output_version": "4.0.0",
-            "input_model": "HDRUK",
-            "input_version": "3.0.0"
-      },
-      {
-            "output_model": "GWDM",
-            "output_version": "2.0",
             "input_model": "HDRUK",
             "input_version": "4.0.0"
       },
@@ -76,6 +82,12 @@
             "output_version": "3.0.0",
             "input_model": "GWDM",
             "input_version": "2.0"
+      },
+      {
+            "output_model": "HDRUK",
+            "output_version": "3.0.0",
+            "input_model": "GWDM",
+            "input_version": "2.1"
       },
       {
             "output_model": "HDRUK",
@@ -112,6 +124,18 @@
             "output_version": "2.2.0",
             "input_model": "GWDM",
             "input_version": "1.1"
+      },
+      {
+            "output_model": "CRUK",
+            "output_version": "1.0.0",
+            "input_model": "GWDM",
+            "input_version": "2.1"
+      },
+      {
+            "output_model": "CRUK",
+            "output_version": "1.0.0",
+            "input_model": "GWDM",
+            "input_version": "2.0"
       },
       {
             "output_model": "GWDM",
@@ -165,19 +189,49 @@
             "output_model": "GWDM",
             "output_version": "2.0",
             "input_model": "HDRUK",
+            "input_version": "4.0.0"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.0",
+            "input_model": "HDRUK",
             "input_version": "3.0.0"
       },
       {
-            "output_model": "HDRUK",
-            "output_version": "4.0.0",
+            "output_model": "GWDM",
+            "output_version": "2.0",
+            "input_model": "CRUK",
+            "input_version": "1.0.0"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.0",
             "input_model": "GWDM",
-            "input_version": "2.0"
+            "input_version": "2.1"
       },
       {
             "output_model": "GWDM",
             "output_version": "2.0",
             "input_model": "GWDM",
             "input_version": "1.2"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.1",
+            "input_model": "HDRUK",
+            "input_version": "4.0.0"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.1",
+            "input_model": "HDRUK",
+            "input_version": "3.0.0"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.1",
+            "input_model": "CRUK",
+            "input_version": "1.0.0"
       },
       {
             "output_model": "GWDM",
