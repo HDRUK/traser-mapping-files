@@ -311,7 +311,7 @@ $fixDeliveryLeadTime := function($x){
   $not($x in deliveryLeadTime_values) ? null : $x
 };
 
-$doi_matcher := /10.\d{4,9}[-._;()/:a-zA-Z0-9]+(?=[\s,/]|$)/i;
+$doi_matcher := /10\.\d{4,9}[-._;()/:a-zA-Z0-9]+(?=[\s,/]|$)/i;
 
 $extract_doi := function($x){
   $match($x,$doi_matcher) ~> 
