@@ -314,11 +314,7 @@ $fixDeliveryLeadTime := function($x){
 $doi_matcher := /10\.\d{4,9}[-._;()/:a-zA-Z0-9]+(?=[\s,/]|$)/i;
 
 $extract_doi := function($x){
-  $match($x,$doi_matcher) ~> 
-  $map(function($m){
-    $m.match
-  }) ~> 
-  $join(",") 
+  $join($match($x,$doi_matcher).match, ",")
 };
 
 $get_date := function($x){
