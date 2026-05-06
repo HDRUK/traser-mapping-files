@@ -7,7 +7,9 @@ $to_str := function($x){
 };
 
 $extract_media := function($x){
-  $type($x)="array" ? $join($x.url, ',') : $x
+  $type($x) = "array"
+    ? $join($map($x, function($v){ $type($v) = "object" ? $v.url : $v }), ',')
+    : $x
 };
 
 $truncate := function($x,$length){
