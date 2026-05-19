@@ -1,4 +1,8 @@
 (
-/* GWDM 2.0 -> 2.1: 2.0 documents are a valid subset of the 2.1 schema. */
-input
+/* GWDM 2.0 -> 2.1: add GWDM 2.1 summary fields not present on 2.0 outputs. */
+input ~> |$| {
+  "summary": summary ~> |$| {
+    "funders": $exists(funders) ? funders : []
+  }|
+}|
 )
