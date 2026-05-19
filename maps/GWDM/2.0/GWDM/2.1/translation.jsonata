@@ -1,0 +1,4 @@
+(
+/* GWDM 2.0 -> 2.1: 2.0 documents are a valid subset of the 2.1 schema. */
+input
+)

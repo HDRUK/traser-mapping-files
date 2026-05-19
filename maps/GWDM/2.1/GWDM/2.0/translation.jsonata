@@ -1,0 +1,4 @@
+(
+/* GWDM 2.1 -> 2.0: drop fields introduced in GWDM 2.1 (see GWDM/2.1/CRUK map). */
+input ~> |$|{}, ['datasetFilters', 'projectGrants', 'icons', 'erd', 'otherDataTypes']|
+)
