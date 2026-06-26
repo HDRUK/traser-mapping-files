@@ -1,11 +1,15 @@
 (
 /*function to enforce any arrays to be strings */
 $to_str := function($x){
-  $type($x)="array" ? $join($x,';,;') : $x
+  $x = null ? "" :
+  $type($x) = "array" ? $join($x,';,;') :
+  $x
 };
 
 $extract_media := function($x){
-  $type($x)="array" ? $join($x.url, ',') : $x
+  $type($x) = "array"
+    ? $join($map($x, function($v){ $type($v) = "object" ? $v.url : $v }), ',')
+    : $x
 };
 
 $truncate := function($x,$length){
@@ -95,6 +99,7 @@ $getOrigin := function(){(
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
+    "datasetAliases": input.summary.datasetAliases,
     "publisher": {
       "name": input.summary.dataCustodian.name ? input.summary.dataCustodian.name : extra.publisherName ? extra.publisherName : null,
       "gatewayId": input.summary.dataCustodian.identifier ? $truncate(input.summary.dataCustodian.identifier, 50) : extra.publisherId ? extra.publisherId : null

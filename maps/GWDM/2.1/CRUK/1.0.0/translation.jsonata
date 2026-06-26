@@ -1,15 +1,13 @@
 (
 /*function to enforce any arrays to be strings */
 $to_str := function($x){
-  $type($x)="array"
-  ? $join($map($x, function($v){ $string($v) }), ';,;')
-  : $string($x)
+  $x = null ? "" :
+  $type($x) = "array" ? $join($x,';,;') :
+  $x
 };
 
 $extract_media := function($x){
-  $type($x) = "array"
-    ? $join($map($x, function($v){ $type($v) = "object" ? $v.url : $v }), ',')
-    : $x
+  $type($x)="array" ? $join($x.url, ',') : $x
 };
 
 $truncate := function($x,$length){
@@ -33,6 +31,88 @@ $joinTypicalAgeRange := function($min, $max){(
 $isEmptyValue := function($value) {
   $value = null or $value = "" or $value = {}
 };
+
+$allowedTimeLag := [
+  "Less than 1 week",
+  "1-2 weeks",
+  "2-4 weeks",
+  "1-2 months",
+  "2-6 months",
+  "More than 6 months",
+  "Variable",
+  "Not applicable",
+  "Other"
+];
+
+$normaliseTimeLag := function($x) {
+  (
+    $v := $string($x);
+    $v = "" or $v = "null" ? "Not applicable" :
+    $v in $allowedTimeLag ? $v :
+    $lowercase($v) = "not applicable" ? "Not applicable" :
+    $lowercase($v) = "n/a" ? "Not applicable" :
+    "Other"
+  )
+};
+
+$lineSeparated := function($x) {
+  $type($x) = "array"
+    ? $join(
+        $map($x, function($g){ $string($g.grantNumber ? $g.grantNumber : $g.pid) }),
+        "\n"
+      )
+    : $x
+};
+
+$normaliseErd := function($x) {
+  $x = null ? null :
+  $type($x) = "string" ? { "image": $string($x), "description": null } :
+  $x
+};
+
+$normaliseProject := function($x) {
+  $exists($x) ? $x :
+  $exists(input.projectGrants) ? { "grantNumbers": $lineSeparated(input.projectGrants) } :
+  null
+};
+
+$formatOtherDataTypes := function($x) {
+  (
+    $items := $type($x) = "array" ? $x : [];
+    $count($items) = 0 ? null :
+      $join(
+        $map($items, function($d) {
+          "- " & $string($d.title) &
+          ($d.format ? (" (" & $string($d.format) & ")") : "") &
+          ($d.description ? (": " & $string($d.description)) : "")
+        }),
+        "\n"
+      )
+  )
+};
+
+$appendOtherDataTypesToDescription := function($base) {
+  (
+    $extra := $formatOtherDataTypes(input.otherDataTypes);
+    $extra ? ($base ? ($base & "\n\nOther data types:\n" & $extra) : ("Other data types:\n" & $extra)) : $base
+  )
+};
+
+/* GWDM 2.1 now models datasetFilters as objects (not stringified objects). */
+$normaliseDatasetFilters := function($x) {
+  $type($x) = "array" ? $x : null
+};
+
+$leadFromProject := function() {(
+  $pg := $exists(input.projectGrants) and $count(input.projectGrants) > 0 ? input.projectGrants[0] : null;
+  $p := $exists(input.project) ? input.project : null;
+  {
+    "leadResearcher": $pg.leadResearcher ? $pg.leadResearcher : $p.leadResearcher,
+    "leadResearchInstitute": $pg.leadResearchInstitute ? $pg.leadResearchInstitute : $p.leadResearchInstitute
+  }
+)};
+
+$lead := $leadFromProject();
 
 $getDatasetLinkage := function() {
   (
@@ -81,15 +161,27 @@ $getOrigin := function(){(
     "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
       $v in extra.controlledKeywords
     })]),
-    "datasetType": input.provenance.origin.datasetType ? $to_str(input.provenance.origin.datasetType) :
-        extra.datasetType ? $to_str(extra.datasetType) : null,
-    "datasetSubType": input.provenance.origin.datasetSubType ? $to_str(input.provenance.origin.datasetSubType) :
-        extra.datasetSubType ? $to_str(extra.datasetSubType) : null,
+    
+    "datasetType": input.provenance.origin.datasetType ? $to_str([$map(input.provenance.origin.datasetType , function($dt) {(
+                $dt.name 
+            )})]) : null ,
+    "datasetSubType": input.provenance.origin.datasetType ? $to_str([
+        $map(input.provenance.origin.datasetType, function($dt) {
+            $to_str(
+            $map($dt.subTypes, function($sx) {
+                $sx = "Occupation" ? "Labour" : $sx = "Economics" ? "Finances" : $sx
+            })
+            )
+        })
+        ]) : null,
     "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
-    "description": $truncate(input.documentation.description,50000),
+    "description": $truncate($appendOtherDataTypesToDescription(input.documentation.description),50000),
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
+    "leadResearcher": $lead.leadResearcher,
+    "leadResearchInstitute": $lead.leadResearchInstitute,
+    "datasetAliases": input.summary.datasetAliases,
     "publisher": {
       "name": input.summary.dataCustodian.name ? input.summary.dataCustodian.name : extra.publisherName ? extra.publisherName : null,
       "gatewayId": input.summary.dataCustodian.identifier ? $truncate(input.summary.dataCustodian.identifier, 50) : extra.publisherId ? extra.publisherId : null
@@ -108,7 +200,7 @@ $getOrigin := function(){(
     "temporal": {
       "endDate": input.provenance.temporal.endDate,
       "startDate": input.provenance.temporal.startDate,
-      "timeLag": input.provenance.temporal.timeLag ? input.provenance.temporal.timeLag : null,
+      "timeLag": $normaliseTimeLag(input.provenance.temporal.timeLag),
       "accrualPeriodicity": input.provenance.temporal.publishingFrequency ? input.provenance.temporal.publishingFrequency : null,
       "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
     }
@@ -173,6 +265,11 @@ $getOrigin := function(){(
       }
     })] : [],
   "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : null,
-  "omics": input.omics ? input.omics : null
+  "omics": input.omics ? input.omics : null,
+
+  "datasetFilters": $normaliseDatasetFilters(input.datasetFilters),
+  "projectGrants": $exists(input.projectGrants) ? input.projectGrants : null,
+  "icons": $exists(input.icons) ? input.icons : null,
+  "erd": $exists(input.erd) ? $normaliseErd(input.erd) : null
 };
 )
