@@ -439,7 +439,7 @@ $cleanEnumSingle := function($x, $allowed){
         "usage": usage ? usage ~> |$|{
             "dataUseRequirements": $safeSplit(dataUseRequirement,";,;") ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
             "dataUseLimitation": $safeSplit(dataUseLimitation,";,;") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
-            "resourceCreator": resourceCreator.name
+            "resourceCreator": resourceCreator.name ~> $safeSplit(";,;") ~> $join(", ")
         }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": vocabularyEncodingSchemes ?
