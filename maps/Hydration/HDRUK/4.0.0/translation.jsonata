@@ -59,6 +59,15 @@ $hiddenFields := $append(
     $hiddenByDataType(dataTypes)
 );
 
+/* the schema has this called a uri but the FE has it called url */
+$formatMap := {
+    "uri": "url"
+};
+
+$mapFormat := function($format){
+    $exists($lookup($formatMap, $format)) ? $lookup($formatMap, $format) : $format
+};
+
 $textArea := function($component){
     {
         "component": "TextArea",
@@ -130,7 +139,7 @@ $autoComplete := function($component){
         "required": $not($component.is_optional),
         "hidden": $isHidden($component.location),
         "freeSolo": $component.types.options ? false : true,
-        "format": $component.types.format = "uri" ? "url" : $component.types.format
+        "format": $mapFormat($component.types.format)
     }
 };
 
@@ -176,7 +185,7 @@ $getItemsType := function($types){
     $types.format ?
         {
             "type": $types.type,
-            "format": $types.format = "uri" ? "url" : $types.format
+            "format": $mapFormat($types.format)
         } :
     $types.pattern ?
         {
@@ -210,7 +219,7 @@ $formatValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": $component.types.type,
-        "format": $component.types.format = "uri" ? "url" : $component.types.format
+        "format": $mapFormat($component.types.format)
     }
 };
 
