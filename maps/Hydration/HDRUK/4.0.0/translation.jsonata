@@ -129,7 +129,8 @@ $autoComplete := function($component){
         "placeholder": $component.examples[0],
         "required": $not($component.is_optional),
         "hidden": $isHidden($component.location),
-        "freeSolo": $component.types.options ? false : true
+        "freeSolo": $component.types.options ? false : true,
+        "format": $component.types.format = "uri" ? "url" : $component.types.format
     }
 };
 
@@ -175,8 +176,8 @@ $getItemsType := function($types){
     $types.format ?
         {
             "type": $types.type,
-            "format": $types.format
-        } : 
+            "format": $types.format = "uri" ? "url" : $types.format
+        } :
     $types.pattern ?
         {
             "type": $types.type,
