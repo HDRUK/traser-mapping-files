@@ -138,8 +138,7 @@ $autoComplete := function($component){
         "placeholder": $component.examples[0],
         "required": $not($component.is_optional),
         "hidden": $isHidden($component.location),
-        "freeSolo": $component.types.options ? false : true,
-        "format": $mapFormat($component.types.format)
+        "freeSolo": $component.types.options ? false : true
     }
 };
 
