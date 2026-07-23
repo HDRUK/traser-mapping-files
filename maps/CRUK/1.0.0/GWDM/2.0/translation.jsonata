@@ -9,8 +9,9 @@ $ageRangeDefault := function($value, $defaultValue){
         $value = 0 ? $value : $defaultvalue
 };
 
-$safeSplit := function($x, $delim) {
-    ($x != null and $x != "null" and $type($x) = "string") ? $x ~> $split($delim) : []
+$safeSplit := function($x,$delim){
+    $type($x) = "array" ? $x :
+        $x ? $x ~> $split($delim) : []
 };
 
 $nullableValues := ["",''," ","\"","Not Applicable","Not Available",
@@ -331,7 +332,7 @@ $allowedMaterialTypes := [
 ];
 
 $getMaterialType := function($tissue){
-    $tissue.materialType ~> $cleanEnumSingle($allowedMaterialTypes) ~> $defaultValue("None/not available")
+    ($type($tissue) = "string" ? $tissue : $tissue.materialType) ~> $cleanEnumSingle($allowedMaterialTypes) ~> $defaultValue("None/not available")
 };
 
 $isValidString := function($str) { $type($str) = "string" and $str != null and $str != "" };
@@ -366,44 +367,46 @@ $cleanEnumSingle := function($x, $allowed){
 
 
 {
-    "identifier": input.required.gatewayPid,
-    "issued": input.required.issued,
-    "modified": input.required.modified,
-    "revisions": input.required.revisions,
-    "version": input.required.version,
+    "identifier": input.identifier,
+    "issued": input.issued,
+    "modified": input.modified,
+    "revisions": input.revisions,
+    "version": input.version,
     "summary": {
         "abstract": input.summary.abstract,
         "contactPoint": input.summary.contactPoint,
-        "keywords": input.summary.keywords ~> $safeSplit(';,;'),
+        "keywords": input.summary.keywords,
         "doiName": input.summary.doiName,
-        "title": input.summary.shortTitle,
+        "title": input.summary.title,
         "dataCustodian": {
-            "name": input.summary.publisher.name,
-            "identifier": input.summary.publisher.gatewayId,
-            "contactPoint": input.summary.contactPoint
+            "name": input.summary.dataCustodian.name,
+            "identifier": input.summary.dataCustodian.identifier,
+            "contactPoint": input.summary.dataCustodian.contactPoint,
+            "logo": input.summary.dataCustodian.logo
         },
         "populationSize": input.summary.populationSize,
+        "funders": input.summary.funders,
         "datasetAliases": input.summary.datasetAliases
     },
-    "documentation": {
-        "description": input.summary.description,
-        "associatedMedia": input.linkage.associatedMedia,
-        "inPipeline": input.summary.inPipeline
-    },
+    "documentation": input.documentation ? {
+        "description": input.documentation.description,
+        "associatedMedia": input.documentation.associatedMedia,
+        "inPipeline": input.documentation.inPipeline
+    } : null,
     "coverage":  input.coverage ~> |$|{
-        "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $ageRangeDefault(null),
-        "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $ageRangeDefault(null),
-        "materialType": $$.input.tissuesSampleCollection ? [$map($$.input.tissuesSampleCollection, $getMaterialType)] : ["None/not available"]
-    },['followup','typicalAgeRange','gender','biologicalsamples','psychological','physical','anthropometric','lifestyle','socioeconomic']|, 
+        "typicalAgeRangeMin": $ageRangeDefault(typicalAgeRangeMin, null),
+        "typicalAgeRangeMax": $ageRangeDefault(typicalAgeRangeMax, null),
+        "materialType": materialType ? [$map(materialType, $getMaterialType)] : ["None/not available"]
+    },['datasetCompleteness','pathway','followUp']|, 
     "provenance": {
-        "origin": {
+        "origin": input.provenance.origin ? {
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
             "source": input.provenance.origin.source  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSource),
-            "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
+            "collectionSource": input.provenance.origin.collectionSource  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
             "datasetType": [
-                $map(input.summary.datasetType ~> $safeSplit(';,;') , function($dt) {(
-                $mainKey := $dt;
-                $sub := input.summary.datasetSubType ~> $safeSplit(';,;');
+                $map(input.provenance.origin.datasetType, function($dt) {(
+                $mainKey := $dt.name;
+                $sub := $type($dt.subTypes) = "array" ? $dt.subTypes : [];
                 $lookUpList :=[$lookup($datasetMap, $mainKey)];
                 $allowedSubs := $filter(
                     $map($sub, function($sx) {
@@ -422,12 +425,12 @@ $cleanEnumSingle := function($x, $allowed){
             )
             })],
             "imageContrast": input.provenance.origin.imageContrast
-        },
+        } : null,
         "temporal": { /* input.provenance.temporal */
             "endDate": input.provenance.temporal.endDate ~> $nullString,
             "startDate": input.provenance.temporal.startDate ~> $nullString ~> $defaultValue("1970-01-01"),
             "timeLag": $cleanEnumSingle(input.provenance.temporal.timeLag, $allowedTimeLag) ~> $defaultValue('Not applicable'),
-            "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency) ~> $defaultValue("Other"),
+            "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.publishingFrequency, $allowedPublishingFrequency) ~> $defaultValue("Other"),
             "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
         }
     },
@@ -437,31 +440,35 @@ $cleanEnumSingle := function($x, $allowed){
             "jurisdiction": $safeSplit(jurisdiction, ";,;")
         }|,  
         "usage": usage ? usage ~> |$|{
-            "dataUseRequirements": $safeSplit(dataUseRequirement,";,;") ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
+            "dataUseRequirements": $safeSplit(dataUseRequirements,";,;") ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
             "dataUseLimitation": $safeSplit(dataUseLimitation,";,;") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
-            "resourceCreator": resourceCreator.name ~> $safeSplit(";,;") ~> $join(", ")
-        }, ['dataUseRequirement']|,
+            "resourceCreator": resourceCreator
+        }|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
-            "vocabularyEncodingScheme": vocabularyEncodingSchemes ?
-                $safeSplit(vocabularyEncodingSchemes, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
-            "language": $safeSplit(languages, ";,;"),
-            "format": $safeSplit(formats, ";,;"),
+            "vocabularyEncodingScheme": vocabularyEncodingScheme ?
+                $safeSplit(vocabularyEncodingScheme, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
+            "language": $safeSplit(language, ";,;"),
+            "format": $safeSplit(format, ";,;"),
             "conformsTo": $safeSplit(conformsTo, ";,;") ~> $cleanEnum($allowedStandards) ~> $defaultValue([])
-        }, ['vocabularyEncodingSchemes','languages','formats']| : null
+        }, ['vocabularyEncodingScheme','language','format']| : null
     }|,
-    "enrichmentAndLinkage": input.linkage ~> |$|{
-        "tools": $defaultValue($$.extra.linkages.tools, tools ~> $safeSplit(";,;")) ~> $nullList,
-        "investigations": $defaultValue($$.extra.linkages.investigations, investigations ~> $safeSplit(";,;")) ~> $nullList,
-        "derivedFrom": datasetLinkage.isDerivedFrom,
-        "isPartOf": datasetLinkage.isPartOf,
-        "linkableDatasets": datasetLinkage.linkedDatasets,
-        "similarToDatasets": datasetLinkage.isMemberOf
-    }, ['dataUses','isGeneratedUsing','associatedMedia','isReferenceIn','syntheticDataWebLink','datasetLinkage']|,
+    "enrichmentAndLinkage": input.enrichmentAndLinkage ? input.enrichmentAndLinkage ~> |$|{
+        "tools": tools,
+        "investigations": investigations,
+        "derivedFrom": derivedFrom,
+        "isPartOf": isPartOf,
+        "linkableDatasets": linkableDatasets,
+        "similarToDatasets": similarToDatasets
+    }| : null,
+    "datasetFilters": input.datasetFilters,
+    "project": input.project,
+    "icons": input.icons,
+    "erd": input.erd,
     "observations": input.observations ~> $defaultValue([]),
-    "structuralMetadata": {
-        "tables": input.structuralMetadata,
-        "syntheticDataWebLink": $safeSplit(input.linkage.syntheticDataWebLink, ";,;")
-    },
+    "structuralMetadata": input.structuralMetadata ? {
+        "tables": input.structuralMetadata.tables,
+        "syntheticDataWebLink": input.structuralMetadata.syntheticDataWebLink
+    } : null,
     "demographicFrequency": input.demographicFrequency,
     "omics": input.omics
 }
