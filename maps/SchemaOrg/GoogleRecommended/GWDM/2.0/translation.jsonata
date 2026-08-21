@@ -11,6 +11,10 @@ $to_str := function($x){
     $type($x) = 'array' ? $join($x,",") : $x
 };
 
+$force_url := function($x){
+    $substring($x, 0, 4) = 'http' ? $x : null
+};
+
 {
     "@context": "https://schema.org/",
     "@id": "https://hdruk.ac.uk",
@@ -48,7 +52,7 @@ $to_str := function($x){
         "contentUrl": "https://somehwere.com"
     },
     "keywords": input.summary.keywords ~> $to_str,
-    "license": input.accessibility.access.accessRights
+    "license": input.accessibility.access.accessRights ~> $force_url
     /* "measuredmentTechnique":{} - google recommend */
 
 }
