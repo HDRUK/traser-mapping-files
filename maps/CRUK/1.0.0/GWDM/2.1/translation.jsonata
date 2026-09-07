@@ -386,37 +386,38 @@ $projectGrantsFromGwdm := function() {
 };
 
 {
-    "identifier": input.identifier,
-    "issued": input.issued,
-    "modified": input.modified,
-    "revisions": input.revisions,
-    "version": input.version,
+    "identifier": input.required.gatewayPid,
+    "issued": input.required.issued,
+    "modified": input.required.modified,
+    "revisions": input.required.revisions,
+    "version": input.required.version,
     "summary": {
         "abstract": input.summary.abstract,
         "contactPoint": input.summary.contactPoint,
-        "keywords": input.summary.keywords,
+        "keywords": input.summary.keywords ~> $safeSplit(';,;'),
         "doiName": input.summary.doiName,
         "title": input.summary.title,
+        "leadResearcher": input.summary.leadResearcher,
+        "leadResearchInstitute": input.summary.leadResearchInstitute,
         "dataCustodian": {
-            "name": input.summary.dataCustodian.name,
-            "identifier": input.summary.dataCustodian.identifier,
-            "contactPoint": input.summary.dataCustodian.contactPoint,
-            "logo": input.summary.dataCustodian.logo
+            "name": input.summary.publisher.name,
+            "identifier": input.summary.publisher.gatewayId ? input.summary.publisher.gatewayId : input.summary.publisher.rorId,
+            "contactPoint": input.summary.contactPoint,
+            "logo": input.summary.publisher.logo
         },
         "populationSize": input.summary.populationSize,
-        "funders": input.summary.funders,
         "datasetAliases": input.summary.datasetAliases
     },
-    "documentation": input.documentation ? {
-        "description": input.documentation.description,
+    "documentation": {
+        "description": input.documentation.description ? input.documentation.description : input.summary.description,
         "associatedMedia": input.documentation.associatedMedia,
-        "inPipeline": input.documentation.inPipeline
-    } : null,
+        "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : input.summary.inPipeline
+    },
     "coverage":  input.coverage ~> |$|{
-        "typicalAgeRangeMin": $ageRangeDefault(typicalAgeRangeMin, null),
-        "typicalAgeRangeMax": $ageRangeDefault(typicalAgeRangeMax, null),
+        "typicalAgeRangeMin": $parseInteger($safeSplit(typicalAgeRange, "-")[0], "#,##0") ~> $ageRangeDefault(null),
+        "typicalAgeRangeMax": $parseInteger($safeSplit(typicalAgeRange, "-")[1], "#,##0") ~> $ageRangeDefault(null),
         "materialType": materialType ? [$map(materialType, $getMaterialType)] : ["None/not available"]
-    },['datasetCompleteness','pathway','followUp']|, 
+    },['datasetCompleteness','pathway','followUp','typicalAgeRange']|, 
     "provenance": {
         "origin": input.provenance.origin ? {
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
@@ -449,7 +450,7 @@ $projectGrantsFromGwdm := function() {
             "endDate": input.provenance.temporal.endDate ~> $nullString,
             "startDate": input.provenance.temporal.startDate ~> $nullString ~> $defaultValue("1970-01-01"),
             "timeLag": $cleanEnumSingle(input.provenance.temporal.timeLag, $allowedTimeLag) ~> $defaultValue('Not applicable'),
-            "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.publishingFrequency, $allowedPublishingFrequency) ~> $defaultValue("Other"),
+            "publishingFrequency": $cleanEnumSingle(input.provenance.temporal.accrualPeriodicity, $allowedPublishingFrequency) ~> $defaultValue("Other"),
             "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
         }
     },
@@ -459,17 +460,17 @@ $projectGrantsFromGwdm := function() {
             "jurisdiction": $safeSplit(jurisdiction, ";,;")
         }|,  
         "usage": usage ? usage ~> |$|{
-            "dataUseRequirements": $safeSplit(dataUseRequirements,";,;") ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
+            "dataUseRequirements": $safeSplit(dataUseRequirement,";,;") ~> $cleanEnum($allowedDataUseRequirements) ~> $defaultValue(null),
             "dataUseLimitation": $safeSplit(dataUseLimitation,";,;") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
-            "resourceCreator": resourceCreator
-        }|,
+            "resourceCreator": resourceCreator.name
+        }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
-            "vocabularyEncodingScheme": vocabularyEncodingScheme ?
-                $safeSplit(vocabularyEncodingScheme, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
-            "language": $safeSplit(language, ";,;"),
-            "format": $safeSplit(format, ";,;"),
+            "vocabularyEncodingScheme": vocabularyEncodingSchemes ?
+                $safeSplit(vocabularyEncodingSchemes, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
+            "language": $safeSplit(languages, ";,;"),
+            "format": $safeSplit(formats, ";,;"),
             "conformsTo": $safeSplit(conformsTo, ";,;") ~> $cleanEnum($allowedStandards) ~> $defaultValue([])
-        }, ['vocabularyEncodingScheme','language','format']| : null
+        }, ['vocabularyEncodingSchemes','languages','formats']| : null
     }|,
     "enrichmentAndLinkage": input.enrichmentAndLinkage ? input.enrichmentAndLinkage ~> |$|{
         "tools": tools,
@@ -482,7 +483,7 @@ $projectGrantsFromGwdm := function() {
     "datasetFilters": input.datasetFilters,
     "projectGrants": $projectGrantsFromGwdm(),
     "icons": input.icons,
-    "erd": input.erd,
+    "erd": input.erd.image ? input.erd.image : ($type(input.erd) = "string" ? input.erd : null),
     "observations": input.observations ~> $defaultValue([]),
     "structuralMetadata": input.structuralMetadata ? {
         "tables": input.structuralMetadata.tables,
