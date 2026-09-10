@@ -1,0 +1,244 @@
+(
+/*
+=============================================================================
+SCAFFOLDING - GWDM 2.2 does not exist in schemata-2 yet
+=============================================================================
+
+Direction: input HDRUK 4.1.0 -> output GWDM 2.2 (the path is output-first).
+
+PROVENANCE
+    This is a copy of maps/GWDM/2.0/HDRUK/4.0.0/translation.jsonata. Everything
+    below is that file verbatim except for three changes:
+      1. This header.
+      2. accessibility.usage gains duoCodes and dataUsePermissions (search
+         "GWDM 2.2 PLACEHOLDER" below) - the only 4.1.0-specific additions.
+      3. $getDatasetLinkage returns the object it builds. In the 4.0.0 map the
+         final expression is missing, so datasetLinkage always evaluates to
+         undefined and the key is dropped. Not propagating that bug.
+    conformsTo needs no change in this direction: it is passed through $to_str,
+    so the BNF/DDI/DCAT values new in 4.1.0 survive without an allow-list.
+
+WHAT IS STILL NEEDED TO ACTUALLY PERSIST THE 4.1.0 FIELDS IN GWDM 2.2
+    The placeholder below writes duoCodes and dataUsePermissions into the GWDM
+    output, but nothing downstream can store them yet. To finish this:
+
+    [ ] 1. Define GWDM 2.2 in schemata-2: hdr_schemata/models/GWDM/v2_2/, with
+           Gwdm22 registered in hdr_schemata/models/GWDM/__init__.py.
+    [ ] 2. Add the two fields to that model under accessibility.usage, and
+           CONFIRM THE SHAPE THIS MAP ASSUMES:
+             - duoCodes           ';,;'-joined string (GWDM list convention,
+                                  as accessibility.usage.dataUseLimitation is)
+             - dataUsePermissions nested object carrying patientRecontact only
+           If GWDM 2.2 models these differently - e.g. duoCodes as a real
+           List[str], or patientRecontact flattened to a scalar - only the
+           placeholder lines below and their counterpart in
+           maps/HDRUK/4.1.0/GWDM/2.2/translation.jsonata need to change.
+    [ ] 3. Run schemata-2's build.py so GWDM 2.2 schema.json and docs exist and
+           "2.2" appears in schemata-2's available.json. Until then traser has
+           no schema for GWDM:2.2, so /translate to it must be called with
+           validate_output=0 or it returns 400.
+    [ ] 4. Persist the fields in gateway-api-2. GWDM is the internal model, so
+           the dataset ingest/versioning path is what actually stores them.
+    [ ] 5. Decide whether GWDM 2.2 should also carry the fields GWDM 2.1 added
+           over 2.0 (summary.funders, icons, projectGrants, datasetFilters,
+           erd, otherDataTypes). This map is based on the 2.0-targeted map and
+           does NOT emit them. That matters because every graph edge has weight
+           1, so this direct map is a shorter path than chaining
+           HDRUK 4.1.0 -> 4.0.0 -> GWDM 2.0 -> 2.1 -> 2.2 and will be selected
+           in preference to it.
+*/
+/*function to enforce any arrays to be strings */
+$to_str := function($x){
+  $x = null ? "" :
+  $type($x) = "array" ? $join($x,';,;') :
+  $x
+};
+
+$extract_media := function($x){
+  $type($x) = "array"
+    ? $join($map($x, function($v){ $type($v) = "object" ? $v.url : $v }), ',')
+    : $x
+};
+
+$truncate := function($x,$length){
+  $type($x)="number" ? $x : $x ? $substring($x,0,$length) : null
+};
+
+$null_to_number := function($x){
+  $exists($x) ? $number($x) : -1
+};
+
+$auto_fill_population_size := function($populationSize, $observations){
+    $populationSize = -1 ? $observations[observedNode="Persons"]^(observationDate)[0].measuredValue ~> $null_to_number : $populationSize ~> $null_to_number
+};
+
+$joinTypicalAgeRange := function($min, $max){(
+    $minStr := $min ? $string($min) : $min = 0 ? $string($min) : null;
+    $maxStr := $max ? $string($max) : null;
+    $minStr ? $maxStr ? $join([$minStr, "-", $maxStr]) : null : null
+)};
+
+$isEmptyValue := function($value) {
+  $value = null or $value = "" or $value = {}
+};
+
+$getDatasetLinkage := function() {
+  (
+    $datasetLinkage := {
+      "isDerivedFrom": input.enrichmentAndLinkage.derivedFrom,
+      "isPartOf": input.enrichmentAndLinkage.isPartOf,
+      "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
+      "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
+    };
+    $datasetLinkage
+  )
+};
+
+
+
+
+
+$getOrigin := function(){(
+    $origin := {
+      "purpose": $to_str(input.provenance.origin.purpose),
+      "source": $to_str(input.provenance.origin.source),
+      "collectionSituation": $to_str(input.provenance.origin.collectionSource),
+      "imageContrast": input.provenance.origin.imageContrast
+    };
+    $origin = {} ? null : $origin
+)};
+
+{
+  "required": {
+    "gatewayId": extra.id ? extra.id : $truncate(input.identifier,50),
+    "gatewayPid": extra.pid ? extra.pid : input.identifier,
+    "issued": input.issued,
+    "modified": input.modified,
+    "version": input.version,
+    "revisions": input.revisions ? [$map(input.revisions,function($r) {
+      {
+        "version": $r.version,
+        "url": $r.url
+      }
+    })] : []
+  },
+  "summary": {
+    "abstract": $truncate(input.summary.abstract,5000),
+    "contactPoint": input.summary.contactPoint,
+    "keywords": $to_str(input.summary.keywords),
+    "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
+      $v in extra.controlledKeywords
+    })]),
+    
+    "datasetType": input.provenance.origin.datasetType ? $to_str([$map(input.provenance.origin.datasetType , function($dt) {(
+                $dt.name 
+            )})]) : null ,
+    "datasetSubType": input.provenance.origin.datasetType ? $to_str([
+        $map(input.provenance.origin.datasetType, function($dt) {
+            $to_str(
+            $map($dt.subTypes, function($sx) {
+                $sx = "Occupation" ? "Labour" : $sx = "Economics" ? "Finances" : $sx
+            })
+            )
+        })
+        ]) : null,
+    "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
+    "description": $truncate(input.documentation.description,50000),
+    "doiName": input.summary.doiName,
+    "shortTitle": $truncate(input.summary.title,100),
+    "title": $truncate(input.summary.title,255),
+    "datasetAliases": input.summary.datasetAliases,
+    "publisher": {
+      "name": input.summary.dataCustodian.name ? input.summary.dataCustodian.name : extra.publisherName ? extra.publisherName : null,
+      "gatewayId": input.summary.dataCustodian.identifier ? $truncate(input.summary.dataCustodian.identifier, 50) : extra.publisherId ? extra.publisherId : null
+    },
+    "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : null
+  },
+  "coverage": {
+    "pathway": input.coverage.pathway, 
+    "spatial": $to_str(input.coverage.spatial),
+    "followUp": input.coverage.followUp,
+    "typicalAgeRange": $joinTypicalAgeRange(input.coverage.typicalAgeRangeMin, input.coverage.typicalAgeRangeMax),
+    "datasetCompleteness": input.coverage.datasetCompleteness
+  },
+  "provenance": {
+    "origin": $getOrigin(),
+    "temporal": {
+      "endDate": input.provenance.temporal.endDate,
+      "startDate": input.provenance.temporal.startDate,
+      "timeLag": input.provenance.temporal.timeLag ? input.provenance.temporal.timeLag : null,
+      "accrualPeriodicity": input.provenance.temporal.publishingFrequency ? input.provenance.temporal.publishingFrequency : null,
+      "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
+    }
+  },
+  "accessibility": {
+    "access": {
+      "deliveryLeadTime": $to_str(input.accessibility.access.deliveryLeadTime), /*may need to be min/max in the future */
+      "jurisdiction": $to_str(input.accessibility.access.jurisdiction),
+      "dataController": input.accessibility.access.dataController,
+      "dataProcessor": input.accessibility.access.dataProcessor,
+      "accessRights": input.accessibility.access.accessRights ~> $to_str,
+      "accessService": input.accessibility.access.accessService,
+      "accessRequestCost": $to_str(input.accessibility.access.accessRequestCost), /* may need to be fixed */
+      "accessServiceCategory": $to_str(input.accessibility.access.accessServiceCategory)
+    },
+    "usage": {
+      "dataUseLimitation": input.accessibility.usage.dataUseLimitation ? 
+        $to_str(input.accessibility.usage.dataUseLimitation) : null,	
+      "dataUseRequirement": input.accessibility.usage.dataUseRequirements ? 
+        $to_str(input.accessibility.usage.dataUseRequirements) : null,
+      "resourceCreator": {
+            "name": input.accessibility.usage.resourceCreator ?
+                $to_str(input.accessibility.usage.resourceCreator) : null
+      },
+      /* GWDM 2.2 PLACEHOLDER - assumed shape, confirm when the 2.2 schema lands.
+         duoCodes as a ';,;'-joined string; dataUsePermissions as a nested object. */
+      "duoCodes": input.accessibility.usage.duoCodes ?
+        $to_str(input.accessibility.usage.duoCodes) : null,
+      "dataUsePermissions": input.accessibility.usage.dataUsePermissions ?
+        {
+          "patientRecontact": input.accessibility.usage.dataUsePermissions.patientRecontact
+        } : null
+    },
+    "formatAndStandards": {
+      "vocabularyEncodingSchemes": input.accessibility.formatAndStandards.vocabularyEncodingScheme ? 
+        $to_str(input.accessibility.formatAndStandards.vocabularyEncodingScheme) : null,
+      "conformsTo": input.accessibility.formatAndStandards.conformsTo ? 
+        $to_str(input.accessibility.formatAndStandards.conformsTo) : null,
+      "languages": input.accessibility.formatAndStandards.language ? 
+        $to_str(input.accessibility.formatAndStandards.language) : null,
+      "formats": input.accessibility.formatAndStandards.format ? 
+        $to_str(input.accessibility.formatAndStandards.format) : null
+    }
+  },
+  "linkage": {
+    "isGeneratedUsing": extra.isGeneratedUsing ? extra.isGeneratedUsing : null,
+    "associatedMedia": $extract_media(input.documentation.associatedMedia),
+    "dataUses": extra.dataUses ? extra.dataUses : null,
+    "isReferenceIn": null,
+    "tools": $to_str(input.enrichmentAndLinkage.tools),
+    "datasetLinkage": $isEmptyValue($getDatasetLinkage()) ? null : $getDatasetLinkage(),
+    "investigations":$to_str(input.enrichmentAndLinkage.investigations),
+    "syntheticDataWebLink": $to_str(input.structuralMetadata.syntheticDataWebLink),
+    "publicationAboutDataset": input.enrichmentAndLinkage.publicationAboutDataset,
+    "publicationUsingDataset": input.enrichmentAndLinkage.publicationUsingDataset
+  },
+  "observations": input.observations ? [$map(input.observations,function($r) {
+      {
+        "observedNode": $r.observedNode,
+        "measuredValue": $r.measuredValue,
+        "observationDate": $r.observationDate,
+        "measuredProperty": $r.measuredProperty,
+        "disambiguatingDescription": $r.disambiguatingDescription
+      }
+    })] : [],
+  "structuralMetadata": input.structuralMetadata.tables,
+  "tissuesSampleCollection": input.coverage.materialType ? [$map(input.coverage.materialType,function($type) {
+      {
+        "materialType": $type
+      }
+    })] : [],
+  "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : null,
+  "omics": input.omics ? input.omics : null
+};
+)

@@ -1,0 +1,28 @@
+(
+/*
+SCAFFOLDING - GWDM 2.2 does not exist in schemata-2 yet.
+
+Direction: input GWDM 2.1 -> output GWDM 2.2 (the path is output-first).
+
+Follows the delta-transform pattern of maps/GWDM/2.0/GWDM/2.1: spread the input
+and override only what changed. Adds the accessibility.usage fields GWDM 2.2 is
+expected to carry for HDRUK 4.1.0, sourced from `extra` since GWDM 2.1 has
+nowhere to hold them.
+
+This pair exists so GWDM 2.2 can reach the rest of the graph - CRUK and
+SchemaOrg are only reachable via GWDM 2.1 and 2.0.
+
+The assumed 2.2 shape, and everything still outstanding, is documented in
+maps/GWDM/2.2/HDRUK/4.1.0/translation.jsonata.
+*/
+input ~> |$| {
+  "accessibility": accessibility ~> |$| {
+    "usage": usage ? usage ~> |$| {
+      /* GWDM 2.2 PLACEHOLDER - assumed shape, confirm when the 2.2 schema lands. */
+      "duoCodes": $exists($$.extra.duoCodes) ? $$.extra.duoCodes : null,
+      "dataUsePermissions": $exists($$.extra.patientRecontact) ?
+        { "patientRecontact": $$.extra.patientRecontact } : null
+    }| : null
+  }|
+}|
+)

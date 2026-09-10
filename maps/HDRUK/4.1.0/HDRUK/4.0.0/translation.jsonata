@@ -1,0 +1,19 @@
+(
+/*
+Notes:
+    - Direction: input HDRUK 4.0.0 -> output HDRUK 4.1.0 (path is output-first)
+    - 4.1.0 adds accessibility.usage.duoCodes and accessibility.usage.dataUsePermissions
+    - conformsTo needs no change: StandardisedDataModelsEnumV2 is a superset of the 4.0.0 enum
+    - dataUsePermissions is emitted as null rather than {} - patientRecontact defaults to "No",
+      so an empty object would assert a permission the 4.0.0 source never stated
+*/
+input ~> |$| {
+  "accessibility": accessibility ~> |$| {
+    "usage": usage ? usage ~> |$| {
+      "duoCodes": $$.extra.duoCodes ? $$.extra.duoCodes : null,
+      "dataUsePermissions": $$.extra.patientRecontact ?
+        { "patientRecontact": $$.extra.patientRecontact } : null
+    }| : null
+  }|
+}|
+)

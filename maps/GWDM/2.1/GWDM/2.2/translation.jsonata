@@ -1,0 +1,20 @@
+(
+/*
+SCAFFOLDING - GWDM 2.2 does not exist in schemata-2 yet.
+
+Direction: input GWDM 2.2 -> output GWDM 2.1 (the path is output-first).
+
+Follows the delta-transform pattern of maps/GWDM/2.1/GWDM/2.0: drop the fields
+the newer version introduced, which GWDM 2.1 cannot hold. Lossy by definition -
+duoCodes and dataUsePermissions have no GWDM 2.1 equivalent.
+
+The assumed 2.2 shape, and everything still outstanding, is documented in
+maps/GWDM/2.2/HDRUK/4.1.0/translation.jsonata.
+*/
+input ~> |$| {
+  "accessibility": accessibility ~> |$| {
+    /* GWDM 2.2 PLACEHOLDER - key names must match whatever the 2.2 schema defines. */
+    "usage": usage ? usage ~> |$|{}, ["duoCodes", "dataUsePermissions"]| : null
+  }|
+}|
+)
