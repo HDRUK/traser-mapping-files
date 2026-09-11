@@ -479,11 +479,9 @@ $cleanEnumSingle := function($x, $allowed){
             "dataUseLimitation": $safeSplit(dataUseLimitation,";,;") ~> $cleanEnum($allowedDataUseLimitation) ~> $defaultValue(null),
             "resourceCreator": resourceCreator.name ?
                 (resourceCreator.name ~> $safeSplit(";,;") ~> $join(", ")) : null,
-            /* GWDM 2.2 PLACEHOLDER - assumed shape, confirm when the 2.2 schema lands.
-               Un-joins the ';,;' string back into the HDRUK 4.1.0 list. */
-            "duoCodes": $safeSplit(duoCodes, ";,;") ~> $defaultValue(null),
-            "dataUsePermissions": dataUsePermissions ?
-                { "patientRecontact": dataUsePermissions.patientRecontact } : null
+            "duoCodes": duoCodes ? $split(duoCodes, ";,;") : null,
+            "dataUsePermissions": patientRecontact ?
+                { "patientRecontact": patientRecontact } : null
         }, ['dataUseRequirement']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": vocabularyEncodingSchemes ?

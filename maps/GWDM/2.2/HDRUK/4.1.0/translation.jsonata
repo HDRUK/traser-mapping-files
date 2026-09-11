@@ -191,14 +191,10 @@ $getOrigin := function(){(
             "name": input.accessibility.usage.resourceCreator ?
                 $to_str(input.accessibility.usage.resourceCreator) : null
       },
-      /* GWDM 2.2 PLACEHOLDER - assumed shape, confirm when the 2.2 schema lands.
-         duoCodes as a ';,;'-joined string; dataUsePermissions as a nested object. */
       "duoCodes": input.accessibility.usage.duoCodes ?
-        $to_str(input.accessibility.usage.duoCodes) : null,
-      "dataUsePermissions": input.accessibility.usage.dataUsePermissions ?
-        {
-          "patientRecontact": input.accessibility.usage.dataUsePermissions.patientRecontact
-        } : null
+        $join(input.accessibility.usage.duoCodes, ";,;") : null,
+      "patientRecontact": input.accessibility.usage.dataUsePermissions ?
+        input.accessibility.usage.dataUsePermissions.patientRecontact : null
     },
     "formatAndStandards": {
       "vocabularyEncodingSchemes": input.accessibility.formatAndStandards.vocabularyEncodingScheme ? 
