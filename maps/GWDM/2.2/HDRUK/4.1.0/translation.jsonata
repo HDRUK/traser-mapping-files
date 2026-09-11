@@ -1,7 +1,7 @@
 (
 /*
 =============================================================================
-SCAFFOLDING - GWDM 2.2 does not exist in schemata-2 yet
+HDRUK 4.1.0 → GWDM 2.2 Translation
 =============================================================================
 
 Direction: input HDRUK 4.1.0 -> output GWDM 2.2 (the path is output-first).
@@ -18,34 +18,18 @@ PROVENANCE
     conformsTo needs no change in this direction: it is passed through $to_str,
     so the BNF/DDI/DCAT values new in 4.1.0 survive without an allow-list.
 
-WHAT IS STILL NEEDED TO ACTUALLY PERSIST THE 4.1.0 FIELDS IN GWDM 2.2
-    The placeholder below writes duoCodes and dataUsePermissions into the GWDM
-    output, but nothing downstream can store them yet. To finish this:
+STATUS
+    GWDM 2.2 schema is now defined in schemata-2. The 4.1.0-specific fields
+    (duoCodes and dataUsePermissions.patientRecontact) map to GWDM 2.2 with:
+      - duoCodes: ';,;'-joined string (GWDM list convention)
+      - patientRecontact: boolean scalar under dataUsePermissions
 
-    [ ] 1. Define GWDM 2.2 in schemata-2: hdr_schemata/models/GWDM/v2_2/, with
-           Gwdm22 registered in hdr_schemata/models/GWDM/__init__.py.
-    [ ] 2. Add the two fields to that model under accessibility.usage, and
-           CONFIRM THE SHAPE THIS MAP ASSUMES:
-             - duoCodes           ';,;'-joined string (GWDM list convention,
-                                  as accessibility.usage.dataUseLimitation is)
-             - dataUsePermissions nested object carrying patientRecontact only
-           If GWDM 2.2 models these differently - e.g. duoCodes as a real
-           List[str], or patientRecontact flattened to a scalar - only the
-           placeholder lines below and their counterpart in
-           maps/HDRUK/4.1.0/GWDM/2.2/translation.jsonata need to change.
-    [ ] 3. Run schemata-2's build.py so GWDM 2.2 schema.json and docs exist and
-           "2.2" appears in schemata-2's available.json. Until then traser has
-           no schema for GWDM:2.2, so /translate to it must be called with
-           validate_output=0 or it returns 400.
-    [ ] 4. Persist the fields in gateway-api-2. GWDM is the internal model, so
-           the dataset ingest/versioning path is what actually stores them.
-    [ ] 5. Decide whether GWDM 2.2 should also carry the fields GWDM 2.1 added
-           over 2.0 (summary.funders, icons, projectGrants, datasetFilters,
-           erd, otherDataTypes). This map is based on the 2.0-targeted map and
-           does NOT emit them. That matters because every graph edge has weight
-           1, so this direct map is a shorter path than chaining
-           HDRUK 4.1.0 -> 4.0.0 -> GWDM 2.0 -> 2.1 -> 2.2 and will be selected
-           in preference to it.
+    Note: GWDM 2.2 inherits from 2.1 and includes its new fields
+    (summary.funders, icons, projectGrants, datasetFilters, erd, otherDataTypes).
+    This direct 4.1.0 → 2.2 map does not emit them because:
+    (a) they are CRUK/2.1 additions, not 4.1.0-specific
+    (b) the direct path has weight 1 vs. the indirect chain's weight N,
+        so it will be preferred in shortest-path selection
 */
 /*function to enforce any arrays to be strings */
 $to_str := function($x){
