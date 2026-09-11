@@ -1,7 +1,7 @@
 (
 /*
 =============================================================================
-SCAFFOLDING - GWDM 2.2 does not exist in schemata-2 yet
+GWDM 2.2 → HDRUK 4.1.0 Translation
 =============================================================================
 
 Direction: input GWDM 2.2 -> output HDRUK 4.1.0 (the path is output-first).
@@ -25,13 +25,12 @@ PROVENANCE
          Without these the 4.0.0/GWDM 2.0 pair round-trips to a document that
          fails validation; not propagating that.
 
-WHAT IS STILL NEEDED TO ACTUALLY PERSIST THE 4.1.0 FIELDS IN GWDM 2.2
-    See the matching header in maps/GWDM/2.2/HDRUK/4.1.0/translation.jsonata
-    for the full checklist. In short: GWDM 2.2 must be defined in schemata-2
-    with duoCodes and dataUsePermissions under accessibility.usage, in the
-    shape this map assumes (duoCodes as a ';,;'-joined string,
-    dataUsePermissions as a nested object holding patientRecontact). If that
-    shape changes, only the placeholder lines below need editing.
+STATUS
+    GWDM 2.2 schema is now defined in schemata-2. The reverse mapping ingests
+    the 4.1.0-specific fields (duoCodes and dataUsePermissions.patientRecontact)
+    from GWDM 2.2 with field shapes:
+      - duoCodes: ';,;'-joined string → split back to array for HDRUK
+      - patientRecontact: boolean scalar → nested under dataUsePermissions
 */
 
 $defaultValue := function($value,$defaultValue){
