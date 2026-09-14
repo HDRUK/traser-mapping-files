@@ -141,7 +141,9 @@ $autoComplete := function($component){
             $map($component.types.options, function ($o, $i){
                 {"label":$component.types.option_titles[$i],"value":$o}
             }) :
-            $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
+            $map($component.types.options,function ($o){
+                $exists($o.value) ? {"label":$o.label,"value":$o.value} : {"label":$o,"value":$o}
+            }),
         "name": $component.title,
         "label": $component.description,
         "placeholder": $component.examples[0],
