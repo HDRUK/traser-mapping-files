@@ -481,7 +481,7 @@ $cleanEnumSingle := function($x, $allowed){
             "duoCodes": duoCodes ? $split(duoCodes, ";,;") : null,
             "dataUsePermissions": patientRecontact ?
                 { "patientRecontact": patientRecontact } : null
-        }, ['dataUseRequirement']|,
+        }, ['dataUseRequirement','patientRecontact']|,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": vocabularyEncodingSchemes ?
                 $safeSplit(vocabularyEncodingSchemes, ";,;") ~> $cleanEnum($allowedEncodings)  : [],
