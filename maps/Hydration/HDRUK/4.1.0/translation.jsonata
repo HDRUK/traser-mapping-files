@@ -189,8 +189,9 @@ $getItemsType := function($types){
     $types.options ?
         {
             "type": $types.type,
-            "enum": $types.options,
-            "enum_titles": $types.option_titles ? $types.option_titles : $types.options
+            "enum": $exists($types.options[0].value) ? $types.options.value : $types.options,
+            "enum_titles": $exists($types.options[0].value) ? $types.options.label :
+                ($types.option_titles ? $types.option_titles : $types.options)
         } :
     $types.format ?
         {
@@ -238,8 +239,9 @@ $enumValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": $component.types.type,
-        "enum": $component.types.options,
-        "enum_titles": $component.types.option_titles ? $component.types.option_titles : $component.types.options
+        "enum": $exists($component.types.options[0].value) ? $component.types.options.value : $component.types.options,
+        "enum_titles": $exists($component.types.options[0].value) ? $component.types.options.label :
+            ($component.types.option_titles ? $component.types.option_titles : $component.types.options)
     }
 };
 
