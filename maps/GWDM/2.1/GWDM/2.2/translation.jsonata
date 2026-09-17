@@ -1,0 +1,14 @@
+(
+/*
+Direction: input GWDM 2.2 -> output GWDM 2.1 (the path is output-first).
+
+Follows the delta-transform pattern: drop the fields GWDM 2.2 introduced,
+which GWDM 2.1 cannot hold. Lossy by definition - duoCodes and patientRecontact
+have no GWDM 2.1 equivalent.
+*/
+input ~> |$| {
+  "accessibility": accessibility ~> |$| {
+    "usage": usage ? usage ~> |$|{}, ["duoCodes", "patientRecontact"]| : null
+  }|
+}|
+)

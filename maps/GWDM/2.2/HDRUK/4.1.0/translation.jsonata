@@ -1,0 +1,224 @@
+(
+/*
+=============================================================================
+HDRUK 4.1.0 → GWDM 2.2 Translation
+=============================================================================
+
+Direction: input HDRUK 4.1.0 -> output GWDM 2.2 (the path is output-first).
+
+PROVENANCE
+    This is a copy of maps/GWDM/2.0/HDRUK/4.0.0/translation.jsonata. Everything
+    below is that file verbatim except for three changes:
+      1. This header.
+      2. accessibility.usage gains duoCodes and dataUsePermissions (search
+         "GWDM 2.2 PLACEHOLDER" below) - the only 4.1.0-specific additions.
+      3. $getDatasetLinkage returns the object it builds. In the 4.0.0 map the
+         final expression is missing, so datasetLinkage always evaluates to
+         undefined and the key is dropped. Not propagating that bug.
+    conformsTo needs no change in this direction: it is passed through $to_str,
+    so the BNF/DDI/DCAT values new in 4.1.0 survive without an allow-list.
+
+STATUS
+    GWDM 2.2 schema is now defined in schemata-2. The 4.1.0-specific fields
+    (duoCodes and dataUsePermissions.patientRecontact) map to GWDM 2.2 with:
+      - duoCodes: ';,;'-joined string (GWDM list convention)
+      - patientRecontact: boolean scalar under dataUsePermissions
+
+    Note: GWDM 2.2 inherits from 2.1 and includes its new fields
+    (summary.funders, icons, projectGrants, datasetFilters, erd, otherDataTypes).
+    This direct 4.1.0 → 2.2 map does not emit them because:
+    (a) they are CRUK/2.1 additions, not 4.1.0-specific
+    (b) the direct path has weight 1 vs. the indirect chain's weight N,
+        so it will be preferred in shortest-path selection
+*/
+/*function to enforce any arrays to be strings */
+$to_str := function($x){
+  $x = null ? "" :
+  $type($x) = "array" ? $join($x,';,;') :
+  $x
+};
+
+$extract_media := function($x){
+  $type($x) = "array"
+    ? $join($map($x, function($v){ $type($v) = "object" ? $v.url : $v }), ',')
+    : $x
+};
+
+$truncate := function($x,$length){
+  $type($x)="number" ? $x : $x ? $substring($x,0,$length) : null
+};
+
+$null_to_number := function($x){
+  $exists($x) ? $number($x) : -1
+};
+
+$auto_fill_population_size := function($populationSize, $observations){
+    $populationSize = -1 ? $observations[observedNode="Persons"]^(observationDate)[0].measuredValue ~> $null_to_number : $populationSize ~> $null_to_number
+};
+
+$joinTypicalAgeRange := function($min, $max){(
+    $minStr := $min ? $string($min) : $min = 0 ? $string($min) : null;
+    $maxStr := $max ? $string($max) : null;
+    $minStr ? $maxStr ? $join([$minStr, "-", $maxStr]) : null : null
+)};
+
+$isEmptyValue := function($value) {
+  $value = null or $value = "" or $value = {}
+};
+
+$getDatasetLinkage := function() {
+  (
+    $datasetLinkage := {
+      "isDerivedFrom": input.enrichmentAndLinkage.derivedFrom,
+      "isPartOf": input.enrichmentAndLinkage.isPartOf,
+      "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
+      "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
+    };
+    $datasetLinkage
+  )
+};
+
+
+
+
+
+$getOrigin := function(){(
+    $origin := {
+      "purpose": $to_str(input.provenance.origin.purpose),
+      "source": $to_str(input.provenance.origin.source),
+      "collectionSituation": $to_str(input.provenance.origin.collectionSource),
+      "imageContrast": input.provenance.origin.imageContrast
+    };
+    $origin = {} ? null : $origin
+)};
+
+{
+  "required": {
+    "gatewayId": extra.id ? extra.id : $truncate(input.identifier,50),
+    "gatewayPid": extra.pid ? extra.pid : input.identifier,
+    "issued": input.issued,
+    "modified": input.modified,
+    "version": input.version,
+    "revisions": input.revisions ? [$map(input.revisions,function($r) {
+      {
+        "version": $r.version,
+        "url": $r.url
+      }
+    })] : []
+  },
+  "summary": {
+    "abstract": $truncate(input.summary.abstract,5000),
+    "contactPoint": input.summary.contactPoint,
+    "keywords": $to_str(input.summary.keywords),
+    "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
+      $v in extra.controlledKeywords
+    })]),
+    
+    "datasetType": input.provenance.origin.datasetType ? $to_str([$map(input.provenance.origin.datasetType , function($dt) {(
+                $dt.name 
+            )})]) : null ,
+    "datasetSubType": input.provenance.origin.datasetType ? $to_str([
+        $map(input.provenance.origin.datasetType, function($dt) {
+            $to_str(
+            $map($dt.subTypes, function($sx) {
+                $sx = "Occupation" ? "Labour" : $sx = "Economics" ? "Finances" : $sx
+            })
+            )
+        })
+        ]) : null,
+    "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
+    "description": $truncate(input.documentation.description,50000),
+    "doiName": input.summary.doiName,
+    "shortTitle": $truncate(input.summary.title,100),
+    "title": $truncate(input.summary.title,255),
+    "datasetAliases": input.summary.datasetAliases,
+    "publisher": {
+      "name": input.summary.dataCustodian.name ? input.summary.dataCustodian.name : extra.publisherName ? extra.publisherName : null,
+      "gatewayId": input.summary.dataCustodian.identifier ? $truncate(input.summary.dataCustodian.identifier, 50) : extra.publisherId ? extra.publisherId : null
+    },
+    "inPipeline": input.documentation.inPipeline ? input.documentation.inPipeline : null
+  },
+  "coverage": {
+    "pathway": input.coverage.pathway, 
+    "spatial": $to_str(input.coverage.spatial),
+    "followUp": input.coverage.followUp,
+    "typicalAgeRange": $joinTypicalAgeRange(input.coverage.typicalAgeRangeMin, input.coverage.typicalAgeRangeMax),
+    "datasetCompleteness": input.coverage.datasetCompleteness
+  },
+  "provenance": {
+    "origin": $getOrigin(),
+    "temporal": {
+      "endDate": input.provenance.temporal.endDate,
+      "startDate": input.provenance.temporal.startDate,
+      "timeLag": input.provenance.temporal.timeLag ? input.provenance.temporal.timeLag : null,
+      "accrualPeriodicity": input.provenance.temporal.publishingFrequency ? input.provenance.temporal.publishingFrequency : null,
+      "distributionReleaseDate": input.provenance.temporal.distributionReleaseDate
+    }
+  },
+  "accessibility": {
+    "access": {
+      "deliveryLeadTime": $to_str(input.accessibility.access.deliveryLeadTime), /*may need to be min/max in the future */
+      "jurisdiction": $to_str(input.accessibility.access.jurisdiction),
+      "dataController": input.accessibility.access.dataController,
+      "dataProcessor": input.accessibility.access.dataProcessor,
+      "accessRights": input.accessibility.access.accessRights ~> $to_str,
+      "accessService": input.accessibility.access.accessService,
+      "accessRequestCost": $to_str(input.accessibility.access.accessRequestCost), /* may need to be fixed */
+      "accessServiceCategory": $to_str(input.accessibility.access.accessServiceCategory)
+    },
+    "usage": {
+      "dataUseLimitation": input.accessibility.usage.dataUseLimitation ? 
+        $to_str(input.accessibility.usage.dataUseLimitation) : null,	
+      "dataUseRequirement": input.accessibility.usage.dataUseRequirements ? 
+        $to_str(input.accessibility.usage.dataUseRequirements) : null,
+      "resourceCreator": {
+            "name": input.accessibility.usage.resourceCreator ?
+                $to_str(input.accessibility.usage.resourceCreator) : null
+      },
+      "duoCodes": input.accessibility.usage.duoCodes ?
+        $join(input.accessibility.usage.duoCodes, ";,;") : null,
+      "patientRecontact": input.accessibility.usage.dataUsePermissions ?
+        input.accessibility.usage.dataUsePermissions.patientRecontact : null
+    },
+    "formatAndStandards": {
+      "vocabularyEncodingSchemes": input.accessibility.formatAndStandards.vocabularyEncodingScheme ? 
+        $to_str(input.accessibility.formatAndStandards.vocabularyEncodingScheme) : null,
+      "conformsTo": input.accessibility.formatAndStandards.conformsTo ? 
+        $to_str(input.accessibility.formatAndStandards.conformsTo) : null,
+      "languages": input.accessibility.formatAndStandards.language ? 
+        $to_str(input.accessibility.formatAndStandards.language) : null,
+      "formats": input.accessibility.formatAndStandards.format ? 
+        $to_str(input.accessibility.formatAndStandards.format) : null
+    }
+  },
+  "linkage": {
+    "isGeneratedUsing": extra.isGeneratedUsing ? extra.isGeneratedUsing : null,
+    "associatedMedia": $extract_media(input.documentation.associatedMedia),
+    "dataUses": extra.dataUses ? extra.dataUses : null,
+    "isReferenceIn": null,
+    "tools": $to_str(input.enrichmentAndLinkage.tools),
+    "datasetLinkage": $isEmptyValue($getDatasetLinkage()) ? null : $getDatasetLinkage(),
+    "investigations":$to_str(input.enrichmentAndLinkage.investigations),
+    "syntheticDataWebLink": $to_str(input.structuralMetadata.syntheticDataWebLink),
+    "publicationAboutDataset": input.enrichmentAndLinkage.publicationAboutDataset,
+    "publicationUsingDataset": input.enrichmentAndLinkage.publicationUsingDataset
+  },
+  "observations": input.observations ? [$map(input.observations,function($r) {
+      {
+        "observedNode": $r.observedNode,
+        "measuredValue": $r.measuredValue,
+        "observationDate": $r.observationDate,
+        "measuredProperty": $r.measuredProperty,
+        "disambiguatingDescription": $r.disambiguatingDescription
+      }
+    })] : [],
+  "structuralMetadata": input.structuralMetadata.tables,
+  "tissuesSampleCollection": input.coverage.materialType ? [$map(input.coverage.materialType,function($type) {
+      {
+        "materialType": $type
+      }
+    })] : [],
+  "demographicFrequency": input.demographicFrequency ? input.demographicFrequency : null,
+  "omics": input.omics ? input.omics : null
+};
+)
