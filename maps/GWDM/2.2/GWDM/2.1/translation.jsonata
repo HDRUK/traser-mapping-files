@@ -1,0 +1,20 @@
+(
+/*
+Direction: input GWDM 2.1 -> output GWDM 2.2 (the path is output-first).
+
+Follows the delta-transform pattern: spread the input and override only what
+changed. Adds the accessibility.usage fields GWDM 2.2 carries for HDRUK 4.1.0,
+sourced from `extra` since GWDM 2.1 has nowhere to hold them.
+
+This pair exists so GWDM 2.2 can reach the rest of the graph - CRUK and
+SchemaOrg are only reachable via GWDM 2.1 and 2.0.
+*/
+input ~> |$| {
+  "accessibility": accessibility ~> |$| {
+    "usage": usage ? usage ~> |$| {
+      "duoCodes": $exists($$.extra.duoCodes) ? $join($$.extra.duoCodes, ";,;") : null,
+      "patientRecontact": $exists($$.extra.patientRecontact) ? $$.extra.patientRecontact : null
+    }| : null
+  }|
+}|
+)
