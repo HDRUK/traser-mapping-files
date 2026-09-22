@@ -103,6 +103,17 @@ $normaliseDatasetFilters := function($x) {
   $type($x) = "array" ? $x : null
 };
 
+$leadFromProject := function() {(
+  $pg := $exists(input.projectGrants) and $count(input.projectGrants) > 0 ? input.projectGrants[0] : null;
+  $p := $exists(input.project) ? input.project : null;
+  {
+    "leadResearcher": $pg.leadResearcher ? $pg.leadResearcher : $p.leadResearcher,
+    "leadResearchInstitute": $pg.leadResearchInstitute ? $pg.leadResearchInstitute : $p.leadResearchInstitute
+  }
+)};
+
+$lead := $leadFromProject();
+
 $getDatasetLinkage := function() {
   (
     $datasetLinkage := {
@@ -168,6 +179,8 @@ $getOrigin := function(){(
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
+    "leadResearcher": $lead.leadResearcher,
+    "leadResearchInstitute": $lead.leadResearchInstitute,
     "datasetAliases": input.summary.datasetAliases,
     "publisher": {
       "name": input.summary.dataCustodian.name ? input.summary.dataCustodian.name : extra.publisherName ? extra.publisherName : null,

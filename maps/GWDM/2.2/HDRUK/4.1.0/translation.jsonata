@@ -1,9 +1,41 @@
 (
+/*
+=============================================================================
+HDRUK 4.1.0 → GWDM 2.2 Translation
+=============================================================================
+
+Direction: input HDRUK 4.1.0 -> output GWDM 2.2 (the path is output-first).
+
+PROVENANCE
+    This is a copy of maps/GWDM/2.0/HDRUK/4.0.0/translation.jsonata. Everything
+    below is that file verbatim except for three changes:
+      1. This header.
+      2. accessibility.usage gains duoCodes and dataUsePermissions (search
+         "GWDM 2.2 PLACEHOLDER" below) - the only 4.1.0-specific additions.
+      3. $getDatasetLinkage returns the object it builds. In the 4.0.0 map the
+         final expression is missing, so datasetLinkage always evaluates to
+         undefined and the key is dropped. Not propagating that bug.
+    conformsTo needs no change in this direction: it is passed through $to_str,
+    so the BNF/DDI/DCAT values new in 4.1.0 survive without an allow-list.
+
+STATUS
+    GWDM 2.2 schema is now defined in schemata-2. The 4.1.0-specific fields
+    (duoCodes and dataUsePermissions.patientRecontact) map to GWDM 2.2 with:
+      - duoCodes: ';,;'-joined string (GWDM list convention)
+      - patientRecontact: boolean scalar under dataUsePermissions
+
+    Note: GWDM 2.2 inherits from 2.1 and includes its new fields
+    (summary.funders, icons, projectGrants, datasetFilters, erd, otherDataTypes).
+    This direct 4.1.0 → 2.2 map does not emit them because:
+    (a) they are CRUK/2.1 additions, not 4.1.0-specific
+    (b) the direct path has weight 1 vs. the indirect chain's weight N,
+        so it will be preferred in shortest-path selection
+*/
 /*function to enforce any arrays to be strings */
 $to_str := function($x){
-  $type($x)="array"
-  ? $join($map($x, function($v){ $string($v) }), ';,;')
-  : $string($x)
+  $x = null ? "" :
+  $type($x) = "array" ? $join($x,';,;') :
+  $x
 };
 
 $extract_media := function($x){
@@ -42,7 +74,7 @@ $getDatasetLinkage := function() {
       "isMemberOf": input.enrichmentAndLinkage.similarToDatasets,
       "linkedDatasets": input.enrichmentAndLinkage.linkableDatasets
     };
-   
+    $datasetLinkage
   )
 };
 
@@ -81,15 +113,25 @@ $getOrigin := function(){(
     "controlledKeywords": $to_str([$filter( $split($to_str($keywords),','), function($v) {
       $v in extra.controlledKeywords
     })]),
-    "datasetType": input.provenance.origin.datasetType ? $to_str(input.provenance.origin.datasetType) :
-        extra.datasetType ? $to_str(extra.datasetType) : null,
-    "datasetSubType": input.provenance.origin.datasetSubType ? $to_str(input.provenance.origin.datasetSubType) :
-        extra.datasetSubType ? $to_str(extra.datasetSubType) : null,
+    
+    "datasetType": input.provenance.origin.datasetType ? $to_str([$map(input.provenance.origin.datasetType , function($dt) {(
+                $dt.name 
+            )})]) : null ,
+    "datasetSubType": input.provenance.origin.datasetType ? $to_str([
+        $map(input.provenance.origin.datasetType, function($dt) {
+            $to_str(
+            $map($dt.subTypes, function($sx) {
+                $sx = "Occupation" ? "Labour" : $sx = "Economics" ? "Finances" : $sx
+            })
+            )
+        })
+        ]) : null,
     "populationSize": input.summary.populationSize ~> $auto_fill_population_size(input.observations),
     "description": $truncate(input.documentation.description,50000),
     "doiName": input.summary.doiName,
     "shortTitle": $truncate(input.summary.title,100),
     "title": $truncate(input.summary.title,255),
+    "datasetAliases": input.summary.datasetAliases,
     "publisher": {
       "name": input.summary.dataCustodian.name ? input.summary.dataCustodian.name : extra.publisherName ? extra.publisherName : null,
       "gatewayId": input.summary.dataCustodian.identifier ? $truncate(input.summary.dataCustodian.identifier, 50) : extra.publisherId ? extra.publisherId : null
@@ -132,7 +174,11 @@ $getOrigin := function(){(
       "resourceCreator": {
             "name": input.accessibility.usage.resourceCreator ?
                 $to_str(input.accessibility.usage.resourceCreator) : null
-      }
+      },
+      "duoCodes": input.accessibility.usage.duoCodes ?
+        $join(input.accessibility.usage.duoCodes, ";,;") : null,
+      "patientRecontact": input.accessibility.usage.dataUsePermissions ?
+        input.accessibility.usage.dataUsePermissions.patientRecontact : null
     },
     "formatAndStandards": {
       "vocabularyEncodingSchemes": input.accessibility.formatAndStandards.vocabularyEncodingScheme ? 

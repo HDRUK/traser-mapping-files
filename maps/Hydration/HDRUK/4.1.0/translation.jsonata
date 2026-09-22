@@ -101,10 +101,15 @@ $selectBox := function($component){
     {
         "component": "Select",
         "options": $map($component.types.options,
-        function ($o){ 
+        function ($o, $i){ 
              $component.title = 'Dataset type' ? 
              {
                  "label":$o.title,"value":$o.title
+             }
+             :
+             $component.types.option_titles ?
+             {
+                 "label":$component.types.option_titles[$i],"value":$o
              }
              :
                 {
@@ -132,7 +137,13 @@ $datePicker := function($component){
 $autoComplete := function($component){
     {
         "component": "Autocomplete",
-        "options": $map($component.types.options,function ($o){{"label":$o,"value":$o}}),
+        "options": $component.types.option_titles ?
+            $map($component.types.options, function ($o, $i){
+                {"label":$component.types.option_titles[$i],"value":$o}
+            }) :
+            $map($component.types.options,function ($o){
+                $exists($o.value) ? {"label":$o.label,"value":$o.value} : {"label":$o,"value":$o}
+            }),
         "name": $component.title,
         "label": $component.description,
         "placeholder": $component.examples[0],
@@ -178,8 +189,9 @@ $getItemsType := function($types){
     $types.options ?
         {
             "type": $types.type,
-            "enum": $types.options,
-            "enum_titles": $types.options
+            "enum": $exists($types.options[0].value) ? $types.options.value : $types.options,
+            "enum_titles": $exists($types.options[0].value) ? $types.options.label :
+                ($types.option_titles ? $types.option_titles : $types.options)
         } :
     $types.format ?
         {
@@ -227,8 +239,9 @@ $enumValidation := function($component){
         "title": $component.title,
         "required": $not($component.is_optional),
         "type": $component.types.type,
-        "enum": $component.types.options,
-        "enum_titles": $component.types.options
+        "enum": $exists($component.types.options[0].value) ? $component.types.options.value : $component.types.options,
+        "enum_titles": $exists($component.types.options[0].value) ? $component.types.options.label :
+            ($component.types.option_titles ? $component.types.option_titles : $component.types.options)
     }
 };
 
