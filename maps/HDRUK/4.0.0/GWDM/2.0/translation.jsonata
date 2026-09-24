@@ -31,18 +31,39 @@ $nullList := function($x){
 
 $datasetMap := {
   "Health and disease"       : ["Mental health","Cardiovascular","Cancer","Rare diseases","Metabolic and endocrine","Neurological","Reproductive","Maternity and neonatology","Respiratory", "Immunity","Musculoskeletal", "Vision", "Renal and urogenital","Oral and gastrointestinal","Cognitive function", "Hearing", "Others"],
-  "Treatments/Interventions"  : ["Vaccines","Preventive","Therapeutic"],
+  "Treatments/Interventions"  : ["Vaccines","Preventive","Therapeutic", "Others"],
   "Measurements/Tests"  : ["Laboratory", "Other diagnostics"],
-  "Imaging types"  : ["CT", "MRI", "PET", "X-ray", "Ultrasound", "Pathology"],
-  "Imaging area of the body"  : ["Head", "Chest", "Arm", "Abdomen", "Leg"],
-  "Omics"  : ["Proteomics", "Transcriptomics", "Epigenomics", "Metabolomics", "Metagenomics", "Genomics", "Lipidomics"],
-  "Socioeconomic"  : ["Education", "Crime and justice", "Ethnicity", "Housing", "Labour", "Ageing", "Economics", "Marital status", "Social support", "Deprivation", "Religion", "Occupation", "Finances", "Family circumstance"],
-  "Lifestyle"  : ["Smoking", "Physical activity", "Dietary habits", "Alcohol"],
-  "Registry"  : ["Disease registry (research)", "National disease registries and audits", "Births and deaths"],
+  "Imaging types"  : ["CT", "MRI", "PET", "X-ray", "Ultrasound", "Pathology", "Others"],
+  "Imaging area of the body"  : ["Head", "Chest", "Arm", "Abdomen", "Leg", "Others"],
+  "Omics"  : ["Proteomics", "Transcriptomics", "Epigenomics", "Metabolomics", "Metagenomics", "Genomics", "Lipidomics", "Others"],
+  "Socioeconomic"  : ["Education", "Crime and justice", "Ethnicity", "Housing", "Labour", "Ageing", "Economics", "Marital status", "Social support", "Deprivation", "Religion", "Occupation", "Finances", "Family circumstance", "Others"],
+  "Lifestyle"  : ["Smoking", "Physical activity", "Dietary habits", "Alcohol", "Others"],
+  "Registry"  : ["Disease registry (research)", "National disease registries and audits", "Births and deaths", "Others"],
   "Environment and energy"  : ["Not applicable"],
   "Information and communication"  : ["Not applicable"],
   "Politics"  : ["Not applicable"]
 };
+
+$placeSubTypes := function($types, $subs) {(
+    $renamed := $map($subs, function($sx) {
+        $sx = "Labour" ? "Occupation" : $sx = "Finances" ? "Economics" : $sx
+    });
+    $allowedUnder := function($type) {
+        $filter($renamed, function($sx) { $sx in $lookup($datasetMap, $type) })
+    };
+    $declared := $map($types, function($type) {
+        { "name": $type, "subTypes": [$allowedUnder($type)] }
+    });
+    $soleOwner := function($sx) {(
+        $owners := $filter($keys($datasetMap), function($type) { $sx in $lookup($datasetMap, $type) });
+        $count($owners) = 1 ? $owners
+    )};
+    $unplaced := $filter($renamed, function($sx) { $not($sx in $declared.subTypes) });
+    $inferred := $filter($keys($datasetMap), function($type) { $type in $map($unplaced, $soleOwner) });
+    [$append($declared, $map($inferred, function($type) {
+        { "name": $type, "subTypes": [$filter($unplaced, function($sx) { $soleOwner($sx) = $type })] }
+    }))]
+)};
 
 $allowedPublishingFrequency := [
     "Static",
@@ -400,27 +421,10 @@ $cleanEnumSingle := function($x, $allowed){
             "purpose": input.provenance.origin.purpose  ~> $safeSplit(';,;') ~> $cleanEnum($allowedPurpose),
             "source": input.provenance.origin.source  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSource),
             "collectionSource": input.provenance.origin.collectionSituation  ~> $safeSplit(';,;') ~> $cleanEnum($allowedSetting),
-            "datasetType": [
-                $map(input.summary.datasetType ~> $safeSplit(';,;') , function($dt) {(
-                $mainKey := $dt;
-                $sub := input.summary.datasetSubType ~> $safeSplit(';,;');
-                $lookUpList :=[$lookup($datasetMap, $mainKey)];
-                $allowedSubs := $filter(
-                    $map($sub, function($sx) {
-                      (
-                    $mapped := $sx = "Labour" ? "Occupation" : $sx = "Finances" ? "Economics" : $sx;
-                    $mapped in $lookUpList ? $mapped : null
-                    )
-                    }),
-                    function($v) { $v }
-                );
-                {
-                    "name": $mainKey,
-                    "subTypes": [$allowedSubs]
-                }
-               
-            )
-            })],
+            "datasetType": $placeSubTypes(
+                input.summary.datasetType ~> $safeSplit(';,;'),
+                input.summary.datasetSubType ~> $safeSplit(';,;')
+            ),
             "imageContrast": input.provenance.origin.imageContrast
         },
         "temporal": { /* input.provenance.temporal */
