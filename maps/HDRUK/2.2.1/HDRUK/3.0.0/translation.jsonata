@@ -277,7 +277,10 @@ input ~> |$| {
         }, ['resourceCreator']| : null,
         "formatAndStandards": formatAndStandards ? formatAndStandards ~> |$|{
             "vocabularyEncodingScheme": $$.input.accessibility.formatAndStandards.vocabularyEncodingScheme ?
-                $cleanEnum($$.input.accessibility.formatAndStandards.vocabularyEncodingScheme, $allowedEncodings) : null
+                $cleanEnum($$.input.accessibility.formatAndStandards.vocabularyEncodingScheme, $allowedEncodings) : null,
+            /* BNF is new in 3.0.0 and has no 2.2.1 equivalent */
+            "conformsTo": conformsTo ?
+                $distinct([$map(conformsTo, function($v) { $v = "BNF" ? "OTHER" : $v })]) : conformsTo
         }| : null
     }|,
     "enrichmentAndLinkage": enrichmentAndLinkage ? enrichmentAndLinkage ~> |$|{
