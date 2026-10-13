@@ -4,7 +4,7 @@ Notes:
     - Direction: input HDRUK 4.1.0 -> output HDRUK 4.0.0 (path is output-first)
     - Drops the fields introduced in 4.1.0: accessibility.usage.duoCodes and
       accessibility.usage.dataUsePermissions have no 4.0.0 equivalent
-    - conformsTo is narrowed: BNF, DDI and DCAT are members of StandardisedDataModelsEnumV2
+    - conformsTo is narrowed: DDI and DCAT are members of StandardisedDataModelsEnumV2
       but not of the 4.0.0 enum, so they collapse to OTHER
     - $distinct stops a dataset carrying two or more of the new values emitting repeated OTHER
 */
@@ -26,7 +26,8 @@ $allowedStandards := [
     "NHS SCOTLAND DATA DICTIONARY",
     "NHS WALES DATA DICTIONARY",
     "LOCAL",
-    "OTHER"
+    "OTHER",
+    "BNF"
 ];
 
 input ~> |$| {
