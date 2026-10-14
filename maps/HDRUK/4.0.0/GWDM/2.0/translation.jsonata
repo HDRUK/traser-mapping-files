@@ -181,7 +181,8 @@ $allowedStandards := [
     'NHS SCOTLAND DATA DICTIONARY',
     'NHS WALES DATA DICTIONARY',
     'LOCAL',
-    'OTHER'
+    'OTHER',
+    'BNF'
 ];
 
 $allowedDatasetSubType := [
