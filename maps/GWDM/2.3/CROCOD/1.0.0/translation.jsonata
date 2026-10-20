@@ -1,10 +1,10 @@
 (
 /*
 =============================================================================
-CROCOD 1.0.0 → GWDM 2.4 Translation
+CROCOD 1.0.0 → GWDM 2.3 Translation
 =============================================================================
 
-Direction: input CROCOD 1.0.0 -> output GWDM 2.4 (the path is output-first).
+Direction: input CROCOD 1.0.0 -> output GWDM 2.3 (the path is output-first).
 
 A CROCOD trial case study is stored as a GWDM record with required.recordType
 "caseStudy". Its fields land in one of two places:
@@ -19,7 +19,7 @@ A CROCOD trial case study is stored as a GWDM record with required.recordType
 
   The crocod section, for everything else, kept in full. Some of these are also
   copied, shortened or flattened, into core fields so that search and listings
-  work. Those copies are never read back - GWDM 2.4 -> CROCOD reads crocod:
+  work. Those copies are never read back - GWDM 2.3 -> CROCOD reads crocod:
     laySummary (HTML removed)              -> summary.abstract, max 5000 chars;
                                               the full title if there is none
     background                             -> summary.description

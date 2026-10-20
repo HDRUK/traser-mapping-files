@@ -1,17 +1,17 @@
 (
 /*
 =============================================================================
-GWDM 2.4 → PRUK 1.0.0 Translation
+GWDM 2.3 → PRUK 1.0.0 Translation
 =============================================================================
 
-Direction: input GWDM 2.4 -> output PRUK 1.0.0 (the path is output-first).
+Direction: input GWDM 2.3 -> output PRUK 1.0.0 (the path is output-first).
 
 PROVENANCE
     This is a copy of maps/HDRUK/4.1.0/GWDM/2.2/translation.jsonata. PRUK reuses
     HDRUK 4.1.0's shared sections unchanged, so those mappings carry over as
     they are. Everything below is that file verbatim except for these changes:
       1. This header.
-      2. Case studies are refused: PRUK describes datasets, and a GWDM 2.4
+      2. Case studies are refused: PRUK describes datasets, and a GWDM 2.3
          caseStudy record has no PRUK equivalent.
       3. summary.title comes from GWDM summary.title when it fits PRUK's 150
          characters, falling back to shortTitle. The HDRUK map always uses
@@ -413,7 +413,7 @@ $cleanEnumSingle := function($x, $allowed){
 
 
 input.required.recordType = "caseStudy"
-  ? $error("GWDM 2.4 caseStudy records cannot be translated to PRUK: case studies are not datasets")
+  ? $error("GWDM 2.3 caseStudy records cannot be translated to PRUK: case studies are not datasets")
   :
 {
     "identifier": input.required.gatewayPid,

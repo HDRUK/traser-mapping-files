@@ -6,6 +6,10 @@ Follows the delta-transform pattern: drop the fields GWDM 2.3 introduced, which
 GWDM 2.2 cannot hold. Lossy by definition - population has no GWDM 2.2
 equivalent.
 
+Case studies are refused rather than downgraded. GWDM 2.2 and everything
+reachable from it (HDRUK, CRUK, SchemaOrg) describe datasets, so letting a
+caseStudy through here would turn it into a dataset elsewhere in the graph.
+
 waveOf is not dropped outright: a wave of a study is also part of it, so each
 waveOf entry is appended to isPartOf (skipping any already there by pid). That
 way HDRUK and other schemas reached through GWDM 2.2 still show the study the
@@ -17,11 +21,14 @@ $waveOf := input.linkage.datasetLinkage.waveOf;
 $isPartOf := input.linkage.datasetLinkage.isPartOf ? input.linkage.datasetLinkage.isPartOf : [];
 $extraParents := $filter($waveOf, function($w) { $not($w.pid in $isPartOf.pid) });
 
-input ~> |$| {
-  "linkage": linkage ? linkage ~> |$| {
-    "datasetLinkage": datasetLinkage ? datasetLinkage ~> |$| {
-      "isPartOf": $count($extraParents) > 0 ? [$append($isPartOf, $extraParents)] : isPartOf
-    }, ["waveOf"]| : datasetLinkage
-  }| : linkage
-}, ["population"]|
+input.required.recordType = "caseStudy"
+  ? $error("GWDM 2.3 caseStudy records cannot be translated to GWDM 2.2: case studies are not datasets")
+  : input ~> |$| {
+      "required": required ~> |$|{}, ["recordType"]|,
+      "linkage": linkage ? linkage ~> |$| {
+        "datasetLinkage": datasetLinkage ? datasetLinkage ~> |$| {
+          "isPartOf": $count($extraParents) > 0 ? [$append($isPartOf, $extraParents)] : isPartOf
+        }, ["waveOf"]| : datasetLinkage
+      }| : linkage
+    }, ["population", "crocod"]|
 )

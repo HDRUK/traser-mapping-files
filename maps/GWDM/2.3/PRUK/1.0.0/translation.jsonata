@@ -1,10 +1,10 @@
 (
 /*
 =============================================================================
-PRUK 1.0.0 → GWDM 2.4 Translation
+PRUK 1.0.0 → GWDM 2.3 Translation
 =============================================================================
 
-Direction: input PRUK 1.0.0 -> output GWDM 2.4 (the path is output-first).
+Direction: input PRUK 1.0.0 -> output GWDM 2.3 (the path is output-first).
 
 PROVENANCE
     This is a copy of maps/GWDM/2.2/HDRUK/4.1.0/translation.jsonata. PRUK reuses
