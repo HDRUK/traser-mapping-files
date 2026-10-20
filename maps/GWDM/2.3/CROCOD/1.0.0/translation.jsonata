@@ -1,0 +1,121 @@
+(
+/*
+=============================================================================
+CROCOD 1.0.0 → GWDM 2.3 Translation
+=============================================================================
+
+Direction: input CROCOD 1.0.0 -> output GWDM 2.3 (the path is output-first).
+
+A CROCOD trial case study is stored as a GWDM record with required.recordType
+"caseStudy". Its fields land in one of two places:
+
+  Core GWDM fields, where the types match and nothing is lost on the way back:
+    trialSummary.fullTitle                 -> summary.title
+    trialSummary.acronym                   -> summary.shortTitle
+    trialDesign.numberOfParticipants       -> summary.populationSize
+    trialDesign.startYear / endYear        -> provenance.temporal.startDate / endDate
+                                              (1 January / 31 December of that year)
+    healthSystemsData.participantLocations -> coverage.spatial (';,;'-joined)
+
+  The crocod section, for everything else, kept in full. Some of these are also
+  copied, shortened or flattened, into core fields so that search and listings
+  work. Those copies are never read back - GWDM 2.3 -> CROCOD reads crocod:
+    laySummary (HTML removed)              -> summary.abstract, max 5000 chars;
+                                              the full title if there is none
+    background                             -> summary.description
+    governance.funder (HTML removed)       -> summary.funders
+    governance.contactPoints[0]            -> summary.contactPoint
+    healthSystemsData.datasetsAccessed     -> linkage.datasetLinkage.linkedDatasets
+
+extra
+    id, pid                   override required.gatewayId / gatewayPid
+    publisherName, publisherId  the Gateway team publishing the case study
+    accrualPeriodicity, timeLag override the defaults ("Static", "Not applicable")
+*/
+
+$stripHtml := function($x) {
+  $x ? $trim($replace($replace($x, /<[^>]*>/, " "), /\s+/, " ")) : undefined
+};
+
+$truncate := function($x, $length) {
+  $x ? $substring($x, 0, $length) : undefined
+};
+
+$nonEmpty := function($o) {
+  ($o and $count($keys($o)) > 0) ? $o : undefined
+};
+
+$yearStart := function($y) { $y ? $string($y) & "-01-01" : undefined };
+$yearEnd := function($y) { $y ? $string($y) & "-12-31" : undefined };
+
+$toDatasetDescriptor := function($ref) {
+  {
+    "pid": $ref.gatewayId,
+    "title": $truncate($ref.title, 150),
+    "url": $ref.url
+  }
+};
+
+$laySummary := $stripHtml(input.trialSummary.laySummary);
+$funder := $stripHtml(input.governance.funder);
+
+{
+  "required": {
+    "gatewayId": extra.id ? extra.id : (input.id ? $string(input.id) : $truncate(input.pid, 50)),
+    "gatewayPid": extra.pid ? extra.pid : $truncate(input.pid, 50),
+    "issued": input.issued,
+    "modified": input.modified,
+    "version": input.version,
+    "revisions": [],
+    "recordType": "caseStudy"
+  },
+  "summary": {
+    "title": input.trialSummary.fullTitle,
+    "shortTitle": input.trialSummary.acronym,
+    "abstract": $laySummary ? $truncate($laySummary, 5000) : input.trialSummary.fullTitle,
+    "description": $truncate(input.trialSummary.background, 50000),
+    "populationSize": input.trialDesign.numberOfParticipants,
+    "contactPoint": input.governance.contactPoints[0],
+    "funders": $funder,
+    "publisher": (extra.publisherName or extra.publisherId) ? {
+      "name": extra.publisherName,
+      "gatewayId": extra.publisherId
+    } : undefined
+  },
+  "coverage": input.healthSystemsData.participantLocations ? {
+    "spatial": $join(input.healthSystemsData.participantLocations, ";,;")
+  } : undefined,
+  "provenance": {
+    "temporal": {
+      "accrualPeriodicity": extra.accrualPeriodicity ? extra.accrualPeriodicity : "Static",
+      "timeLag": extra.timeLag ? extra.timeLag : "Not applicable",
+      "startDate": $yearStart(input.trialDesign.startYear),
+      "endDate": $yearEnd(input.trialDesign.endYear)
+    }
+  },
+  "accessibility": {
+    "access": {}
+  },
+  "linkage": input.healthSystemsData.datasetsAccessed ? {
+    "datasetLinkage": {
+      "linkedDatasets": [$map(input.healthSystemsData.datasetsAccessed, $toDatasetDescriptor)]
+    }
+  } : undefined,
+  "crocod": {
+    "trialStatus": input.trialSummary.status,
+    "therapeuticArea": input.trialSummary.therapeuticArea,
+    "laySummary": input.trialSummary.laySummary,
+    "background": input.trialSummary.background,
+    "trialDesign": $nonEmpty({
+      "categories": input.trialDesign.categories,
+      "designDescription": input.trialDesign.designDescription,
+      "registration": input.trialDesign.registration
+    }),
+    "governance": input.governance,
+    "healthSystemsData": $nonEmpty(input.healthSystemsData ~> |$|{}, ["participantLocations"]|),
+    "learnings": input.learnings,
+    "publications": input.publications,
+    "readMore": input.readMore
+  }
+}
+)
