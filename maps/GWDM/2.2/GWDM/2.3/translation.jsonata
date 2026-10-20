@@ -1,0 +1,27 @@
+(
+/*
+Direction: input GWDM 2.3 -> output GWDM 2.2 (the path is output-first).
+
+Follows the delta-transform pattern: drop the fields GWDM 2.3 introduced, which
+GWDM 2.2 cannot hold. Lossy by definition - population has no GWDM 2.2
+equivalent.
+
+waveOf is not dropped outright: a wave of a study is also part of it, so each
+waveOf entry is appended to isPartOf (skipping any already there by pid). That
+way HDRUK and other schemas reached through GWDM 2.2 still show the study the
+dataset belongs to.
+*/
+/* Input validation inserts null for absent optional fields, so treat null and
+   missing alike. */
+$waveOf := input.linkage.datasetLinkage.waveOf;
+$isPartOf := input.linkage.datasetLinkage.isPartOf ? input.linkage.datasetLinkage.isPartOf : [];
+$extraParents := $filter($waveOf, function($w) { $not($w.pid in $isPartOf.pid) });
+
+input ~> |$| {
+  "linkage": linkage ? linkage ~> |$| {
+    "datasetLinkage": datasetLinkage ? datasetLinkage ~> |$| {
+      "isPartOf": $count($extraParents) > 0 ? [$append($isPartOf, $extraParents)] : isPartOf
+    }, ["waveOf"]| : datasetLinkage
+  }| : linkage
+}, ["population"]|
+)

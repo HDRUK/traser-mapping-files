@@ -132,6 +132,12 @@
             "input_version": "1.1"
       },
       {
+            "output_model": "CROCOD",
+            "output_version": "1.0.0",
+            "input_model": "GWDM",
+            "input_version": "2.4"
+      },
+      {
             "output_model": "GWDM",
             "output_version": "1.0",
             "input_model": "HDRUK",
@@ -247,6 +253,36 @@
       },
       {
             "output_model": "GWDM",
+            "output_version": "2.4",
+            "input_model": "CROCOD",
+            "input_version": "1.0.0"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.4",
+            "input_model": "GWDM",
+            "input_version": "2.3"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.4",
+            "input_model": "PRUK",
+            "input_version": "1.0.0"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.3",
+            "input_model": "GWDM",
+            "input_version": "2.4"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.3",
+            "input_model": "GWDM",
+            "input_version": "2.2"
+      },
+      {
+            "output_model": "GWDM",
             "output_version": "2.2",
             "input_model": "HDRUK",
             "input_version": "4.1.0"
@@ -256,6 +292,12 @@
             "output_version": "2.2",
             "input_model": "GWDM",
             "input_version": "2.1"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.2",
+            "input_model": "GWDM",
+            "input_version": "2.3"
       },
       {
             "output_model": "CRUK",
@@ -268,6 +310,12 @@
             "output_version": "1.0.0",
             "input_model": "GWDM",
             "input_version": "2.1"
+      },
+      {
+            "output_model": "PRUK",
+            "output_version": "1.0.0",
+            "input_model": "GWDM",
+            "input_version": "2.4"
       },
       {
             "output_model": "SchemaOrg",

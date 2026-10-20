@@ -1,0 +1,13 @@
+(
+/*
+Direction: input GWDM 2.2 -> output GWDM 2.3 (the path is output-first).
+
+GWDM 2.3 only adds optional fields (population, linkage.datasetLinkage.waveOf),
+so every GWDM 2.2 document is already a valid GWDM 2.3 document. Passed through
+unchanged.
+
+This pair exists so HDRUK 4.1.0 and CRUK, which reach GWDM 2.2, can chain on to
+GWDM 2.3 and beyond.
+*/
+input
+)

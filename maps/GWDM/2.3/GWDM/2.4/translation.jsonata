@@ -1,0 +1,17 @@
+(
+/*
+Direction: input GWDM 2.4 -> output GWDM 2.3 (the path is output-first).
+
+Follows the delta-transform pattern: drop required.recordType and crocod, which
+GWDM 2.3 cannot hold.
+
+Case studies are refused rather than downgraded. GWDM 2.3 and everything
+reachable from it (HDRUK, CRUK, SchemaOrg) describe datasets, so letting a
+caseStudy through here would turn it into a dataset elsewhere in the graph.
+*/
+input.required.recordType = "caseStudy"
+  ? $error("GWDM 2.4 caseStudy records cannot be translated to GWDM 2.3: case studies are not datasets")
+  : input ~> |$| {
+      "required": required ~> |$|{}, ["recordType"]|
+    }, ["crocod"]|
+)
