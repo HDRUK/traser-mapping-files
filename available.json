@@ -346,5 +346,17 @@
             "output_version": "GoogleRecommended",
             "input_model": "GWDM",
             "input_version": "2.0"
+      },
+      {
+            "output_model": "HealthDCATAP",
+            "output_version": "8",
+            "input_model": "GWDM",
+            "input_version": "2.3"
+      },
+      {
+            "output_model": "GWDM",
+            "output_version": "2.3",
+            "input_model": "HealthDCATAP",
+            "input_version": "8"
       }
 ]

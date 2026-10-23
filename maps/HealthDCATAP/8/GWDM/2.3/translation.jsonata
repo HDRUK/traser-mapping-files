@@ -1,0 +1,433 @@
+(
+/*
+=============================================================================
+GWDM 2.3 → HealthDCAT-AP Release 8 Translation
+=============================================================================
+
+Direction: input GWDM 2.3 -> output HealthDCAT-AP 8 (the path is output-first).
+
+Output is compacted JSON-LD. The @context below is a copy of
+hdr_schemata/models/HealthDCATAP/8/context.jsonld in schemata; keep the two
+identical. Every term in it resolves to the HealthDCAT-AP / DCAT-AP 3 IRI, so
+the document can be loaded into any RDF tool and validated against the
+HealthDCAT-AP SHACL shapes as it is.
+
+Every referenced IRI is written as a typed node ({"@id", "@type"}), the same
+way the HealthDCAT-AP examples declare `<iri> a dct:Frequency` and so on, so
+the SHACL class checks pass without the validator needing RDFS inference.
+
+Records are published as NON_PUBLIC (the HealthDCAT-AP "non-public" profile):
+Gateway datasets are released through an access request, not a download.
+
+CONTROLLED VOCABULARIES
+    HealthDCAT-AP wants IRIs from the EU Publications Office and DG SANTE
+    vocabularies where GWDM holds free text or its own enums. The $...Iris
+    tables below map the GWDM values that have a counterpart; values without
+    one are dropped rather than invented.
+
+UK DEFAULTS THAT NEED A POLICY DECISION (overridable through `extra`)
+    applicableLegislation  Mandatory. Defaults to the Data Protection Act 2018;
+                           the EU examples use EU regulations, which do not
+                           apply to UK data.
+    hdab                   Mandatory, exactly one. The UK has no Health Data
+                           Access Body, so this defaults to the data custodian
+                           that runs the access request.
+    datasetType            Mandatory. GWDM's dataset types have no EU
+                           counterpart; defaults to the EU STATISTICAL type
+                           that the HealthDCAT-AP examples use.
+    landingPage            Defaults to the Gateway dataset page.
+
+NOT MAPPED
+    Legal basis, personal data categories, retention period and quality
+    annotations have no GWDM source. observations (other than counts),
+    demographicFrequency, tissue sample detail and CROCOD case study content
+    have no HealthDCAT-AP home. A caseStudy record is not a dataset and must
+    not be sent through this map.
+*/
+
+$context := {
+  "dcat": "http://www.w3.org/ns/dcat#",
+  "dct": "http://purl.org/dc/terms/",
+  "dcatap": "http://data.europa.eu/r5r/",
+  "healthdcatap": "http://healthdataportal.eu/ns/health#",
+  "dpv": "https://w3id.org/dpv#",
+  "foaf": "http://xmlns.com/foaf/0.1/",
+  "vcard": "http://www.w3.org/2006/vcard/ns#",
+  "cv": "http://data.europa.eu/m8g/",
+  "geodcatap": "http://data.europa.eu/930/",
+  "csvw": "http://www.w3.org/ns/csvw#",
+  "skos": "http://www.w3.org/2004/02/skos/core#",
+  "eli": "http://data.europa.eu/eli/ontology#",
+  "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+  "xsd": "http://www.w3.org/2001/XMLSchema#",
+  "@language": "en",
+  "Dataset": "dcat:Dataset",
+  "Distribution": "dcat:Distribution",
+  "Agent": "foaf:Agent",
+  "Kind": "vcard:Kind",
+  "ContactPoint": "cv:ContactPoint",
+  "PeriodOfTime": "dct:PeriodOfTime",
+  "ProvenanceStatement": "dct:ProvenanceStatement",
+  "Purpose": "dpv:Purpose",
+  "TableGroup": "csvw:TableGroup",
+  "Table": "csvw:Table",
+  "Column": "csvw:Column",
+  "Concept": "skos:Concept",
+  "LegalResource": "eli:LegalResource",
+  "RightsStatement": "dct:RightsStatement",
+  "Frequency": "dct:Frequency",
+  "LinguisticSystem": "dct:LinguisticSystem",
+  "Location": "dct:Location",
+  "Standard": "dct:Standard",
+  "MediaTypeOrExtent": "dct:MediaTypeOrExtent",
+  "Document": "foaf:Document",
+  "title": "dct:title",
+  "alternative": "dct:alternative",
+  "description": "dct:description",
+  "keyword": "dcat:keyword",
+  "name": "foaf:name",
+  "label": "rdfs:label",
+  "identifier": { "@id": "dct:identifier", "@language": null },
+  "version": { "@id": "dcat:version", "@language": null },
+  "issued": { "@id": "dct:issued", "@type": "xsd:dateTime" },
+  "modified": { "@id": "dct:modified", "@type": "xsd:dateTime" },
+  "startDate": { "@id": "dcat:startDate", "@type": "xsd:date" },
+  "endDate": { "@id": "dcat:endDate", "@type": "xsd:date" },
+  "accessRights": { "@id": "dct:accessRights", "@type": "@id" },
+  "applicableLegislation": { "@id": "dcatap:applicableLegislation", "@type": "@id" },
+  "datasetType": { "@id": "dct:type", "@type": "@id" },
+  "theme": { "@id": "dcat:theme", "@type": "@id" },
+  "language": { "@id": "dct:language", "@type": "@id" },
+  "accrualPeriodicity": { "@id": "dct:accrualPeriodicity", "@type": "@id" },
+  "spatial": { "@id": "dct:spatial", "@type": "@id" },
+  "conformsTo": { "@id": "dct:conformsTo", "@type": "@id" },
+  "format": { "@id": "dct:format", "@type": "@id" },
+  "landingPage": { "@id": "dcat:landingPage", "@type": "@id" },
+  "accessURL": { "@id": "dcat:accessURL", "@type": "@id" },
+  "isReferencedBy": { "@id": "dct:isReferencedBy", "@type": "@id" },
+  "isPartOf": { "@id": "dct:isPartOf", "@type": "@id" },
+  "relation": { "@id": "dct:relation", "@type": "@id" },
+  "hasEmail": { "@id": "vcard:hasEmail", "@type": "@id" },
+  "hasURL": { "@id": "vcard:hasURL", "@type": "@id" },
+  "email": { "@id": "cv:email", "@language": null },
+  "contactPage": { "@id": "cv:contactPage", "@type": "@id" },
+  "healthCategory": { "@id": "healthdcatap:healthCategory", "@type": "@id" },
+  "healthTheme": { "@id": "healthdcatap:healthTheme", "@type": "@id" },
+  "hasCodingSystem": { "@id": "healthdcatap:hasCodingSystem", "@type": "@id" },
+  "hasStructuredData": { "@id": "healthdcatap:hasStructuredData" },
+  "minTypicalAge": { "@id": "healthdcatap:minTypicalAge", "@type": "xsd:nonNegativeInteger" },
+  "maxTypicalAge": { "@id": "healthdcatap:maxTypicalAge", "@type": "xsd:nonNegativeInteger" },
+  "numberOfRecords": { "@id": "healthdcatap:numberOfRecords", "@type": "xsd:nonNegativeInteger" },
+  "numberOfUniqueIndividuals": { "@id": "healthdcatap:numberOfUniqueIndividuals", "@type": "xsd:nonNegativeInteger" },
+  "publisher": { "@id": "dct:publisher" },
+  "creator": { "@id": "dct:creator" },
+  "hdab": { "@id": "healthdcatap:hdab" },
+  "custodian": { "@id": "geodcatap:custodian" },
+  "contactPoint": { "@id": "dcat:contactPoint" },
+  "contact": { "@id": "cv:contactPoint" },
+  "temporal": { "@id": "dct:temporal" },
+  "provenance": { "@id": "dct:provenance" },
+  "hasPurpose": { "@id": "dpv:hasPurpose" },
+  "distribution": { "@id": "dcat:distribution" },
+  "hasVariables": { "@id": "healthdcatap:hasVariables" },
+  "table": { "@id": "csvw:table" },
+  "column": { "@id": "csvw:column" },
+  "columnName": { "@id": "csvw:name", "@language": null },
+  "columnTitle": { "@id": "csvw:title" },
+  "datatype": { "@id": "csvw:datatype", "@language": null }
+};
+
+$EU := "http://publications.europa.eu/resource/authority/";
+$HDEU := "https://hdeu-dcat.data.health.europa.eu/resource/authority/";
+
+/* GWDM accrualPeriodicity -> EU frequency */
+$frequencyIris := {
+  "Static": "NEVER",
+  "Irregular": "IRREG",
+  "Continuous": "CONT",
+  "Biennial": "BIENNIAL",
+  "Annual": "ANNUAL",
+  "Biannual": "ANNUAL_2",
+  "Quarterly": "QUARTERLY",
+  "Bimonthly": "BIMONTHLY",
+  "Monthly": "MONTHLY",
+  "Biweekly": "BIWEEKLY",
+  "Weekly": "WEEKLY",
+  "Twice a week": "WEEKLY_2",
+  "Daily": "DAILY",
+  "Other": "OTHER"
+};
+
+/* ISO 639-1 (GWDM languages) -> EU language */
+$languageIris := {
+  "en": "ENG", "cy": "CYM", "gd": "GLA", "ga": "GLE", "fr": "FRA",
+  "de": "DEU", "es": "SPA", "it": "ITA", "nl": "NLD", "pt": "POR"
+};
+
+/* GWDM coverage.spatial / jurisdiction -> EU country. UK nations have no EU
+   country concept of their own, so all of them resolve to GBR. */
+$countryIris := {
+  "United Kingdom": "GBR", "UK": "GBR", "Great Britain": "GBR",
+  "England": "GBR", "Scotland": "GBR", "Wales": "GBR", "Northern Ireland": "GBR",
+  "GB": "GBR", "GB-ENG": "GBR", "GB-SCT": "GBR", "GB-WLS": "GBR", "GB-NIR": "GBR",
+  "Ireland": "IRL", "IE": "IRL"
+};
+
+/* GWDM formats -> EU file-type */
+$formatIris := {
+  "CSV": "CSV", "TSV": "TSV", "JSON": "JSON", "JSON-LD": "JSON_LD", "XML": "XML",
+  "PDF": "PDF", "XLS": "XLS", "XLSX": "XLSX", "DOCX": "DOCX", "TXT": "TXT",
+  "SAS": "SAS", "SQL": "SQL", "PARQUET": "PARQUET", "RDATA": "RDATA",
+  "HDF": "HDF", "NETCDF": "NETCDF", "ZIP": "ZIP", "TAR": "TAR", "RDF": "RDF"
+};
+
+/* GWDM conformsTo -> HealthDCAT-AP standard */
+$standardIris := {
+  "HL7 FHIR": "FHIR", "HL7 V2": "HL7", "HL7 CDA": "CDA", "HL7 CCOW": "HL7-CCOW",
+  "DICOM": "DICOM", "OMOP": "OMOP-CDM", "OPENEHR": "OPENEHR", "CDISC": "CDISC-SDTM"
+};
+
+/* GWDM vocabularyEncodingSchemes -> HealthDCAT-AP coding-system */
+$codingSystemIris := {
+  "SNOMED CT": "SNOMED-CT", "ICD10": "ICD-10", "ICD9CM": "ICD-9-CM",
+  "ICDO3": "ICD-O", "LOINC": "LOINC", "ATC": "ATC", "HPO": "HPO", "RXNORM": "RXNORM"
+};
+
+/* GWDM Health and disease sub-types -> HealthDCAT-AP health-theme */
+$healthThemeIris := {
+  "Mental health": "MENTAL_HEALTH",
+  "Cancer": "CANCER_DISEASE",
+  "Respiratory": "RESPIRATORY_DISEASES",
+  "Reproductive": "REPRODUCTIVE_HEALTH",
+  "Maternity and neonatology": "REPRODUCTIVE_HEALTH",
+  "Cardiovascular": "NONCOMMUNICABLE_DISEASES",
+  "Metabolic and endocrine": "NONCOMMUNICABLE_DISEASES",
+  "Neurological": "NONCOMMUNICABLE_DISEASES",
+  "Renal and urogenital": "NONCOMMUNICABLE_DISEASES",
+  "Musculoskeletal": "NONCOMMUNICABLE_DISEASES",
+  "Vision": "SENSORY_HEALTH",
+  "Hearing": "SENSORY_HEALTH"
+};
+
+$GENOMIC_ASSAYS := [
+  "Whole genome sequencing", "Exome sequencing", "Genotyping by array",
+  "Genomic variant calling", "Targeted mutation analysis", "Amplicon sequencing",
+  "Whole genome shotgun sequencing", "Methylation binding domain sequencing",
+  "Methylation profiling by high-throughput sequencing",
+  "Chromatin accessibility profiling by high-throughput sequencing",
+  "Histone modification profiling by high-throughput sequencing",
+  "Chromatin immunoprecipitation sequencing"
+];
+
+/* GWDM stores lists as ';,;'-delimited strings (older records use ',') */
+$csv := function($x){(
+  $parts := $type($x) = "array" ? $x
+    : $type($x) = "string" ? ($contains($x, ";,;") ? $split($x, ";,;") : $split($x, ","))
+    : [];
+  [$filter($map($parts, function($v){ $trim($string($v)) }), function($v){ $v != "" })]
+)};
+
+$isUrl := function($x){ $type($x) = "string" and $contains($x, /^https?:\/\//) };
+
+/* Looks each value up in $table and returns the matching IRIs, dropping values with no match */
+$iris := function($values, $table, $base){
+  [$distinct($filter($map($values, function($v){ $lookup($table, $v) }), function($v){ $exists($v) })).($base & $)]
+};
+
+$nonEmpty := function($a){ $count($a) > 0 ? $a };
+
+$ref := function($iri, $type){ { "@id": $iri, "@type": $type } };
+
+$refs := function($iris, $type){ $nonEmpty([$map($iris, function($i){ $ref($i, $type) })]) };
+
+$asDate := function($x){ $type($x) = "string" ? $substring($x, 0, 10) };
+
+$doiIri := function($x){ $isUrl($x) ? $x : "https://doi.org/" & $x };
+
+$latestCount := function($node){(
+  $obs := input.observations[observedNode = $node and measuredValue >= 0];
+  $exists($obs) ? $obs^(>observationDate)[0].measuredValue
+)};
+
+/* The values HealthDCAT-AP health categories are derived from */
+$purposes := $csv(input.provenance.origin.purpose);
+$sources := $csv(input.provenance.origin.source);
+$settings := $csv(input.provenance.origin.collectionSituation);
+$datasetTypes := $csv(input.summary.datasetType);
+$datasetSubTypes := $csv(input.summary.datasetSubType);
+$assay := input.omics.assay;
+
+$healthCategories := $distinct([
+  ("EPR" in $sources or $count($settings[$contains($, /^(Primary|Secondary) care/)]) > 0) ? "EHRS",
+  ("Trial" in $purposes) ? "EHCT",
+  ("Research cohort" in $purposes or "Study" in $purposes or "Cohort, study, trial" in $settings) ? "RQSH",
+  ("Disease registry" in $purposes or "Registry" in $datasetTypes) ? "MRMR",
+  ("National disease registries and audits" in $datasetSubTypes) ? "PHDR",
+  ("Administrative" in $purposes or "Financial" in $purposes or $count($settings[$contains($, /^Prescribing/)]) > 0) ? "HRAD",
+  ($assay in $GENOMIC_ASSAYS or "Genomics" in $datasetSubTypes or "Epigenomics" in $datasetSubTypes) ? "HGPD",
+  (($exists($assay) and $not($assay in $GENOMIC_ASSAYS)) or $count($datasetSubTypes[$ in ["Proteomics", "Transcriptomics", "Metabolomics", "Lipidomics"]]) > 0) ? "HPML",
+  ($count(input.tissuesSampleCollection) > 0) ? "EINS",
+  ("Wearables" in $settings) ? "PGEH",
+  ($count($datasetTypes[$ in ["Socioeconomic", "Lifestyle", "Environmental and energy"]]) > 0) ? "DIOH"
+]);
+
+$landingPage := extra.landingPage ? extra.landingPage
+  : "https://healthdatagateway.org/en/dataset/" & input.required.gatewayId;
+
+$legislation := $refs(
+  extra.applicableLegislation ? [extra.applicableLegislation] : ["https://www.legislation.gov.uk/ukpga/2018/12"],
+  "LegalResource"
+);
+
+$email := input.summary.contactPoint;
+
+/* cv:ContactPoint for an agent; falls back to the landing page when there is no email */
+$agentContact := function(){
+  $email ? { "@type": "ContactPoint", "email": $email } : { "@type": "ContactPoint", "contactPage": $landingPage }
+};
+
+$agent := function($name, $id){(
+  $base := { "@type": "Agent", "name": $name, "contact": $agentContact() };
+  $id ? $merge([{ "@id": $id }, $base]) : $base
+)};
+
+/* GWDM rorId is the bare id; some older records put the ROR URL in gatewayId instead */
+$publisherRor := (
+  $id := input.summary.publisher.rorId;
+  $url := [input.summary.publisher.rorId, input.summary.publisher.gatewayId][$contains($string($), "ror.org/")][0];
+  $url ? $url : $type($id) = "string" and $contains($id, /^0[a-z0-9]{6}[0-9]{2}$/) ? "https://ror.org/" & $id
+);
+
+$custodianName := input.accessibility.access.dataController ? input.accessibility.access.dataController
+  : input.summary.publisher.name;
+
+$typicalAge := $type(input.coverage.typicalAgeRange) = "string" ? $split(input.coverage.typicalAgeRange, "-");
+
+$tables := input.structuralMetadata[$count(columns) > 0];
+
+$csvwDatatypes := {
+  "string": "string", "text": "string", "varchar": "string", "char": "string",
+  "integer": "integer", "int": "integer", "bigint": "integer", "smallint": "integer",
+  "float": "double", "double": "double", "real": "double", "decimal": "decimal", "numeric": "decimal",
+  "date": "date", "datetime": "dateTime", "timestamp": "dateTime", "time": "time",
+  "boolean": "boolean", "bool": "boolean"
+};
+
+$accessUrl := [input.accessibility.access.accessService, input.accessibility.access.accessRights][$isUrl($)][0];
+
+/* DCAT-AP allows one dct:format per distribution, so each format gets its own */
+$formats := $iris(
+  $map($csv(input.accessibility.formatAndStandards.formats), $uppercase), $formatIris, $EU & "file-type/"
+);
+
+$distributionDescription := $isUrl(input.accessibility.access.accessService) or $not($exists(input.accessibility.access.accessService))
+  ? "Access is granted by " & $custodianName & " through a data access request."
+  : input.accessibility.access.accessService;
+
+$origin := [
+  $count($sources) > 0 ? "Source: " & $join($sources, ", ") & ".",
+  $count($settings) > 0 ? "Collection setting: " & $join($settings, ", ") & ".",
+  $count($purposes) > 0 ? "Original purpose: " & $join($purposes, ", ") & "."
+];
+
+{
+  "@context": $context,
+  "@id": $landingPage,
+  "@type": "Dataset",
+  "identifier": [
+    input.required.gatewayPid,
+    input.summary.doiName ? $doiIri(input.summary.doiName)
+  ],
+  "title": input.summary.title,
+  "alternative": input.summary.shortTitle != input.summary.title ? input.summary.shortTitle,
+  "description": input.summary.description ? input.summary.description : input.summary.abstract,
+  "version": input.required.version,
+  "issued": input.required.issued,
+  "modified": input.required.modified,
+  "landingPage": $ref($landingPage, "Document"),
+  "accessRights": $ref($EU & "access-right/NON_PUBLIC", "RightsStatement"),
+  "applicableLegislation": $legislation,
+  "datasetType": $refs([extra.datasetType ? extra.datasetType : $EU & "dataset-type/STATISTICAL"], "Concept"),
+  "theme": $refs([$EU & "data-theme/HEAL"], "Concept"),
+  "healthCategory": $refs([
+    $healthCategories.($HDEU & "healthcategories/" & $),
+    extra.healthCategory
+  ], "Concept"),
+  "healthTheme": $refs($iris($datasetSubTypes, $healthThemeIris, $HDEU & "health-theme/"), "Concept"),
+  "keyword": $nonEmpty($csv(input.summary.keywords)),
+  "contactPoint": [
+    $email ? { "@type": "Kind", "hasEmail": "mailto:" & $email } : { "@type": "Kind", "hasURL": $landingPage }
+  ],
+  "publisher": $agent(input.summary.publisher.name, $publisherRor),
+  "creator": input.accessibility.usage.resourceCreator.name
+    ? [{ "@type": "Agent", "name": input.accessibility.usage.resourceCreator.name }],
+  "custodian": $agent($custodianName, null),
+  "hdab": extra.hdab ? extra.hdab : $agent($custodianName, null),
+  "temporal": (input.provenance.temporal.startDate or input.provenance.temporal.endDate) ? [{
+    "@type": "PeriodOfTime",
+    "startDate": $asDate(input.provenance.temporal.startDate),
+    "endDate": $asDate(input.provenance.temporal.endDate)
+  }],
+  "accrualPeriodicity": $refs(
+    $iris($csv(input.provenance.temporal.accrualPeriodicity), $frequencyIris, $EU & "frequency/"), "Frequency"
+  )[0],
+  "spatial": $refs($iris(
+    [$csv(input.coverage.spatial), $csv(input.accessibility.access.jurisdiction)], $countryIris, $EU & "country/"
+  ), "Location"),
+  "language": $refs(
+    $iris($csv(input.accessibility.formatAndStandards.languages), $languageIris, $EU & "language/"), "LinguisticSystem"
+  ),
+  "conformsTo": $refs(
+    $iris($csv(input.accessibility.formatAndStandards.conformsTo), $standardIris, $HDEU & "standard/"), "Standard"
+  ),
+  "hasCodingSystem": $refs($iris(
+    $csv(input.accessibility.formatAndStandards.vocabularyEncodingSchemes), $codingSystemIris, $HDEU & "coding-system/"
+  ), "Standard"),
+  "provenance": [{
+    "@type": "ProvenanceStatement",
+    "label": $count($origin) > 0 ? $join($origin, " ") : "Provenance is not recorded in the source metadata."
+  }],
+  "hasPurpose": $count($purposes) > 0 ? [{
+    "@type": "Purpose",
+    "description": "Data originally collected for: " & $join($purposes, ", ") & "."
+  }],
+  "numberOfUniqueIndividuals": input.summary.populationSize > 0 ? input.summary.populationSize : $latestCount("Persons"),
+  "numberOfRecords": $latestCount("Events"),
+  "minTypicalAge": $count($typicalAge) = 2 ? $number($typicalAge[0]),
+  "maxTypicalAge": $count($typicalAge) = 2 ? $number($typicalAge[1]),
+  "isReferencedBy": $nonEmpty([
+    input.linkage.publicationAboutDataset.$doiIri($),
+    input.linkage.publicationUsingDataset.$doiIri($)
+  ]),
+  "isPartOf": $nonEmpty([input.linkage.datasetLinkage.isPartOf.url[$isUrl($)]]),
+  "relation": $nonEmpty([input.linkage.datasetLinkage.linkedDatasets.url[$isUrl($)]]),
+  "hasStructuredData": $count($tables) > 0,
+  "hasVariables": $count($tables) > 0 ? [{
+    "@type": "TableGroup",
+    "title": "Structural metadata for " & input.summary.title,
+    "table": [$map($tables, function($t){ {
+      "@type": "Table",
+      "title": $t.name,
+      "description": $t.description,
+      "column": [$map($t.columns, function($c){ {
+        "@type": "Column",
+        "columnName": $c.name,
+        "columnTitle": $c.name,
+        "description": $c.description ? $c.description : $c.name,
+        "datatype": (
+          $d := $lookup($csvwDatatypes, $lowercase($string($c.dataType)));
+          $d ? $d : "string"
+        )
+      } })]
+    } })]
+  }],
+  "distribution": [$map($count($formats) > 0 ? $formats : [null], function($format){ {
+    "@type": "Distribution",
+    "title": "Data access request" & ($format ? " (" & $substringAfter($format, "file-type/") & ")"),
+    "description": $distributionDescription,
+    "accessURL": $accessUrl ? $accessUrl : $landingPage,
+    "applicableLegislation": $legislation,
+    "format": $format ? $ref($format, "MediaTypeOrExtent")
+  } })]
+}
+)
