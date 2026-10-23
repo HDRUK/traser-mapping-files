@@ -1,0 +1,176 @@
+(
+/*
+=============================================================================
+HealthDCAT-AP Release 8 → GWDM 2.3 Translation
+=============================================================================
+
+Direction: input HealthDCAT-AP 8 -> output GWDM 2.3 (the path is output-first).
+
+INPUT SHAPE
+    Compacted JSON-LD in the shape maps/HealthDCATAP/8/GWDM/2.3 produces:
+    the dcat:Dataset at the root, keys from
+    hdr_schemata/models/HealthDCATAP/8/context.jsonld, and references written
+    as {"@id", "@type"} nodes. HealthDCAT-AP from another catalogue (Turtle,
+    RDF/XML, or JSON-LD with a different context or framing) has to be parsed,
+    framed on dcat:Dataset and compacted with that context before it reaches
+    this map. That normalisation step is not part of TRASER yet.
+
+LOSSY OR DEFAULTED
+    timeLag                 HealthDCAT-AP has no equivalent; GWDM requires it,
+                            so it is "Other".
+    accrualPeriodicity      "Other" when absent or not in the EU frequency table.
+    columns[].sensitive     HealthDCAT-AP has no equivalent; GWDM requires it,
+                            so it is false. Review before publishing.
+    healthCategory,         No GWDM field; GWDM's datasetType and origin cannot
+    healthTheme, hdab,      be rebuilt from them reliably.
+    applicableLegislation
+    isReferencedBy          Every DOI goes to publicationAboutDataset; DCAT does
+                            not say whether a publication is about the dataset
+                            or uses it.
+    spatial                 GBR becomes "United Kingdom"; the UK nation is lost
+                            on the way out and cannot be recovered.
+*/
+
+/* Inverse of a one-to-one lookup table */
+$invert := function($table){ $merge($each($table, function($v, $k){ { $v: $k } })) };
+
+$code := function($iri){ $iri ? $split($iri, "/")[-1] };
+
+$codes := function($refs){ [$refs.$code(`@id`)] };
+
+$lookupAll := function($codes, $table){
+  [$distinct($filter($map($codes, function($c){ $lookup($table, $c) }), function($v){ $exists($v) }))]
+};
+
+$csvJoin := function($a){ $count($a) > 0 ? $join($a, ";,;") };
+
+$truncate := function($x, $length){ $x ? $substring($x, 0, $length) };
+
+$frequencies := $invert({
+  "Static": "NEVER", "Irregular": "IRREG", "Continuous": "CONT", "Biennial": "BIENNIAL",
+  "Annual": "ANNUAL", "Biannual": "ANNUAL_2", "Quarterly": "QUARTERLY", "Bimonthly": "BIMONTHLY",
+  "Monthly": "MONTHLY", "Biweekly": "BIWEEKLY", "Weekly": "WEEKLY", "Twice a week": "WEEKLY_2",
+  "Daily": "DAILY", "Other": "OTHER"
+});
+
+$languages := $invert({
+  "en": "ENG", "cy": "CYM", "gd": "GLA", "ga": "GLE", "fr": "FRA",
+  "de": "DEU", "es": "SPA", "it": "ITA", "nl": "NLD", "pt": "POR"
+});
+
+$countries := { "GBR": "United Kingdom", "IRL": "Ireland" };
+
+$standards := $invert({
+  "HL7 FHIR": "FHIR", "HL7 V2": "HL7", "HL7 CDA": "CDA", "HL7 CCOW": "HL7-CCOW",
+  "DICOM": "DICOM", "OMOP": "OMOP-CDM", "OPENEHR": "OPENEHR", "CDISC": "CDISC-SDTM"
+});
+
+$codingSystems := $invert({
+  "SNOMED CT": "SNOMED-CT", "ICD10": "ICD-10", "ICD9CM": "ICD-9-CM",
+  "ICDO3": "ICD-O", "LOINC": "LOINC", "ATC": "ATC", "HPO": "HPO", "RXNORM": "RXNORM"
+});
+
+$doi := function($iri){ $contains($iri, "doi.org/") ? $substringAfter($iri, "doi.org/") };
+
+$datasetDoi := $doi(input.identifier[$contains($, "doi.org/")][0]);
+
+/* DOIs of publications; the dataset's own DOI is in identifier and is kept out */
+$publicationDois := [$filter($map(input.isReferencedBy, $doi), function($v){ $exists($v) and $v != $datasetDoi })];
+
+$email := (
+  $mail := input.contactPoint.hasEmail[0];
+  $mail ? $substringAfter($mail, "mailto:") : input.publisher.contact.email
+);
+
+/* GWDM holds the bare ROR id, not the URL */
+$ror := $contains($string(input.publisher.`@id`), "ror.org/") ? $substringAfter(input.publisher.`@id`, "ror.org/");
+
+$period := input.temporal[0];
+
+$firstDistribution := input.distribution[0];
+
+$descriptor := function($url){ { "url": $url } };
+
+$modified := input.modified ? input.modified : $now();
+
+{
+  "required": {
+    "gatewayId": extra.id ? extra.id : $truncate(input.identifier[0], 50),
+    "gatewayPid": extra.pid ? extra.pid : input.identifier[0],
+    "issued": input.issued ? input.issued : $now(),
+    "modified": $modified,
+    "version": input.version ? input.version : "1.0.0",
+    "revisions": [],
+    "recordType": "dataset"
+  },
+  "summary": {
+    "title": $truncate(input.title, 255),
+    "shortTitle": input.alternative ? $truncate(input.alternative, 100),
+    "abstract": $truncate(input.description, 5000),
+    "description": input.description,
+    "keywords": $csvJoin(input.keyword),
+    "contactPoint": $email,
+    "doiName": $datasetDoi,
+    "populationSize": input.numberOfUniqueIndividuals,
+    "publisher": {
+      "name": input.publisher.name,
+      "rorId": $ror
+    }
+  },
+  "coverage": {
+    "spatial": $csvJoin($lookupAll($codes(input.spatial), $countries)),
+    "typicalAgeRange": $exists(input.minTypicalAge) and $exists(input.maxTypicalAge)
+      ? $string(input.minTypicalAge) & "-" & $string(input.maxTypicalAge)
+  },
+  "provenance": {
+    "temporal": {
+      "accrualPeriodicity": (
+        $f := $lookup($frequencies, $code(input.accrualPeriodicity.`@id`));
+        $f ? $f : "Other"
+      ),
+      "timeLag": "Other",
+      "startDate": $period.startDate,
+      "endDate": $period.endDate
+    }
+  },
+  "accessibility": {
+    "access": {
+      "accessRights": $firstDistribution.accessURL,
+      "accessService": $firstDistribution.description,
+      "dataController": input.custodian.name
+    },
+    "usage": input.creator ? {
+      "resourceCreator": { "name": input.creator[0].name }
+    },
+    "formatAndStandards": {
+      "languages": $csvJoin($lookupAll($codes(input.language), $languages)),
+      "formats": $csvJoin([$distinct(input.distribution.format.$code(`@id`))]),
+      "conformsTo": $csvJoin($lookupAll($codes(input.conformsTo), $standards)),
+      "vocabularyEncodingSchemes": $csvJoin($lookupAll($codes(input.hasCodingSystem), $codingSystems))
+    }
+  },
+  "linkage": {
+    "publicationAboutDataset": $count($publicationDois) > 0 ? $publicationDois,
+    "datasetLinkage": (input.relation or input.isPartOf) ? {
+      "linkedDatasets": input.relation ? [$map(input.relation, $descriptor)],
+      "isPartOf": input.isPartOf ? [$map(input.isPartOf, $descriptor)]
+    }
+  },
+  "observations": $exists(input.numberOfRecords) ? [{
+    "observedNode": "Events",
+    "measuredValue": input.numberOfRecords,
+    "observationDate": $substring($modified, 0, 10),
+    "measuredProperty": "Count"
+  }],
+  "structuralMetadata": input.hasStructuredData ? [$map(input.hasVariables.table, function($t){ {
+    "name": $t.title,
+    "description": $t.description,
+    "columns": [$map($t.column, function($c){ {
+      "name": $c.columnName,
+      "dataType": $c.datatype,
+      "description": $c.description,
+      "sensitive": false
+    } })]
+  } })]
+}
+)
