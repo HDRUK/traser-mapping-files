@@ -20,7 +20,7 @@ $placeSubTypes := function($types, $subs) {(
         $sx = "Labour" ? "Occupation" : $sx = "Finances" ? "Economics" : $sx
     });
     $allowedUnder := function($type) {
-        $filter($renamed, function($sx) { $sx in $lookup($datasetMap, $type) })
+        $distinct($filter($renamed, function($sx) { $sx in $lookup($datasetMap, $type) }))
     };
     $declared := $map($types, function($type) {
         { "name": $type, "subTypes": [$allowedUnder($type)] }
